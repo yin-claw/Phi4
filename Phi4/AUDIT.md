@@ -496,6 +496,10 @@ local `sorry`.
     `reconstructionLinearGrowthModel_nonempty_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`),
     reducing global `_nonempty_of_` route surface (`79 -> 77`) and tightening
     the bloat guard baseline accordingly.
+22. A further no-caller constructor
+    (`reconstructionLinearGrowthModel_nonempty_of_explicit_bound`) was removed
+    from `Reconstruction/Part1Core.lean`, reducing global `_nonempty_of_`
+    count `77 -> 76` and tightening the guard baseline again.
 
 ### Low
 

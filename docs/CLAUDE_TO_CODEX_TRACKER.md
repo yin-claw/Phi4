@@ -255,6 +255,11 @@ primary local Glimm-Jaffe work queue.
     (`Reconstruction/Part1Tail.lean`).
 - Tightened `scripts/route_bloat_guard.sh` `_nonempty_of_` cap:
   - `79 -> 77`.
+- Removed one additional no-caller reconstruction constructor:
+  - `reconstructionLinearGrowthModel_nonempty_of_explicit_bound`
+    (`Reconstruction/Part1Core.lean`).
+- Tightened `scripts/route_bloat_guard.sh` `_nonempty_of_` cap again:
+  - `77 -> 76`.
 - Verification:
   - `lake build Phi4.Interaction.Part1Core Phi4.Interaction.Part2 Phi4.Interaction.Part3` passes.
   - `lake build Phi4.Reconstruction.Part1Core Phi4.Reconstruction.Part1Tail Phi4.Reconstruction.Part3` passes.
