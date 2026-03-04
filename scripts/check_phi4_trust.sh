@@ -11,6 +11,18 @@ TMP_AXIOMS_LEAN="$TMP_DIR/axioms_check.lean"
 TMP_AXIOMS_OUT="$TMP_DIR/axioms_out.txt"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
+# 0) Core external dependencies must be pinned (no floating @ "main").
+if awk '
+  /require «GaussianField» from git/ { getline; if ($0 ~ /@ "main"/) print "GaussianField" }
+  /require «OSReconstruction» from git/ { getline; if ($0 ~ /@ "main"/) print "OSReconstruction" }
+' lakefile.lean | rg -n '.' >"$TMP_REPORT"; then
+  echo "[FAIL] Floating @ \"main\" dependency pins detected for core deps:" >&2
+  cat "$TMP_REPORT" >&2
+  exit 1
+fi
+
+echo "[OK] Core git dependencies are pinned in lakefile.lean"
+
 # 1) Explicit axiom declarations are forbidden.
 if rg -n "^\s*axiom\b" Phi4 --glob '*.lean' >"$TMP_REPORT"; then
   echo "[FAIL] Explicit axiom declarations found in Phi4/**/*.lean:" >&2
@@ -59,11 +71,11 @@ fi
 # 4) Trusted endpoints must not depend on sorryAx.
 TRUSTED_THEOREMS=(
   phi4_satisfies_OS_of_interfaces
-  phi4_satisfies_OS_of_bundle
+  phi4_satisfies_OS
   phi4_wightman_exists_of_interfaces
-  phi4_wightman_exists_of_bundle
-  phi4_os4_weak_coupling_eventually_small
-  phi4_os4_weak_coupling_eventually_small_of_bundle
+  phi4_wightman_exists
+  phi4_linear_growth
+  phi4_wightman_reconstruction_step
 )
 
 {
@@ -119,3 +131,7 @@ for theorem in "${TRUSTED_THEOREMS[@]}"; do
 done
 
 echo "[OK] Trusted interface/bundle endpoints are free of sorryAx dependencies"
+
+# 5) Emit a machine-readable frontier obligation inventory for external tooling.
+mkdir -p docs/frontier_obligations
+scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv

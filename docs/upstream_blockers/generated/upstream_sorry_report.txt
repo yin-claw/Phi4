@@ -1,0 +1,6 @@
+osreconstruction_rev=cbab0ad49724b09f547597fe7e04a4f36af2050c
+textual_theorem_level_sorry_count=0
+os_to_wightman_full_sorryax_status=present
+axiom_report_sample:
+warning: OSReconstruction: repository '/Users/xiyin/Phi4/.lake/packages/OSReconstruction' has local changes
+'os_to_wightman_full' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]

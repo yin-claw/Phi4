@@ -1,6 +1,6 @@
 # Upstream Blocking Proof Summary
 
-_Generated: 2026-02-28_
+_Generated: 2026-03-04_
 
 - Source tree: /Users/xiyin/Phi4/.lake/packages/OSReconstruction/OSReconstruction
 - Total sorry tokens: 97

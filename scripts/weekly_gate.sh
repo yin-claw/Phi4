@@ -13,8 +13,17 @@ lake build Phi4.Interaction Phi4.FiniteVolumeMeasure Phi4.InfiniteVolumeLimit Ph
 echo "[weekly_gate] Running route-bloat guard..."
 scripts/route_bloat_guard.sh
 
+echo "[weekly_gate] Running scratch hygiene guard..."
+scripts/scratch_guard.sh
+
+echo "[weekly_gate] Emitting frontier obligations report..."
+scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv
+
 echo "[weekly_gate] Scanning upstream blockers..."
 scripts/upstream_blockers_scan.sh >/dev/null
 scripts/upstream_blockers_status.sh stats
+
+echo "[weekly_gate] Reporting upstream theorem-level sorry inventory..."
+scripts/upstream_sorry_report.sh --emit docs/upstream_blockers/generated/upstream_sorry_report.txt
 
 echo "[weekly_gate] Completed."

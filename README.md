@@ -60,6 +60,13 @@ Local per-folder guides are available at:
 - Dependency reproducibility:
   - `GaussianField` and `OSReconstruction` are pinned to commit hashes in
     `lakefile.lean` (no floating `@ "main"`).
+- Frontier transparency:
+  - machine-readable frontier inventory is emitted at
+    `docs/frontier_obligations/frontier.tsv` via
+    `scripts/frontier_report.sh`.
+- Scratch hygiene:
+  - local scratch inventory is guarded by `scripts/scratch_guard.sh`
+    (count and naming caps) and checked in `scripts/quick_gate.sh`.
 - Open frontier obligations are represented explicitly as theorem-level `gap_*`
   endpoints and interface assumptions (`...Model` classes), not hidden in
   definitions.
@@ -624,6 +631,9 @@ scripts/upstream_blockers_status.sh list open 20
 # Generate declaration prompt and top-N workpack
 scripts/upstream_blockers_prompt.sh "Wightman/Reconstruction/WickRotation/OSToWightman.lean" theorem full_analytic_continuation
 scripts/upstream_blockers_workpack.sh 10 open
+
+# Report pinned-upstream sorry/sorryAx risk at current lock revision
+scripts/upstream_sorry_report.sh --emit docs/upstream_blockers/generated/upstream_sorry_report.txt
 ```
 
 Outputs are written under `docs/upstream_blockers/generated/`, and persistent

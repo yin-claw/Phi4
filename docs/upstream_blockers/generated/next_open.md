@@ -1,6 +1,6 @@
 # Next Open Blocking Declarations
 
-_Generated: 2026-02-28_
+_Generated: 2026-03-04_
 
 | Score | Status | File | Declaration | Sorry Count | Reverse Importers | Owner |
 |---:|---|---|---|---:|---:|---|

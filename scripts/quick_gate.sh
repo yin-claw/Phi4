@@ -10,4 +10,10 @@ lake build Phi4.Interaction Phi4.FiniteVolumeMeasure Phi4.InfiniteVolumeLimit Ph
 echo "[quick_gate] Running route-bloat guard..."
 scripts/route_bloat_guard.sh
 
+echo "[quick_gate] Running scratch hygiene guard..."
+scripts/scratch_guard.sh
+
+echo "[quick_gate] Printing frontier obligations report..."
+scripts/frontier_report.sh
+
 echo "[quick_gate] Completed."

@@ -2,6 +2,28 @@
 
 Date: 2026-03-03
 
+Update (2026-03-04, frontier-transparency + scratch-hygiene tooling pass):
+- Added explicit, machine-readable frontier inventory tooling:
+  - `scripts/frontier_report.sh`,
+  - generated report `docs/frontier_obligations/frontier.tsv`,
+  - report refresh integrated into `scripts/check_phi4_trust.sh` and
+    `scripts/weekly_gate.sh`.
+- Added explicit upstream-risk report:
+  - `scripts/upstream_sorry_report.sh`,
+  - generated report
+    `docs/upstream_blockers/generated/upstream_sorry_report.txt`,
+  - includes `os_to_wightman_full` `sorryAx` status at pinned upstream revision.
+- Added scratch hygiene guard:
+  - `scripts/scratch_guard.sh` (caps `Scratch` `.lean` file count and
+    disallows `Check*.lean` drift),
+  - integrated into `scripts/quick_gate.sh` and `scripts/weekly_gate.sh`.
+- Tightened trust checks:
+  - `scripts/check_phi4_trust.sh` now fails on floating `@ "main"` pins for
+    core dependencies (`GaussianField`, `OSReconstruction`).
+- Local scratch cleanup executed:
+  - scratch `.lean` inventory reduced `98 -> 54`,
+  - `Check*.lean` inventory reduced `9 -> 0`.
+
 Update (2026-03-04, correlation-lattice wrapper pruning with content check):
 - Removed one no-caller forwarding wrapper with no additional mathematical
   content:

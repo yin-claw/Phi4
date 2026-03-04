@@ -1,4 +1,4 @@
-_Generated: 2026-02-28_
+_Generated: 2026-03-04_
 
 Generated from `.lake/packages/OSReconstruction/OSReconstruction/**/*.lean` by mapping each `sorry` token to its enclosing declaration.
 

@@ -27,6 +27,15 @@ the local Glimm-Jaffe objective.
   `scripts/route_bloat_guard.sh`) pass.
 - `lakefile.lean` pins `GaussianField` and `OSReconstruction` to immutable
   commit hashes for reproducible builds.
+- `scripts/check_phi4_trust.sh` now enforces pinned core git dependencies and
+  emits machine-readable frontier inventory at
+  `docs/frontier_obligations/frontier.tsv`.
+- `scripts/quick_gate.sh` / `scripts/weekly_gate.sh` now include:
+  - `scripts/scratch_guard.sh` (scratch count/naming hygiene),
+  - `scripts/frontier_report.sh` (explicit frontier inventory report).
+- `scripts/upstream_sorry_report.sh` now emits pinned-upstream risk inventory
+  (`docs/upstream_blockers/generated/upstream_sorry_report.txt`), including
+  `os_to_wightman_full` `sorryAx` status.
 - `scripts/check_phi4_trust.sh` now also enforces that selected trusted
   interface/bundle endpoints are free of `sorryAx` dependencies (`#print axioms` check).
 - `Phi4/InfiniteVolumeLimit/Part1.lean` now reduces assumption smuggling at the

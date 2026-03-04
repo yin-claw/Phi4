@@ -78,6 +78,29 @@ Each line item is actionable, testable, and tied to concrete files/modules.
   - `lake env lean Phi4/CorrelationInequalities.lean`,
   - `bash scripts/route_bloat_guard.sh`.
 
+## Session Update (2026-03-04, frontier transparency and scratch hygiene)
+
+- Added explicit frontier-inventory tooling for external auditability:
+  - `scripts/frontier_report.sh`,
+  - generated artifact `docs/frontier_obligations/frontier.tsv`.
+- Added explicit upstream-risk report tooling:
+  - `scripts/upstream_sorry_report.sh`,
+  - generated artifact
+    `docs/upstream_blockers/generated/upstream_sorry_report.txt`
+    (including `os_to_wightman_full` `sorryAx` status at pinned revision).
+- Integrated frontier reporting into gates:
+  - `scripts/check_phi4_trust.sh` emits `frontier.tsv`,
+  - `scripts/weekly_gate.sh` emits `frontier.tsv`,
+  - `scripts/quick_gate.sh` prints frontier inventory summary.
+- Added scratch bloat control:
+  - new `scripts/scratch_guard.sh` with count and `Check*.lean` caps,
+  - guard integrated in `scripts/quick_gate.sh` and `scripts/weekly_gate.sh`.
+- Tightened reproducibility trust check:
+  - `scripts/check_phi4_trust.sh` now fails if core deps float on `@ "main"`.
+- Local cleanup action:
+  - scratch `.lean` count reduced `98 -> 54`,
+  - `Check*.lean` reduced `9 -> 0`.
+
 ## Session Update (2026-03-04, linear-growth frontier assumption-explicit refactor)
 
 - `Phi4/Reconstruction/Part1Core.lean`:
