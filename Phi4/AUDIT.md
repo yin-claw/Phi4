@@ -476,6 +476,10 @@ local `sorry`.
     `[InteractionUVModel]` assumptions; downstream square-data callers in
     `Interaction/Part2.lean` and `Interaction/Part3.lean` were rewired to this
     assumption-explicit infrastructure.
+18. `Interaction/Part3.lean` now includes a reusable square-data composition
+    core (`interactionIntegrabilityModel_nonempty_from_sq_integrable_data_and_weight`)
+    to eliminate repeated UV-model assembly plumbing across constructive
+    `InteractionIntegrabilityModel` endpoints without increasing route counts.
 
 ### Low
 

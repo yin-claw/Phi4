@@ -232,6 +232,11 @@ primary local Glimm-Jaffe work queue.
   - removed the same class-instantiation detour in
     `interactionWeightModel_nonempty_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_moment_abs_geometric_bound`
     (`Interaction/Part3.lean`).
+- Added a reusable square-data composition core in `Interaction/Part3.lean`:
+  - `interactionIntegrabilityModel_nonempty_from_sq_integrable_data_and_weight`,
+    factoring the repeated
+    `interactionUVModel_nonempty_of_sq_integrable_data` + `...uv_weight_nonempty`
+    assembly used by multiple hard-core integrability constructors.
 - Verification:
   - `lake build Phi4.Interaction.Part2 Phi4.Interaction.Part3` passes.
   - `bash scripts/quick_gate.sh` passes with route-bloat caps unchanged.

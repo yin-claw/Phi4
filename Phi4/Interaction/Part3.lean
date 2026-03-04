@@ -140,6 +140,52 @@ theorem
   theorem, then lift with `interactionIntegrabilityModel_nonempty_of_uv_weight_nonempty`.
 -/
 
+/-- Core square-data composition: once UV data is promoted to
+    `InteractionUVModel` and a constructive `InteractionWeightModel` endpoint is
+    available, obtain `InteractionIntegrabilityModel` without route wrappers. -/
+theorem interactionIntegrabilityModel_nonempty_from_sq_integrable_data_and_weight
+    (params : Phi4Params)
+    (hcutoff_meas :
+      ∀ (Λ : Rectangle) (κ : UVCutoff),
+        AEStronglyMeasurable (interactionCutoff params Λ κ)
+          (freeFieldMeasure params.mass params.mass_pos))
+    (hcutoff_sq :
+      ∀ (Λ : Rectangle) (κ : UVCutoff),
+        Integrable (fun ω => (interactionCutoff params Λ κ ω) ^ 2)
+          (freeFieldMeasure params.mass params.mass_pos))
+    (hcutoff_conv :
+      ∀ (Λ : Rectangle),
+        Filter.Tendsto
+          (fun (κ : ℝ) => if h : 0 < κ then
+            ∫ ω, (interactionCutoff params Λ ⟨κ, h⟩ ω - interaction params Λ ω) ^ 2
+              ∂(freeFieldMeasure params.mass params.mass_pos)
+            else 0)
+          Filter.atTop
+          (nhds 0))
+    (hcutoff_ae :
+      ∀ (Λ : Rectangle),
+        ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
+          Filter.Tendsto
+            (fun (κ : ℝ) => if h : 0 < κ then interactionCutoff params Λ ⟨κ, h⟩ ω else 0)
+            Filter.atTop
+            (nhds (interaction params Λ ω)))
+    (hinteraction_meas :
+      ∀ (Λ : Rectangle),
+        AEStronglyMeasurable (interaction params Λ)
+          (freeFieldMeasure params.mass params.mass_pos))
+    (hinteraction_sq :
+      ∀ (Λ : Rectangle),
+        Integrable (fun ω => (interaction params Λ ω) ^ 2)
+          (freeFieldMeasure params.mass params.mass_pos))
+    (hW : Nonempty (InteractionWeightModel params)) :
+    Nonempty (InteractionIntegrabilityModel params) := by
+  rcases interactionUVModel_nonempty_of_sq_integrable_data
+      (params := params)
+      hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
+      hinteraction_meas hinteraction_sq with ⟨huv⟩
+  exact interactionIntegrabilityModel_nonempty_of_uv_weight_nonempty
+    (params := params) ⟨huv⟩ hW
+
 /-- Construct `InteractionIntegrabilityModel` from:
     1. square-integrability/measurability UV data (promoted to
        `InteractionUVModel`), and
@@ -208,18 +254,16 @@ theorem
               Real.exp (-(q * interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω))
               ∂(freeFieldMeasure params.mass params.mass_pos) ≤ D)) :
     Nonempty (InteractionIntegrabilityModel params) := by
-  rcases interactionUVModel_nonempty_of_sq_integrable_data
-      (params := params)
-      hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
-      hinteraction_meas hinteraction_sq with ⟨huv⟩
-  have hW : Nonempty (InteractionWeightModel params) :=
+  refine interactionIntegrabilityModel_nonempty_from_sq_integrable_data_and_weight
+    (params := params)
+    hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
+    hinteraction_meas hinteraction_sq ?_
+  exact
     interactionWeightModel_nonempty_of_sq_moment_polynomial_bound_per_volume_and_uniform_partition_bound_of_succ_succ
       (params := params) (β := β) hβ (C := C) hC_nonneg hInt hM
       (hcutoff_meas := fun Λ n => by
         simpa using hcutoff_meas Λ (standardUVCutoffSeq (n + 1)))
       hpartition
-  exact interactionIntegrabilityModel_nonempty_of_uv_weight_nonempty
-    (params := params) ⟨huv⟩ hW
 
 /-- Construct `InteractionIntegrabilityModel` from:
     1. square-integrability/measurability UV data (promoted to
@@ -295,18 +339,16 @@ theorem
               Real.exp (-(q * interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω))
               ∂(freeFieldMeasure params.mass params.mass_pos) ≤ D)) :
     Nonempty (InteractionIntegrabilityModel params) := by
-  rcases interactionUVModel_nonempty_of_sq_integrable_data
-      (params := params)
-      hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
-      hinteraction_meas hinteraction_sq with ⟨huv⟩
-  have hW : Nonempty (InteractionWeightModel params) :=
+  refine interactionIntegrabilityModel_nonempty_from_sq_integrable_data_and_weight
+    (params := params)
+    hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
+    hinteraction_meas hinteraction_sq ?_
+  exact
     interactionWeightModel_nonempty_of_sq_moment_polynomial_bound_per_volume_and_uniform_partition_bound
       (params := params) (β := β) hβ (C := C) hC_nonneg hInt hM
       (hcutoff_meas := fun Λ n => by
         simpa using hcutoff_meas Λ (standardUVCutoffSeq (n + 1)))
       hpartition
-  exact interactionIntegrabilityModel_nonempty_of_uv_weight_nonempty
-    (params := params) ⟨huv⟩ hW
 
 /-- Construct `InteractionIntegrabilityModel` from:
     1. square-integrability/measurability UV data (promoted to
@@ -383,19 +425,17 @@ theorem
               Real.exp (-(q * interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω))
               ∂(freeFieldMeasure params.mass params.mass_pos) ≤ D)) :
     Nonempty (InteractionIntegrabilityModel params) := by
-  rcases interactionUVModel_nonempty_of_sq_integrable_data
-      (params := params)
-      hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
-      hinteraction_meas hinteraction_sq with ⟨huv⟩
-  have hW : Nonempty (InteractionWeightModel params) :=
+  refine interactionIntegrabilityModel_nonempty_from_sq_integrable_data_and_weight
+    (params := params)
+    hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
+    hinteraction_meas hinteraction_sq ?_
+  exact
     interactionWeightModel_nonempty_of_higher_moment_polynomial_bound_per_volume_and_uniform_partition_bound
       (params := params) (j := j) (hj := hj)
       (β := β) hβ (C := C) hC_nonneg hInt hM
       (hcutoff_meas := fun Λ n => by
         simpa using hcutoff_meas Λ (standardUVCutoffSeq (n + 1)))
       hpartition
-  exact interactionIntegrabilityModel_nonempty_of_uv_weight_nonempty
-    (params := params) ⟨huv⟩ hW
 
 /-- Construct `InteractionIntegrabilityModel` from:
     1. square-integrability/measurability UV data (promoted to
@@ -472,18 +512,16 @@ theorem
               Real.exp (-(q * interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω))
               ∂(freeFieldMeasure params.mass params.mass_pos) ≤ D)) :
     Nonempty (InteractionIntegrabilityModel params) := by
-  rcases interactionUVModel_nonempty_of_sq_integrable_data
-      (params := params)
-      hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
-      hinteraction_meas hinteraction_sq with ⟨huv⟩
-  have hW : Nonempty (InteractionWeightModel params) :=
+  refine interactionIntegrabilityModel_nonempty_from_sq_integrable_data_and_weight
+    (params := params)
+    hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
+    hinteraction_meas hinteraction_sq ?_
+  exact
     interactionWeightModel_nonempty_of_higher_moment_polynomial_bound_per_volume_and_uniform_partition_bound_of_succ_succ
       (params := params) (j := j) (hj := hj) (β := β) hβ (C := C) hC_nonneg hInt hM
       (hcutoff_meas := fun Λ n => by
         simpa using hcutoff_meas Λ (standardUVCutoffSeq (n + 1)))
       hpartition
-  exact interactionIntegrabilityModel_nonempty_of_uv_weight_nonempty
-    (params := params) ⟨huv⟩ hW
 
 /-- Construct `InteractionIntegrabilityModel` from:
     1. square-integrability/measurability UV data (promoted to
@@ -562,30 +600,27 @@ theorem
                 (∀ n : ℕ,
                   (freeFieldMeasure params.mass params.mass_pos) (bad n) ≤ Cb * rb ^ n)) :
     Nonempty (InteractionIntegrabilityModel params) := by
-  rcases interactionUVModel_nonempty_of_sq_integrable_data
-      (params := params)
-      hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
-      hinteraction_meas hinteraction_sq with ⟨huv⟩
-  have hW : Nonempty (InteractionWeightModel params) := by
-    refine interactionWeightModel_nonempty_of_standardSeq_succ_tendsto_ae_and_geometric_exp_moment_bound
-      (params := params) ?_ ?_ ?_
-    · intro Λ
-      exact interactionCutoff_standardSeq_succ_tendsto_ae_of_tendsto_ae
-        (params := params) (Λ := Λ) (hcutoff_ae Λ)
-    · intro Λ n
-      simpa using hcutoff_meas Λ (standardUVCutoffSeq (n + 1))
-    intro Λ q hq
-    rcases hdecomp Λ q hq with
-      ⟨a, b, ha, bad, hbad_meas, hInt, hgood, hmem2, D2, r2, hD2, hr20, hr21, hMoment2,
-        Cb, rb, hCb, hrb1, hbadMeasure⟩
-    exact
-      standardSeq_succ_geometric_exp_moment_bound_of_linear_lower_bound_off_bad_sets_and_sq_exp_moment_geometric_and_bad_measure_geometric_ennreal
-        (params := params) (Λ := Λ) (q := q) (a := a) (b := b) hq ha
-        bad hbad_meas hInt hgood hmem2
-        D2 r2 hD2 hr20 hr21 hMoment2
-        Cb rb hCb hrb1 hbadMeasure
-  exact interactionIntegrabilityModel_nonempty_of_uv_weight_nonempty
-    (params := params) ⟨huv⟩ hW
+  refine interactionIntegrabilityModel_nonempty_from_sq_integrable_data_and_weight
+    (params := params)
+    hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
+    hinteraction_meas hinteraction_sq ?_
+  refine interactionWeightModel_nonempty_of_standardSeq_succ_tendsto_ae_and_geometric_exp_moment_bound
+    (params := params) ?_ ?_ ?_
+  · intro Λ
+    exact interactionCutoff_standardSeq_succ_tendsto_ae_of_tendsto_ae
+      (params := params) (Λ := Λ) (hcutoff_ae Λ)
+  · intro Λ n
+    simpa using hcutoff_meas Λ (standardUVCutoffSeq (n + 1))
+  intro Λ q hq
+  rcases hdecomp Λ q hq with
+    ⟨a, b, ha, bad, hbad_meas, hInt, hgood, hmem2, D2, r2, hD2, hr20, hr21, hMoment2,
+      Cb, rb, hCb, hrb1, hbadMeasure⟩
+  exact
+    standardSeq_succ_geometric_exp_moment_bound_of_linear_lower_bound_off_bad_sets_and_sq_exp_moment_geometric_and_bad_measure_geometric_ennreal
+      (params := params) (Λ := Λ) (q := q) (a := a) (b := b) hq ha
+      bad hbad_meas hInt hgood hmem2
+      D2 r2 hD2 hr20 hr21 hMoment2
+      Cb rb hCb hrb1 hbadMeasure
 
 /-- Construct `InteractionIntegrabilityModel` from:
     1. square-integrable/measurable UV data,
