@@ -5,6 +5,27 @@ Date: 2026-02-27
 This tracker converts `claude_to_codex.md` into an execution matrix.
 Each line item is actionable, testable, and tied to concrete files/modules.
 
+## Session Update (2026-03-04, Reconstruction-input wrapper collapse)
+
+- Removed six no-caller forwarding wrappers from
+  `Phi4/Reconstruction/Part1Tail.lean`:
+  - `reconstructionInputModel_nonempty_of_sq_integrable_data_and_linear_lower_bound_off_bad_sets_and_sq_exp_moment_geometric_and_bad_measure_geometric_ennreal`,
+  - `reconstructionInputModel_nonempty_of_sq_integrable_data_and_sq_moment_polynomial_bound_per_volume_and_uniform_partition_bound`,
+  - `reconstructionInputModel_nonempty_of_sq_integrable_data_and_higher_moment_polynomial_bound_per_volume_and_uniform_partition_bound`,
+  - `reconstructionInputModel_nonempty_of_sq_integrable_data_and_sq_moment_polynomial_bound_per_volume_and_uniform_partition_bound_of_succ_succ`,
+  - `reconstructionInputModel_nonempty_of_sq_integrable_data_and_higher_moment_polynomial_bound_per_volume_and_uniform_partition_bound_of_succ_succ`,
+  - `reconstructionInputModel_nonempty_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets`.
+- Measured reduction:
+  - `Reconstruction/Part1Tail` `reconstructionInputModel_nonempty_of_*` routes
+    `6 -> 0`.
+- Guard updates in `scripts/route_bloat_guard.sh`:
+  - tightened `Reconstruction.Part1Tail reconstructionInput routes` cap
+    `6 -> 0`.
+- Verification passed:
+  - `lake build Phi4.Reconstruction.Part1Tail Phi4.Reconstruction`,
+  - `bash scripts/route_bloat_guard.sh`,
+  - `bash scripts/quick_gate.sh`.
+
 ## Session Update (2026-03-04, Reconstruction linear-growth wrapper trim)
 
 - Removed six no-caller forwarding wrappers:

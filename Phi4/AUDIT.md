@@ -2,6 +2,26 @@
 
 Date: 2026-03-03
 
+Update (2026-03-04, reconstruction-input wrapper collapse):
+- Removed six no-caller forwarding wrappers from
+  `Reconstruction/Part1Tail.lean`:
+  - `reconstructionInputModel_nonempty_of_sq_integrable_data_and_linear_lower_bound_off_bad_sets_and_sq_exp_moment_geometric_and_bad_measure_geometric_ennreal`,
+  - `reconstructionInputModel_nonempty_of_sq_integrable_data_and_sq_moment_polynomial_bound_per_volume_and_uniform_partition_bound`,
+  - `reconstructionInputModel_nonempty_of_sq_integrable_data_and_higher_moment_polynomial_bound_per_volume_and_uniform_partition_bound`,
+  - `reconstructionInputModel_nonempty_of_sq_integrable_data_and_sq_moment_polynomial_bound_per_volume_and_uniform_partition_bound_of_succ_succ`,
+  - `reconstructionInputModel_nonempty_of_sq_integrable_data_and_higher_moment_polynomial_bound_per_volume_and_uniform_partition_bound_of_succ_succ`,
+  - `reconstructionInputModel_nonempty_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets`.
+- Surface-size impact:
+  - `Reconstruction/Part1Tail` `reconstructionInputModel_nonempty_of_*` routes:
+    `6 -> 0`.
+- Guard hardening:
+  - tightened `Reconstruction/Part1Tail reconstructionInput routes` cap in
+    `scripts/route_bloat_guard.sh` from `6` to `0`.
+- Verification:
+  - `lake build Phi4.Reconstruction.Part1Tail Phi4.Reconstruction` passes.
+  - `bash scripts/route_bloat_guard.sh` passes with new cap.
+  - `bash scripts/quick_gate.sh` passes.
+
 Update (2026-03-04, reconstruction linear-growth wrapper trim):
 - Removed six no-caller forwarding wrappers:
   - `Reconstruction/Part1Core.lean`:

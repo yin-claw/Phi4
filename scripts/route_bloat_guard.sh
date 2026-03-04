@@ -12,7 +12,7 @@ cd "$ROOT_DIR"
 # - gap_phi4_linear_growth variant count in Reconstruction/Part1Core.lean: 2
 # - Reconstruction/Part1Core InteractionUVModel wrapper count: 0
 # - Reconstruction/Part1Tail InteractionUVModel wrapper count: 0
-# - Reconstruction/Part1Tail reconstructionInputModel_nonempty_of_* route count: 6
+# - Reconstruction/Part1Tail reconstructionInputModel_nonempty_of_* route count: 0
 # - Interaction/Part2 top-level theorem count: 8
 # - Reconstruction/Part2 top-level theorem count: 1
 # - Reconstruction/Part2 *_explicit* theorem count: 0
@@ -32,7 +32,7 @@ MAX_INTEGRABILITY_ROUTES=2
 MAX_LINEAR_GROWTH_ROUTES=2
 MAX_RECON_PART1CORE_INTERACTIONUV_WRAPPERS=0
 MAX_RECON_PART1TAIL_INTERACTIONUV_WRAPPERS=0
-MAX_RECON_PART1TAIL_INPUT_ROUTES=6
+MAX_RECON_PART1TAIL_INPUT_ROUTES=0
 MAX_INTERACTION_PART2_THEOREMS=8
 MAX_RECON_PART2_THEOREMS=1
 MAX_RECON_PART2_EXPLICIT_ROUTES=0
