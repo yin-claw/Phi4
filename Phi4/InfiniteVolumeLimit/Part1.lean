@@ -101,20 +101,6 @@ theorem schwinger_monotone_in_volume (params : Phi4Params)
     (![f, g] : Fin 2 → TestFun2D) hfvec hsuppvec
   simpa [schwingerN_two_eq_schwingerTwo] using hmonoN
 
-/-- Lattice-bridge variant of two-point monotonicity in volume. -/
-theorem schwinger_monotone_in_volume_from_lattice (params : Phi4Params)
-    [LatticeSchwingerTwoMonotoneModel params]
-    (n₁ n₂ : ℕ) (hn₁ : 0 < n₁) (hn₂ : 0 < n₂) (h : n₁ ≤ n₂)
-    (f g : TestFun2D) (hf : ∀ x, 0 ≤ f x) (hg : ∀ x, 0 ≤ g x)
-    (hfsupp : ∀ x ∉ (exhaustingRectangles n₁ hn₁).toSet, f x = 0)
-    (hgsupp : ∀ x ∉ (exhaustingRectangles n₁ hn₁).toSet, g x = 0) :
-    schwingerTwo params (exhaustingRectangles n₁ hn₁) f g ≤
-      schwingerTwo params (exhaustingRectangles n₂ hn₂) f g := by
-  exact schwinger_two_monotone_from_lattice params
-    (exhaustingRectangles n₁ hn₁) (exhaustingRectangles n₂ hn₂)
-    (exhaustingRectangles_mono_toSet n₁ n₂ hn₁ hn₂ h)
-    f g hf hg hfsupp hgsupp
-
 /-- Monotonicity of finite-volume `k`-point Schwinger moments along the
     exhausting rectangles, under a `SchwingerNMonotoneModel` interface. -/
 theorem schwingerN_monotone_in_volume_of_model (params : Phi4Params)
@@ -153,32 +139,6 @@ theorem schwingerN_monotone_in_volume_two_from_lattice (params : Phi4Params)
   letI : SchwingerNMonotoneModel params 2 := hmono
   exact schwingerN_monotone_in_volume_of_model
     (params := params) (k := 2) n₁ n₂ hn₁ hn₂ h f hf hfsupp
-
-/-- Monotonicity for `schwingerN` in the currently established case `k = 2`,
-    reduced to `schwinger_monotone_in_volume`. -/
-theorem schwingerN_monotone_in_volume (params : Phi4Params)
-    [SchwingerNMonotoneModel params 2]
-    (n₁ n₂ : ℕ) (hn₁ : 0 < n₁) (hn₂ : 0 < n₂) (h : n₁ ≤ n₂)
-    (k : ℕ) (f : Fin k → TestFun2D) (hf : ∀ i, ∀ x, 0 ≤ f i x)
-    (hfsupp : ∀ i, ∀ x ∉ (exhaustingRectangles n₁ hn₁).toSet, f i x = 0)
-    (hk : k = 2) :
-    schwingerN params (exhaustingRectangles n₁ hn₁) k f ≤
-      schwingerN params (exhaustingRectangles n₂ hn₂) k f := by
-  subst hk
-  exact schwingerN_monotone_in_volume_two params n₁ n₂ hn₁ hn₂ h f hf hfsupp
-
-/-- Lattice-bridge variant of `schwingerN` monotonicity in the established case `k = 2`. -/
-theorem schwingerN_monotone_in_volume_from_lattice (params : Phi4Params)
-    [LatticeSchwingerTwoMonotoneModel params]
-    (n₁ n₂ : ℕ) (hn₁ : 0 < n₁) (hn₂ : 0 < n₂) (h : n₁ ≤ n₂)
-    (k : ℕ) (f : Fin k → TestFun2D) (hf : ∀ i, ∀ x, 0 ≤ f i x)
-    (hfsupp : ∀ i, ∀ x ∉ (exhaustingRectangles n₁ hn₁).toSet, f i x = 0)
-    (hk : k = 2) :
-    schwingerN params (exhaustingRectangles n₁ hn₁) k f ≤
-      schwingerN params (exhaustingRectangles n₂ hn₂) k f := by
-  subst hk
-  exact schwingerN_monotone_in_volume_two_from_lattice
-    params n₁ n₂ hn₁ hn₂ h f hf hfsupp
 
 private lemma support_zero_outside_of_subset
     (f : TestFun2D) {A B : Set Spacetime2D}
@@ -401,31 +361,6 @@ theorem schwingerN_tendsto_if_exhaustion_of_models
     rintro y ⟨n, rfl⟩
     exact le_trans (le_abs_self _) (hbound n)
   exact tendsto_atTop_ciSup hmono hbdd
-
-/-- Uniform absolute bound for the exhausting-sequence two-point function,
-    obtained from the multiple-reflection uniform bound and support-in-base-volume
-    assumptions. -/
-theorem schwingerTwo_uniformly_bounded_on_exhaustion
-    (params : Phi4Params)
-    [MultipleReflectionModel params]
-    (n0 : ℕ)
-    (f g : TestFun2D)
-    (hfsupp0 : ∀ x ∉ (exhaustingRectangles (n0 + 1) (Nat.succ_pos n0)).toSet, f x = 0)
-    (hgsupp0 : ∀ x ∉ (exhaustingRectangles (n0 + 1) (Nat.succ_pos n0)).toSet, g x = 0) :
-    ∃ C : ℝ, ∀ n : ℕ,
-      |schwingerTwo params (exhaustingRectangles (n + n0 + 1) (Nat.succ_pos _)) f g| ≤ C := by
-  have hfgsupp0 :
-      ∀ i, ∀ x ∉ (exhaustingRectangles (n0 + 1) (Nat.succ_pos n0)).toSet,
-        (![f, g] : Fin 2 → TestFun2D) i x = 0 := by
-    intro i x hx
-    fin_cases i
-    · simpa using hfsupp0 x hx
-    · simpa using hgsupp0 x hx
-  rcases schwingerN_uniformly_bounded_on_exhaustion
-      params n0 2 (![f, g] : Fin 2 → TestFun2D) hfgsupp0 with ⟨C, hC⟩
-  refine ⟨C, ?_⟩
-  intro n
-  simpa [schwingerN_two_eq_schwingerTwo] using hC n
 
 /-- Lattice-bridge `n + 1`-shifted exhaustion form of two-point convergence. -/
 theorem schwingerTwo_tendsto_if_exhaustion_of_lattice_models

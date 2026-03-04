@@ -2,6 +2,25 @@
 
 Date: 2026-03-03
 
+Update (2026-03-04, infinite-volume monotonicity-wrapper trim):
+- Removed four no-caller forwarding wrappers in
+  `InfiniteVolumeLimit/Part1.lean`:
+  - `schwinger_monotone_in_volume_from_lattice`,
+  - `schwingerN_monotone_in_volume`,
+  - `schwingerN_monotone_in_volume_from_lattice`,
+  - `schwingerTwo_uniformly_bounded_on_exhaustion`.
+- Surface-size impact:
+  - `InfiniteVolumeLimit/Part1` theorem count reduced `28 -> 24`,
+  - `InfiniteVolumeLimit/Part1` `schwingerTwo_*` route count reduced `2 -> 1`.
+- Guard hardening:
+  - tightened `scripts/route_bloat_guard.sh` caps for
+    `InfiniteVolumeLimit/Part1` theorem count to `24`,
+    `schwingerTwo_*` route count to `1`.
+- Verification:
+  - `lake build Phi4.InfiniteVolumeLimit.Part1 Phi4.InfiniteVolumeLimit` passes.
+  - `lake env lean test/task3_lattice_audit.lean` passes.
+  - `bash scripts/route_bloat_guard.sh` passes.
+
 Update (2026-03-04, infinite-volume existence-wrapper cleanup):
 - Removed six no-caller `InfiniteVolumeLimit/Part1.lean` forwarding routes:
   - `schwingerN_limit_exists_of_monotone_bounded`,

@@ -5,6 +5,23 @@ Date: 2026-02-27
 This tracker converts `claude_to_codex.md` into an execution matrix.
 Each line item is actionable, testable, and tied to concrete files/modules.
 
+## Session Update (2026-03-04, IV monotonicity-route trim)
+
+- Removed four no-caller forwarding wrappers from
+  `Phi4/InfiniteVolumeLimit/Part1.lean`:
+  - `schwinger_monotone_in_volume_from_lattice`,
+  - `schwingerN_monotone_in_volume`,
+  - `schwingerN_monotone_in_volume_from_lattice`,
+  - `schwingerTwo_uniformly_bounded_on_exhaustion`.
+- Tightened `scripts/route_bloat_guard.sh` IVL caps to current baseline:
+  - `InfiniteVolumeLimit/Part1` theorem cap `24`,
+  - `schwingerTwo_*` route cap `1`,
+  - `infinite_volume_schwinger_exists_*_of_*` cap unchanged `4`.
+- Verification passed:
+  - `lake build Phi4.InfiniteVolumeLimit.Part1 Phi4.InfiniteVolumeLimit`,
+  - `lake env lean test/task3_lattice_audit.lean`,
+  - `bash scripts/route_bloat_guard.sh`.
+
 ## Session Update (2026-03-04, IV existence-route pruning)
 
 - Removed six no-caller forwarding routes from
