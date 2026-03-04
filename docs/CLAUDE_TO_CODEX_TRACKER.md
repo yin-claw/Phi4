@@ -5,6 +5,19 @@ Date: 2026-02-27
 This tracker converts `claude_to_codex.md` into an execution matrix.
 Each line item is actionable, testable, and tied to concrete files/modules.
 
+## Session Update (2026-03-04, IV Part3 alias cleanup)
+
+- Removed three no-caller alias theorems from
+  `Phi4/InfiniteVolumeLimit/Part3.lean`:
+  - `connectedTwoPointBilinear_symm`,
+  - `connectedTwoPoint_quadratic_nonneg_standard`,
+  - `infiniteVolumeSchwinger_zero_of_moment`.
+- Added a new non-growth guard in `scripts/route_bloat_guard.sh`:
+  - `InfiniteVolumeLimit/Part3` theorem cap `16`.
+- Verification passed:
+  - `lake build Phi4.InfiniteVolumeLimit.Part3 Phi4.InfiniteVolumeLimit`,
+  - `bash scripts/route_bloat_guard.sh`.
+
 ## Session Update (2026-03-04, IV Part2 alias cleanup)
 
 - Removed nine no-caller alias theorems from

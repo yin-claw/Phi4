@@ -2,6 +2,23 @@
 
 Date: 2026-03-03
 
+Update (2026-03-04, infinite-volume Part3 alias trim):
+- Removed three no-caller alias theorems in
+  `InfiniteVolumeLimit/Part3.lean`:
+  - `connectedTwoPointBilinear_symm`,
+  - `connectedTwoPoint_quadratic_nonneg_standard`,
+  - `infiniteVolumeSchwinger_zero_of_moment`.
+- Kept the constructive core chain (`connectedTwoPoint_*` convergence,
+  bilinearity, positivity, and Cauchy-Schwarz bounds) unchanged.
+- Surface-size impact:
+  - `InfiniteVolumeLimit/Part3` theorem count reduced to `16`.
+- Guard hardening:
+  - added `InfiniteVolumeLimit/Part3` theorem cap (`16`) to
+    `scripts/route_bloat_guard.sh`.
+- Verification:
+  - `lake build Phi4.InfiniteVolumeLimit.Part3 Phi4.InfiniteVolumeLimit` passes.
+  - `bash scripts/route_bloat_guard.sh` passes with the new cap.
+
 Update (2026-03-04, infinite-volume 4-point alias pruning):
 - Removed nine no-caller alias theorems in
   `InfiniteVolumeLimit/Part2.lean`:

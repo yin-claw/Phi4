@@ -209,16 +209,6 @@ def connectedTwoPointBilinear (params : Phi4Params)
     ext g
     exact connectedTwoPoint_smul_left params c f g
 
-/-- Symmetry of the infinite-volume connected two-point bilinear form. -/
-theorem connectedTwoPointBilinear_symm (params : Phi4Params)
-    [SchwingerLimitModel params]
-    [InteractionWeightModel params]
-    (f g : TestFun2D) :
-    connectedTwoPointBilinear params f g =
-      connectedTwoPointBilinear params g f := by
-  simpa [connectedTwoPointBilinear] using
-    connectedTwoPoint_symm params f g
-
 /-- Diagonal connected two-point nonnegativity in infinite volume, obtained from
     finite-volume variance positivity and convergence along the exhaustion. -/
 theorem connectedTwoPoint_self_nonneg
@@ -331,30 +321,6 @@ theorem connectedTwoPoint_quadratic_nonneg
     connectedTwoPointBilinear_self_nonneg params v
   rw [hvv] at hnonneg
   simpa [B] using hnonneg
-
-/-- Standard-index-order form of `connectedTwoPoint_quadratic_nonneg`. -/
-theorem connectedTwoPoint_quadratic_nonneg_standard
-    (params : Phi4Params)
-    [SchwingerLimitModel params]
-    [InteractionWeightModel params]
-    {ι : Type*} (s : Finset ι)
-    (f : ι → TestFun2D) (c : ι → ℝ) :
-    0 ≤ Finset.sum s (fun i => Finset.sum s (fun j =>
-      c i * c j * connectedTwoPoint params (f i) (f j))) := by
-  have hbase := connectedTwoPoint_quadratic_nonneg params s f c
-  have hEq :
-      Finset.sum s (fun i =>
-        c i * Finset.sum s (fun j => c j * connectedTwoPoint params (f j) (f i)))
-      =
-      Finset.sum s (fun i => Finset.sum s (fun j =>
-        c i * c j * connectedTwoPoint params (f i) (f j))) := by
-    refine Finset.sum_congr rfl (fun i hi => ?_)
-    rw [Finset.mul_sum]
-    refine Finset.sum_congr rfl (fun j hj => ?_)
-    rw [connectedTwoPoint_symm params (f j) (f i)]
-    ring
-  rw [hEq] at hbase
-  exact hbase
 
 /-- Geometric-mean bound from infinite-volume connected two-point
     Cauchy-Schwarz:
@@ -496,21 +462,5 @@ theorem infiniteVolumeSchwinger_zero (params : Phi4Params)
     have hn' : 0 < n := hn
     simp [hn', schwingerN_zero params (exhaustingRectangles n hn') f]
   exact tendsto_nhds_unique hlim' hconst
-
-/-- Measure-representation proof of zeroth infinite-volume Schwinger
-    normalization (`S_0 = 1`). -/
-theorem infiniteVolumeSchwinger_zero_of_moment (params : Phi4Params)
-    [InfiniteVolumeSchwingerModel params]
-    [InfiniteVolumeMeasureModel params]
-    [InfiniteVolumeMomentModel params]
-    (f : Fin 0 → TestFun2D) :
-    infiniteVolumeSchwinger params 0 f = 1 := by
-  have hprob : IsProbabilityMeasure (infiniteVolumeMeasure params) :=
-    infiniteVolumeMeasure_isProbability params
-  letI : IsProbabilityMeasure (infiniteVolumeMeasure params) := hprob
-  rw [infiniteVolumeSchwinger_is_moment]
-  change ∫ ω : FieldConfig2D, (1 : ℝ) ∂(infiniteVolumeMeasure params) = 1
-  rw [integral_const]
-  simp
 
 end
