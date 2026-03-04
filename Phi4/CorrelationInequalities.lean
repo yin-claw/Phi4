@@ -199,20 +199,6 @@ theorem schwingerN_monotone_of_interface
   exact SchwingerNMonotoneModel.schwingerN_monotone
     (params := params) Λ₁ Λ₂ h f hf hfΛ
 
-/-- Interface-level access to finite-volume monotonicity from the family-level
-    monotonicity interface. -/
-theorem schwingerN_monotone_of_family
-    (params : Phi4Params) (k : ℕ)
-    [SchwingerNMonotoneFamilyModel params]
-    (Λ₁ Λ₂ : Rectangle)
-    (h : Λ₁.toSet ⊆ Λ₂.toSet)
-    (f : Fin k → TestFun2D)
-    (hf : ∀ i, ∀ x, 0 ≤ f i x)
-    (hfΛ : ∀ i, ∀ x ∉ Λ₁.toSet, f i x = 0) :
-    schwingerN params Λ₁ k f ≤ schwingerN params Λ₂ k f := by
-  exact SchwingerNMonotoneFamilyModel.schwingerN_monotone
-    (params := params) k Λ₁ Λ₂ h f hf hfΛ
-
 /-- Two-point monotonicity implies `k = 2` Schwinger-moment monotonicity. -/
 instance (priority := 100) schwingerNMonotoneModel_two_of_correlationTwoPoint
     (params : Phi4Params) [CorrelationTwoPointModel params] :

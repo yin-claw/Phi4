@@ -2,6 +2,25 @@
 
 Date: 2026-03-03
 
+Update (2026-03-04, infinite-volume wrapper-route trim):
+- Removed eight no-caller wrapper routes:
+  - `CorrelationInequalities.lean`:
+    `schwingerN_monotone_of_family`.
+  - `InfiniteVolumeLimit/Part1.lean`:
+    `schwingerTwo_limit_exists_if_exhaustion_of_models`,
+    `schwingerN_two_limit_exists_if_exhaustion_of_models`,
+    `schwingerTwo_limit_exists_of_lattice_models`,
+    `schwingerN_two_tendsto_iSup_of_lattice_monotone_bounded`,
+    `schwingerN_two_limit_exists_of_monotone_bounded`,
+    `schwingerN_two_limit_exists_of_models`,
+    `schwingerN_two_limit_exists_of_lattice_models`.
+- Surface-size impact:
+  - no change to `_nonempty_of_` route counts (still `75`);
+    reduction is in theorem-wrapper route surface.
+- Verification:
+  - `lake build Phi4.CorrelationInequalities Phi4.InfiniteVolumeLimit.Part1 Phi4.InfiniteVolumeLimit Phi4.Regularity Phi4.OSAxioms` passes.
+  - `bash scripts/quick_gate.sh` passes.
+
 Update (2026-03-04, cross-module interface-wrapper trim):
 - Removed four no-caller interface wrappers:
   - `Regularity.lean`: `infiniteVolumeSchwinger_mixed_bound_of_interface`,

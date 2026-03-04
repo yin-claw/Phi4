@@ -291,3 +291,19 @@ primary local Glimm-Jaffe work queue.
 - Verification:
   - `lake build Phi4.CorrelationInequalities Phi4.InfiniteVolumeLimit.Part1 Phi4.Regularity Phi4.OSAxioms` passes.
   - `bash scripts/route_bloat_guard.sh` passes.
+
+### Infinite-volume wrapper-route trim (same session)
+
+- Removed eight no-caller wrapper routes:
+  - `schwingerN_monotone_of_family` (`CorrelationInequalities.lean`),
+  - `schwingerTwo_limit_exists_if_exhaustion_of_models`,
+    `schwingerN_two_limit_exists_if_exhaustion_of_models`,
+    `schwingerTwo_limit_exists_of_lattice_models`,
+    `schwingerN_two_tendsto_iSup_of_lattice_monotone_bounded`,
+    `schwingerN_two_limit_exists_of_monotone_bounded`,
+    `schwingerN_two_limit_exists_of_models`,
+    `schwingerN_two_limit_exists_of_lattice_models`
+    (`InfiniteVolumeLimit/Part1.lean`).
+- Verification:
+  - `lake build Phi4.CorrelationInequalities Phi4.InfiniteVolumeLimit.Part1 Phi4.InfiniteVolumeLimit Phi4.Regularity Phi4.OSAxioms` passes.
+  - `bash scripts/quick_gate.sh` passes.
