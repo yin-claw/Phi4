@@ -7,21 +7,25 @@ Each line item is actionable, testable, and tied to concrete files/modules.
 
 ## Session Update (2026-03-04, Reconstruction linear-growth wrapper trim)
 
-- Removed four no-caller forwarding wrappers:
+- Removed six no-caller forwarding wrappers:
   - `Phi4/Reconstruction/Part1Core.lean`:
     `gap_phi4_linear_growth_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`,
     `reconstructionLinearGrowthModel_nonempty_of_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets`.
   - `Phi4/Reconstruction/Part1Tail.lean`:
     `gap_phi4_linear_growth_of_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets`,
-    `reconstructionInputModel_nonempty_of_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets`.
+    `reconstructionInputModel_nonempty_of_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets`,
+    `reconstructionInputModel_nonempty_of_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets_of_aestronglyMeasurable_and_standardSeq_tendsto_ae`,
+    `reconstructionInputModel_nonempty_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`.
 - Measured reduction:
   - `gap_phi4_linear_growth*` routes in `Part1Core` `3 -> 2`,
   - class-based `InteractionUVModel` wrappers in `Part1Core` `1 -> 0`,
-  - class-based `InteractionUVModel` wrappers in `Part1Tail` `2 -> 0`.
+  - class-based `InteractionUVModel` wrappers in `Part1Tail` `2 -> 0`,
+  - `reconstructionInputModel_nonempty_of_*` routes in `Part1Tail` `8 -> 6`.
 - Guard updates in `scripts/route_bloat_guard.sh`:
   - tightened `gap_phi4_linear_growth` cap `3 -> 2`,
   - added `Reconstruction.Part1Core InteractionUV wrappers` cap `0`,
-  - added `Reconstruction.Part1Tail InteractionUV wrappers` cap `0`.
+  - added `Reconstruction.Part1Tail InteractionUV wrappers` cap `0`,
+  - added `Reconstruction.Part1Tail reconstructionInput routes` cap `6`.
 - Verification passed:
   - `lake build Phi4.Reconstruction.Part1Core Phi4.Reconstruction.Part1Tail Phi4.Reconstruction`,
   - `bash scripts/route_bloat_guard.sh`,

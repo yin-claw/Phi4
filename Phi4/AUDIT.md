@@ -3,22 +3,27 @@
 Date: 2026-03-03
 
 Update (2026-03-04, reconstruction linear-growth wrapper trim):
-- Removed four no-caller forwarding wrappers:
+- Removed six no-caller forwarding wrappers:
   - `Reconstruction/Part1Core.lean`:
     `gap_phi4_linear_growth_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`,
     `reconstructionLinearGrowthModel_nonempty_of_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets`.
   - `Reconstruction/Part1Tail.lean`:
     `gap_phi4_linear_growth_of_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets`,
-    `reconstructionInputModel_nonempty_of_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets`.
+    `reconstructionInputModel_nonempty_of_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets`,
+    `reconstructionInputModel_nonempty_of_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets_of_aestronglyMeasurable_and_standardSeq_tendsto_ae`,
+    `reconstructionInputModel_nonempty_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`.
 - Surface-size impact:
   - `gap_phi4_linear_growth*` routes in `Reconstruction/Part1Core.lean`: `3 -> 2`.
   - class-based `InteractionUVModel` wrappers in `Reconstruction/Part1Core.lean`: `1 -> 0`.
   - class-based `InteractionUVModel` wrappers in `Reconstruction/Part1Tail.lean`: `2 -> 0`.
+  - `reconstructionInputModel_nonempty_of_*` routes in `Reconstruction/Part1Tail.lean`: `8 -> 6`.
 - Guard hardening:
   - tightened `gap_phi4_linear_growth` route cap in
     `scripts/route_bloat_guard.sh` from `3` to `2`,
   - added `Reconstruction/Part1Core` and `Reconstruction/Part1Tail`
-    `InteractionUVModel` wrapper caps (`0` each).
+    `InteractionUVModel` wrapper caps (`0` each),
+  - added `Reconstruction/Part1Tail` `reconstructionInputModel_nonempty_of_*`
+    route cap (`6`).
 - Verification:
   - `lake build Phi4.Reconstruction.Part1Core Phi4.Reconstruction.Part1Tail Phi4.Reconstruction` passes.
   - `bash scripts/route_bloat_guard.sh` passes with new caps.
