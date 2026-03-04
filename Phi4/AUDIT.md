@@ -2,6 +2,13 @@
 
 Date: 2026-03-03
 
+Update (2026-03-04, unused wrapper module removal):
+- Deleted [HonestGaps.lean](/Users/xiyin/Phi4/Phi4/HonestGaps.lean), which consisted of
+  forwarding alias theorems and was not imported by any module in `Phi4/` or `test/`.
+- Verification:
+  - `bash scripts/route_bloat_guard.sh` passes.
+  - `bash scripts/quick_gate.sh` passes.
+
 Update (2026-03-04, reconstruction corollary-wrapper trim):
 - Removed four no-caller Wightman corollary wrappers from
   `Reconstruction/Part3.lean`:

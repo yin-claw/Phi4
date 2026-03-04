@@ -5,6 +5,14 @@ Date: 2026-02-27
 This tracker converts `claude_to_codex.md` into an execution matrix.
 Each line item is actionable, testable, and tied to concrete files/modules.
 
+## Session Update (2026-03-04, remove unused HonestGaps wrapper module)
+
+- Deleted `Phi4/HonestGaps.lean` (unused forwarding-only wrapper module).
+- Confirmed no in-repo imports/usages remained before deletion.
+- Verification passed:
+  - `bash scripts/route_bloat_guard.sh`,
+  - `bash scripts/quick_gate.sh`.
+
 ## Session Update (2026-03-04, Reconstruction Part3 corollary trim)
 
 - Removed four no-caller Wightman corollary wrappers from
