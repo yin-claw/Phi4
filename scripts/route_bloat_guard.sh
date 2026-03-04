@@ -21,7 +21,7 @@ cd "$ROOT_DIR"
 # - ModelBundle top-level theorem count: 0
 # - Reconstruction/Part3 top-level theorem count: 5
 # - Reconstruction/Part3 phi4_wightman_exists* theorem count: 4
-# - InfiniteVolumeLimit/Part1 top-level theorem count: 24
+# - InfiniteVolumeLimit/Part1 top-level theorem count: 23
 # - InfiniteVolumeLimit/Part1 schwingerTwo_* theorem count: 1
 # - InfiniteVolumeLimit/Part1 infinite_volume_schwinger_exists_*_of_* theorem count: 4
 # - InfiniteVolumeLimit/Part2 top-level theorem count: 11
@@ -43,12 +43,15 @@ MAX_RECON_PART2_EXPLICIT_ROUTES=0
 MAX_MODELBUNDLE_THEOREMS=0
 MAX_RECON_PART3_THEOREMS=5
 MAX_RECON_PART3_WIGHTMAN_ROUTES=4
-MAX_IVL_PART1_THEOREMS=24
+MAX_IVL_PART1_THEOREMS=23
 MAX_IVL_PART1_SCHWINGERTWO_ROUTES=1
 MAX_IVL_PART1_EXISTS_ROUTES=4
 MAX_IVL_PART2_THEOREMS=11
 MAX_IVL_PART3_THEOREMS=16
 MAX_CORRELATION_THEOREMS=53
+MAX_INTERACTION_PART2_EVENTUAL_LOWER_WRAPPER=0
+MAX_INTERACTION_PART2_GLOBAL_NONNEG_WRAPPER=0
+MAX_IVL_PART1_LATTICE_MONO_TWO_WRAPPER=0
 
 model_classes="$( (rg -n '^class .*Model' Phi4 --glob '*.lean' || true) | wc -l | tr -d ' ' )"
 nonempty_ctors="$( (rg -n '^theorem[[:space:]]+.*_nonempty_of_' Phi4 --glob '*.lean' || true) | wc -l | tr -d ' ' )"
@@ -70,6 +73,9 @@ ivl_part1_exists_routes="$( (rg -n '^theorem[[:space:]]+infinite_volume_schwinge
 ivl_part2_theorem_count="$(rg -n '^theorem[[:space:]]' Phi4/InfiniteVolumeLimit/Part2.lean | wc -l | tr -d ' ')"
 ivl_part3_theorem_count="$(rg -n '^theorem[[:space:]]' Phi4/InfiniteVolumeLimit/Part3.lean | wc -l | tr -d ' ')"
 correlation_theorem_count="$(rg -n '^theorem[[:space:]]' Phi4/CorrelationInequalities.lean | wc -l | tr -d ' ')"
+interaction_part2_eventual_lower_wrapper="$( (rg -n 'interactionWeightModel_nonempty_of_cutoff_seq_eventually_lower_bounds_of_aestronglyMeasurable_and_standardSeq_tendsto_ae' Phi4/Interaction/Part2.lean || true) | wc -l | tr -d ' ' )"
+interaction_part2_global_nonneg_wrapper="$( (rg -n 'interaction_ae_nonneg_all_rectangles_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound_of_standardSeq_tendsto_ae' Phi4/Interaction/Part2.lean || true) | wc -l | tr -d ' ' )"
+ivl_part1_lattice_mono_two_wrapper="$( (rg -n 'schwingerN_monotone_in_volume_two_from_lattice' Phi4/InfiniteVolumeLimit/Part1.lean || true) | wc -l | tr -d ' ' )"
 part3_theorem_names="$(
   awk '
   /^[[:space:]]*theorem([[:space:]]|$)/{
@@ -119,6 +125,9 @@ echo "[route_bloat_guard] InfiniteVolumeLimit.Part3 theorem count: $ivl_part3_th
 echo "[route_bloat_guard] CorrelationInequalities theorem count: $correlation_theorem_count (max $MAX_CORRELATION_THEOREMS)"
 echo "[route_bloat_guard] Reconstruction.Part3 theorem count: $part3_theorem_count (max $MAX_RECON_PART3_THEOREMS)"
 echo "[route_bloat_guard] Reconstruction.Part3 phi4_wightman_exists* routes: $part3_wightman_routes (max $MAX_RECON_PART3_WIGHTMAN_ROUTES)"
+echo "[route_bloat_guard] Interaction.Part2 eventual-lower wrapper: $interaction_part2_eventual_lower_wrapper (max $MAX_INTERACTION_PART2_EVENTUAL_LOWER_WRAPPER)"
+echo "[route_bloat_guard] Interaction.Part2 global nonneg wrapper: $interaction_part2_global_nonneg_wrapper (max $MAX_INTERACTION_PART2_GLOBAL_NONNEG_WRAPPER)"
+echo "[route_bloat_guard] InfiniteVolumeLimit.Part1 lattice mono-two wrapper: $ivl_part1_lattice_mono_two_wrapper (max $MAX_IVL_PART1_LATTICE_MONO_TWO_WRAPPER)"
 
 fail=0
 if (( model_classes > MAX_MODEL_CLASSES )); then
@@ -207,6 +216,18 @@ if (( part3_theorem_count > MAX_RECON_PART3_THEOREMS )); then
 fi
 if (( part3_wightman_routes > MAX_RECON_PART3_WIGHTMAN_ROUTES )); then
   echo "[FAIL] Reconstruction.Part3 phi4_wightman_exists route count exceeded baseline." >&2
+  fail=1
+fi
+if (( interaction_part2_eventual_lower_wrapper > MAX_INTERACTION_PART2_EVENTUAL_LOWER_WRAPPER )); then
+  echo "[FAIL] Interaction.Part2 eventual-lower wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( interaction_part2_global_nonneg_wrapper > MAX_INTERACTION_PART2_GLOBAL_NONNEG_WRAPPER )); then
+  echo "[FAIL] Interaction.Part2 global nonneg wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( ivl_part1_lattice_mono_two_wrapper > MAX_IVL_PART1_LATTICE_MONO_TWO_WRAPPER )); then
+  echo "[FAIL] InfiniteVolumeLimit.Part1 lattice mono-two wrapper count exceeded baseline." >&2
   fail=1
 fi
 

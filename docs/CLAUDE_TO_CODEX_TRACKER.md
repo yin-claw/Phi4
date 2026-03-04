@@ -5,6 +5,37 @@ Date: 2026-02-27
 This tracker converts `claude_to_codex.md` into an execution matrix.
 Each line item is actionable, testable, and tied to concrete files/modules.
 
+## Session Update (2026-03-04, continued wrapper-pruning follow-up)
+
+- Removed eleven no-caller forwarding routes from
+  `Phi4/Reconstruction/Part1Tail.lean`:
+  - `reconstructionLinearGrowthModel_nonempty_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`,
+  - `reconstructionLinearGrowthModel_nonempty_of_sq_integrable_data_and_sq_moment_polynomial_bound_per_volume_and_uniform_partition_bound`,
+  - `reconstructionLinearGrowthModel_nonempty_of_sq_integrable_data_and_linear_lower_bound_off_bad_sets_and_sq_exp_moment_geometric_and_bad_measure_geometric_ennreal`,
+  - `reconstructionLinearGrowthModel_nonempty_of_sq_integrable_data_and_linear_threshold_geometric_exp_moment_and_double_exp_moment_geometric_of_moment_bounds`,
+  - `reconstructionLinearGrowthModel_nonempty_of_sq_integrable_data_and_higher_moment_polynomial_bound_per_volume_and_uniform_partition_bound`,
+  - `reconstructionLinearGrowthModel_nonempty_of_sq_integrable_data_and_sq_moment_polynomial_bound_per_volume_and_uniform_partition_bound_of_succ_succ`,
+  - `reconstructionLinearGrowthModel_nonempty_of_sq_integrable_data_and_higher_moment_polynomial_bound_per_volume_and_uniform_partition_bound_of_succ_succ`,
+  - `gap_phi4_linear_growth_of_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets_of_aestronglyMeasurable_and_standardSeq_tendsto_ae`,
+  - `gap_phi4_linear_growth_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets`,
+  - `reconstructionLinearGrowthModel_nonempty_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets`,
+  - `reconstructionLinearGrowthModel_nonempty_of_sq_integrable_data_and_linear_threshold_geometric_exp_moment_and_sq_exp_moment_geometric`.
+- Removed two no-caller wrappers from `Phi4/Interaction/Part2.lean`:
+  - `interactionWeightModel_nonempty_of_cutoff_seq_eventually_lower_bounds_of_aestronglyMeasurable_and_standardSeq_tendsto_ae`,
+  - `interaction_ae_nonneg_all_rectangles_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound_of_standardSeq_tendsto_ae`.
+- Removed one no-caller wrapper from `Phi4/InfiniteVolumeLimit/Part1.lean`:
+  - `schwingerN_monotone_in_volume_two_from_lattice`.
+- Guard updates in `scripts/route_bloat_guard.sh`:
+  - tightened `InfiniteVolumeLimit.Part1` theorem cap `24 -> 23`,
+  - added exact-zero caps for the two removed `Interaction/Part2` wrappers,
+  - added an exact-zero cap for
+    `schwingerN_monotone_in_volume_two_from_lattice`.
+- Verification passed:
+  - `lake build Phi4.Interaction.Part2 Phi4.InfiniteVolumeLimit.Part1`,
+  - `lake build Phi4.Reconstruction.Part1Tail Phi4.Reconstruction`,
+  - `bash scripts/route_bloat_guard.sh`,
+  - `bash scripts/quick_gate.sh`.
+
 ## Session Update (2026-03-04, Part1Core explicit-route trim)
 
 - Removed two no-caller explicit forwarding routes from

@@ -204,38 +204,6 @@ theorem
       (hcutoff_tendsto_ae := fun Λ => interactionCutoff_standardSeq_tendsto_ae params Λ)
       hwick_bad
 
-/-- Construct `InteractionWeightModel` from per-volume eventually-in-`n`
-    cutoff-sequence almost-everywhere lower bounds, using explicit
-    measurability of `interaction` and explicit a.e. convergence of the
-    canonical cutoff sequence. -/
-theorem
-    interactionWeightModel_nonempty_of_cutoff_seq_eventually_lower_bounds_of_aestronglyMeasurable_and_standardSeq_tendsto_ae
-    (params : Phi4Params)
-    (hinteraction_meas :
-      ∀ Λ : Rectangle,
-        AEStronglyMeasurable (interaction params Λ)
-          (freeFieldMeasure params.mass params.mass_pos))
-    (hcutoff_tendsto_ae :
-      ∀ Λ : Rectangle,
-        ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
-          Filter.Tendsto
-            (fun n : ℕ => interactionCutoff params Λ (standardUVCutoffSeq n) ω)
-            Filter.atTop
-            (nhds (interaction params Λ ω)))
-    (hcutoff_ae :
-      ∀ Λ : Rectangle, ∃ B : ℝ,
-        ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
-          ∀ᶠ n in Filter.atTop,
-            -B ≤ interactionCutoff params Λ (standardUVCutoffSeq n) ω) :
-    Nonempty (InteractionWeightModel params) := by
-  refine interactionWeightModel_nonempty_of_data params ?_
-  intro Λ p _hp
-  rcases hcutoff_ae Λ with ⟨B, hB⟩
-  exact
-    exp_interaction_Lp_of_cutoff_seq_eventually_lower_bound_of_aestronglyMeasurable_and_standardSeq_tendsto_ae
-      (params := params) (Λ := Λ)
-      (hinteraction_meas Λ) (hcutoff_tendsto_ae Λ) (B := B) hB
-
 /-- Eventual cutoff nonnegativity from geometric decay of shifted-index
     exponential moments of cutoff interactions on a fixed volume. -/
 theorem cutoff_seq_eventually_nonneg_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound
@@ -342,40 +310,6 @@ theorem interaction_ae_nonneg_of_uv_cutoff_seq_shifted_exponential_moment_geomet
     interaction_ae_nonneg_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound_of_standardSeq_tendsto_ae
       (params := params) (Λ := Λ)
       (interactionCutoff_standardSeq_tendsto_ae params Λ) hmom
-
-/-- Globalized nonnegativity transfer: shifted-index exponential-moment
-    geometric decay implies almost-everywhere nonnegativity of the limiting
-    interaction on every volume cutoff `Λ`, given explicit canonical-sequence
-    a.e. convergence data. -/
-theorem
-    interaction_ae_nonneg_all_rectangles_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound_of_standardSeq_tendsto_ae
-    (params : Phi4Params)
-    (hcutoff_tendsto_ae :
-      ∀ Λ : Rectangle,
-        ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
-          Filter.Tendsto
-            (fun n : ℕ => interactionCutoff params Λ (standardUVCutoffSeq n) ω)
-            Filter.atTop
-            (nhds (interaction params Λ ω)))
-    (hmom :
-      ∀ Λ : Rectangle, ∃ θ D r : ℝ,
-        0 < θ ∧ 0 ≤ D ∧ 0 ≤ r ∧ r < 1 ∧
-        (∀ n : ℕ,
-          Integrable
-            (fun ω : FieldConfig2D =>
-              Real.exp ((-θ) * interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω))
-            (freeFieldMeasure params.mass params.mass_pos)) ∧
-        (∀ n : ℕ,
-          ∫ ω : FieldConfig2D,
-            Real.exp ((-θ) * interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω)
-            ∂(freeFieldMeasure params.mass params.mass_pos) ≤ D * r ^ n)) :
-    ∀ Λ : Rectangle,
-      ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
-        0 ≤ interaction params Λ ω := by
-  intro Λ
-  exact
-    interaction_ae_nonneg_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound_of_standardSeq_tendsto_ae
-      (params := params) (Λ := Λ) (hcutoff_tendsto_ae Λ) (hmom Λ)
 
 /-- Square-data nonnegativity transfer on a fixed volume cutoff:
     shifted-index geometric exponential-moment decay implies almost-everywhere
