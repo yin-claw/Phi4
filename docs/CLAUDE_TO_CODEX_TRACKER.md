@@ -307,3 +307,23 @@ primary local Glimm-Jaffe work queue.
 - Verification:
   - `lake build Phi4.CorrelationInequalities Phi4.InfiniteVolumeLimit.Part1 Phi4.InfiniteVolumeLimit Phi4.Regularity Phi4.OSAxioms` passes.
   - `bash scripts/quick_gate.sh` passes.
+
+### Deep infinite-volume route thinning (same session)
+
+- Removed twelve additional no-caller route/wrapper theorems from
+  `InfiniteVolumeLimit/Part1.lean`:
+  - `schwingerN_two_tendsto_if_exhaustion_of_models`,
+  - `schwingerTwo_tendsto_iSup_of_lattice_models`,
+  - `schwingerTwo_limit_exists_of_monotone_bounded`,
+  - `schwingerN_two_tendsto_iSup_of_monotone_bounded`,
+  - `schwingerN_two_tendsto_iSup_of_models`,
+  - `schwingerN_two_tendsto_iSup_of_lattice_models`,
+  - `infinite_volume_schwinger_exists_all_k_of_family_models`,
+  - `infinite_volume_schwinger_exists_all_k_of_lattice_family_models`,
+  - `infinite_volume_schwinger_exists_four_of_correlationFourPoint_models`,
+  - `infinite_volume_schwinger_exists_four_of_correlationInequality_models`,
+  - `infinite_volume_schwinger_exists_four_of_lattice_and_core_models`,
+  - `infinite_volume_schwinger_exists_two_of_lattice_models`.
+- Verification:
+  - `lake build Phi4.InfiniteVolumeLimit.Part1 Phi4.InfiniteVolumeLimit Phi4.CorrelationInequalities Phi4.Regularity Phi4.OSAxioms` passes.
+  - `bash scripts/quick_gate.sh` passes.
