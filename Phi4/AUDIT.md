@@ -2,6 +2,27 @@
 
 Date: 2026-03-03
 
+Update (2026-03-04, correlation-wrapper collapse):
+- Removed eight no-caller forwarding wrappers in
+  `CorrelationInequalities.lean`:
+  - `schwingerNMonotoneFamilyModel_nonempty_of_models`,
+  - `correlationInequalityModel_nonempty_of_submodels_and_schwingerFourMonotone`,
+  - `latticeSchwingerNMonotoneFamilyModel_nonempty_of_models`,
+  - `correlationFourPointModel_nonempty_of_data_and_lattice_monotone`,
+  - `correlationInequalityCoreModel_nonempty_of_data_and_lattice_monotone`,
+  - `correlationInequalityModel_nonempty_of_lattice_and_core_data_and_lattice_monotone`,
+  - `correlationInequalityModel_nonempty_of_lattice_and_core_models_and_lattice_monotone`,
+  - `correlationInequalityModel_nonempty_of_twoPoint_and_core`.
+- Surface-size impact:
+  - `CorrelationInequalities` theorem count reduced `64 -> 56`,
+  - global `_nonempty_of_` constructor count reduced `75 -> 67`.
+- Guard hardening:
+  - tightened `_nonempty_of_` cap in `scripts/route_bloat_guard.sh` to `67`,
+  - added `CorrelationInequalities` theorem cap (`56`).
+- Verification:
+  - `lake build Phi4.CorrelationInequalities Phi4.InfiniteVolumeLimit Phi4.Regularity Phi4.OSAxioms` passes.
+  - `bash scripts/quick_gate.sh` passes with new caps.
+
 Update (2026-03-04, infinite-volume Part3 alias trim):
 - Removed three no-caller alias theorems in
   `InfiniteVolumeLimit/Part3.lean`:

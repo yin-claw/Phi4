@@ -5,6 +5,28 @@ Date: 2026-02-27
 This tracker converts `claude_to_codex.md` into an execution matrix.
 Each line item is actionable, testable, and tied to concrete files/modules.
 
+## Session Update (2026-03-04, Correlation wrapper collapse)
+
+- Removed eight no-caller wrapper constructors/routes in
+  `Phi4/CorrelationInequalities.lean`:
+  - `schwingerNMonotoneFamilyModel_nonempty_of_models`,
+  - `correlationInequalityModel_nonempty_of_submodels_and_schwingerFourMonotone`,
+  - `latticeSchwingerNMonotoneFamilyModel_nonempty_of_models`,
+  - `correlationFourPointModel_nonempty_of_data_and_lattice_monotone`,
+  - `correlationInequalityCoreModel_nonempty_of_data_and_lattice_monotone`,
+  - `correlationInequalityModel_nonempty_of_lattice_and_core_data_and_lattice_monotone`,
+  - `correlationInequalityModel_nonempty_of_lattice_and_core_models_and_lattice_monotone`,
+  - `correlationInequalityModel_nonempty_of_twoPoint_and_core`.
+- Measured reduction:
+  - `CorrelationInequalities` theorem count `64 -> 56`,
+  - global `_nonempty_of_` count `75 -> 67`.
+- Guard updates in `scripts/route_bloat_guard.sh`:
+  - `_nonempty_of_` cap tightened to `67`,
+  - added `CorrelationInequalities` theorem cap `56`.
+- Verification passed:
+  - `lake build Phi4.CorrelationInequalities Phi4.InfiniteVolumeLimit Phi4.Regularity Phi4.OSAxioms`,
+  - `bash scripts/quick_gate.sh`.
+
 ## Session Update (2026-03-04, IV Part3 alias cleanup)
 
 - Removed three no-caller alias theorems from
