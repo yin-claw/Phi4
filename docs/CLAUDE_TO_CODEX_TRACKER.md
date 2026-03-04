@@ -199,3 +199,21 @@ primary local Glimm-Jaffe work queue.
   - `interactionWeightModel_nonempty_of_*`: `9`,
   - `interactionIntegrabilityModel_nonempty_of_*`: `2`,
   - `Interaction/Part2` theorem count: `10`.
+
+### Follow-up trim 4 (same session)
+
+- Removed one additional forwarding route in `Interaction/Part1Core.lean`:
+  - `interactionWeightModel_nonempty_of_tendsto_ae_and_geometric_exp_moment_bound`,
+  and rewired the `Interaction/Part3.lean` caller to the standard-sequence core.
+- Removed two no-caller routes in `Interaction/Part2.lean`:
+  - `exp_interaction_Lp_of_cutoff_seq_shifted_bad_set_summable`,
+  - `cutoff_seq_eventually_lower_bound_of_summable_bad_event_bound`.
+- Updated guard baselines in `scripts/route_bloat_guard.sh`:
+  - `_nonempty_of_` cap: `79`,
+  - `interactionWeightModel_nonempty_of_*` cap: `8`,
+  - `Interaction.Part2` theorem cap: `8`.
+- Current measured surface:
+  - `_nonempty_of_`: `79`,
+  - `interactionWeightModel_nonempty_of_*`: `8`,
+  - `interactionIntegrabilityModel_nonempty_of_*`: `2`,
+  - `Interaction/Part2` theorem count: `8`.

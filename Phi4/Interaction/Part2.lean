@@ -9,51 +9,6 @@ noncomputable section
 open MeasureTheory
 open scoped ENNReal NNReal
 
-/-- `Lᵖ` integrability from shifted-index summable bad sets with good-set
-    cutoff lower bounds. -/
-theorem exp_interaction_Lp_of_cutoff_seq_shifted_bad_set_summable
-    (params : Phi4Params) (Λ : Rectangle)
-    [InteractionUVModel params]
-    (B : ℝ)
-    (bad : ℕ → Set FieldConfig2D)
-    (hbad_sum :
-      (∑' n : ℕ,
-        (freeFieldMeasure params.mass params.mass_pos) (bad n)) ≠ ∞)
-    (hcutoff_good :
-      ∀ n : ℕ, ∀ ω : FieldConfig2D, ω ∉ bad n →
-        -B ≤ interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω)
-    {p : ℝ≥0∞} :
-    MemLp (fun ω => Real.exp (-(interaction params Λ ω)))
-      p (freeFieldMeasure params.mass params.mass_pos) := by
-  exact
-    exp_interaction_Lp_of_cutoff_seq_shifted_bad_set_summable_of_aestronglyMeasurable_and_standardSeq_tendsto_ae
-      (params := params) (Λ := Λ)
-      ((interaction_in_L2 params Λ).aestronglyMeasurable)
-      (interactionCutoff_standardSeq_tendsto_ae params Λ)
-      (B := B) (bad := bad) hbad_sum hcutoff_good
-
-/-- If bad-event measures are controlled by a sequence with finite total mass,
-    then the cutoff sequence is eventually bounded below almost surely. -/
-theorem cutoff_seq_eventually_lower_bound_of_summable_bad_event_bound
-    (params : Phi4Params) (Λ : Rectangle) (B : ℝ)
-    (ε : ℕ → ℝ≥0∞)
-    (hε_sum : (∑' n : ℕ, ε n) ≠ ∞)
-    (hbad_le :
-      ∀ n : ℕ,
-        (freeFieldMeasure params.mass params.mass_pos)
-          {ω : FieldConfig2D |
-            interactionCutoff params Λ (standardUVCutoffSeq n) ω < -B} ≤ ε n) :
-    ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
-      ∀ᶠ n in Filter.atTop,
-        -B ≤ interactionCutoff params Λ (standardUVCutoffSeq n) ω := by
-  have hbad_sum :
-      (∑' n : ℕ,
-        (freeFieldMeasure params.mass params.mass_pos)
-          {ω : FieldConfig2D |
-            interactionCutoff params Λ (standardUVCutoffSeq n) ω < -B}) ≠ ∞ :=
-    ne_top_of_le_ne_top hε_sum (ENNReal.tsum_le_tsum hbad_le)
-  exact cutoff_seq_eventually_lower_bound_of_summable_bad_event_measure params Λ B hbad_sum
-
 /-- Shifted-index variant of
     `cutoff_seq_eventually_lower_bound_of_summable_bad_event_bound`:
     summable majorants on `{interactionCutoff(κ_{n+1}) < -B}` imply eventual

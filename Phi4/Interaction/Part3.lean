@@ -569,8 +569,13 @@ theorem
       hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
       hinteraction_meas hinteraction_sq with ⟨huv⟩
   have hW : Nonempty (InteractionWeightModel params) := by
-    refine interactionWeightModel_nonempty_of_tendsto_ae_and_geometric_exp_moment_bound
-      (params := params) hcutoff_ae hcutoff_meas ?_
+    refine interactionWeightModel_nonempty_of_standardSeq_succ_tendsto_ae_and_geometric_exp_moment_bound
+      (params := params) ?_ ?_ ?_
+    · intro Λ
+      exact interactionCutoff_standardSeq_succ_tendsto_ae_of_tendsto_ae
+        (params := params) (Λ := Λ) (hcutoff_ae Λ)
+    · intro Λ n
+      simpa using hcutoff_meas Λ (standardUVCutoffSeq (n + 1))
     intro Λ q hq
     rcases hdecomp Λ q hq with
       ⟨a, b, ha, bad, hbad_meas, hInt, hgood, hmem2, D2, r2, hD2, hr20, hr21, hMoment2,

@@ -345,6 +345,28 @@ Update (2026-03-04, Interaction core-chain collapse pass):
   - `scripts/route_bloat_guard.sh` passes with tightened caps.
   - `scripts/quick_gate.sh` passes end-to-end.
 
+Update (2026-03-04, final interaction-route trims):
+- Removed one additional forwarding route in `Interaction/Part1Core.lean`:
+  - `interactionWeightModel_nonempty_of_tendsto_ae_and_geometric_exp_moment_bound`
+  and rewired its `Interaction/Part3.lean` caller to
+  `interactionWeightModel_nonempty_of_standardSeq_succ_tendsto_ae_and_geometric_exp_moment_bound`.
+- Removed two additional no-caller `Interaction/Part2` declarations:
+  - `exp_interaction_Lp_of_cutoff_seq_shifted_bad_set_summable`,
+  - `cutoff_seq_eventually_lower_bound_of_summable_bad_event_bound`.
+- Surface-size impact:
+  - `_nonempty_of_` theorem count reduced `80 → 79`.
+  - `interactionWeightModel_nonempty_of_*` route count reduced `9 → 8`.
+  - `Interaction/Part2` theorem count reduced `10 → 8`.
+- Guard tightening:
+  - `scripts/route_bloat_guard.sh` caps tightened to
+    `_nonempty_of_ = 79`,
+    `interactionWeightModel routes = 8`,
+    `Interaction.Part2` theorem count = `8`.
+- Verification:
+  - `lake build Phi4.Interaction.Part1Core Phi4.Interaction.Part2 Phi4.Interaction.Part3 Phi4.FiniteVolumeMeasure Phi4.Reconstruction.Part1Core` passes.
+  - `scripts/route_bloat_guard.sh` passes with tightened caps.
+  - `scripts/quick_gate.sh` passes end-to-end.
+
 ## Canonical Goal And Architecture (Authoritative)
 
 This audit is scoped to the Glimm-Jaffe `φ⁴₂` objective:
