@@ -5,6 +5,19 @@ Date: 2026-02-27
 This tracker converts `claude_to_codex.md` into an execution matrix.
 Each line item is actionable, testable, and tied to concrete files/modules.
 
+## Session Update (2026-03-04, Part1Core explicit-route trim)
+
+- Removed two no-caller explicit forwarding routes from
+  `Phi4/Reconstruction/Part1Core.lean`:
+  - `gap_phi4_linear_growth_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound_of_aestronglyMeasurable_and_standardSeq_tendsto_ae`,
+  - `reconstructionLinearGrowthModel_nonempty_of_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets_of_aestronglyMeasurable_and_standardSeq_tendsto_ae`.
+- Guard updates in `scripts/route_bloat_guard.sh`:
+  - added exact zero caps for both removed route names.
+- Verification passed:
+  - `lake build Phi4.Reconstruction.Part1Core Phi4.Reconstruction`,
+  - `bash scripts/route_bloat_guard.sh`,
+  - `bash scripts/quick_gate.sh`.
+
 ## Session Update (2026-03-04, Reconstruction-input wrapper collapse)
 
 - Removed six no-caller forwarding wrappers from

@@ -2,6 +2,19 @@
 
 Date: 2026-03-03
 
+Update (2026-03-04, Part1Core explicit-route trim):
+- Removed two no-caller explicit forwarding routes from
+  `Reconstruction/Part1Core.lean`:
+  - `gap_phi4_linear_growth_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound_of_aestronglyMeasurable_and_standardSeq_tendsto_ae`,
+  - `reconstructionLinearGrowthModel_nonempty_of_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets_of_aestronglyMeasurable_and_standardSeq_tendsto_ae`.
+- Guard hardening:
+  - added exact zero caps in `scripts/route_bloat_guard.sh` for both removed
+    explicit wrapper-route names.
+- Verification:
+  - `lake build Phi4.Reconstruction.Part1Core Phi4.Reconstruction` passes.
+  - `bash scripts/route_bloat_guard.sh` passes with new checks.
+  - `bash scripts/quick_gate.sh` passes.
+
 Update (2026-03-04, reconstruction-input wrapper collapse):
 - Removed six no-caller forwarding wrappers from
   `Reconstruction/Part1Tail.lean`:

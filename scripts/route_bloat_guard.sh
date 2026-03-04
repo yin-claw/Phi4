@@ -10,6 +10,8 @@ cd "$ROOT_DIR"
 # - interactionWeightModel_nonempty_of_* count: 8
 # - interactionIntegrabilityModel_nonempty_of_* count: 2
 # - gap_phi4_linear_growth variant count in Reconstruction/Part1Core.lean: 2
+# - Reconstruction/Part1Core explicit shifted-moment linear-growth wrapper count: 0
+# - Reconstruction/Part1Core explicit Wick-sublevel linear-growth-model wrapper count: 0
 # - Reconstruction/Part1Core InteractionUVModel wrapper count: 0
 # - Reconstruction/Part1Tail InteractionUVModel wrapper count: 0
 # - Reconstruction/Part1Tail reconstructionInputModel_nonempty_of_* route count: 0
@@ -30,6 +32,8 @@ MAX_NONEMPTY_CONSTRUCTORS=64
 MAX_WEIGHT_ROUTES=8
 MAX_INTEGRABILITY_ROUTES=2
 MAX_LINEAR_GROWTH_ROUTES=2
+MAX_RECON_PART1CORE_EXPLICIT_MOMENT_ROUTE=0
+MAX_RECON_PART1CORE_EXPLICIT_WICK_MODEL_ROUTE=0
 MAX_RECON_PART1CORE_INTERACTIONUV_WRAPPERS=0
 MAX_RECON_PART1TAIL_INTERACTIONUV_WRAPPERS=0
 MAX_RECON_PART1TAIL_INPUT_ROUTES=0
@@ -51,6 +55,8 @@ nonempty_ctors="$( (rg -n '^theorem[[:space:]]+.*_nonempty_of_' Phi4 --glob '*.l
 weight_routes="$( (rg -n '^theorem[[:space:]]+interactionWeightModel_nonempty_of_' Phi4/Interaction --glob '*.lean' || true) | wc -l | tr -d ' ' )"
 integrability_routes="$( (rg -n '^theorem[[:space:]]+interactionIntegrabilityModel_nonempty_of_' Phi4/Interaction --glob '*.lean' || true) | wc -l | tr -d ' ' )"
 linear_growth_routes="$( (rg -n '^theorem[[:space:]]+gap_phi4_linear_growth(_of_[A-Za-z0-9_]+)?' Phi4/Reconstruction/Part1Core.lean || true) | wc -l | tr -d ' ' )"
+recon_part1core_explicit_moment_route="$( (rg -n 'gap_phi4_linear_growth_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound_of_aestronglyMeasurable_and_standardSeq_tendsto_ae' Phi4/Reconstruction/Part1Core.lean || true) | wc -l | tr -d ' ' )"
+recon_part1core_explicit_wick_model_route="$( (rg -n 'reconstructionLinearGrowthModel_nonempty_of_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets_of_aestronglyMeasurable_and_standardSeq_tendsto_ae' Phi4/Reconstruction/Part1Core.lean || true) | wc -l | tr -d ' ' )"
 recon_part1core_interactionuv_wrappers="$( (rg -n '^[[:space:]]*\\[InteractionUVModel params\\]' Phi4/Reconstruction/Part1Core.lean || true) | wc -l | tr -d ' ' )"
 recon_part1tail_interactionuv_wrappers="$( (rg -n '^[[:space:]]*\\[InteractionUVModel params\\]' Phi4/Reconstruction/Part1Tail.lean || true) | wc -l | tr -d ' ' )"
 recon_part1tail_input_routes="$( (rg -n '^[[:space:]]*reconstructionInputModel_nonempty_of_' Phi4/Reconstruction/Part1Tail.lean || true) | wc -l | tr -d ' ' )"
@@ -96,6 +102,8 @@ echo "[route_bloat_guard] _nonempty_of_ constructors: $nonempty_ctors (max $MAX_
 echo "[route_bloat_guard] interactionWeightModel routes: $weight_routes (max $MAX_WEIGHT_ROUTES)"
 echo "[route_bloat_guard] interactionIntegrabilityModel routes: $integrability_routes (max $MAX_INTEGRABILITY_ROUTES)"
 echo "[route_bloat_guard] gap_phi4_linear_growth routes: $linear_growth_routes (max $MAX_LINEAR_GROWTH_ROUTES)"
+echo "[route_bloat_guard] Reconstruction.Part1Core explicit shifted-moment wrapper: $recon_part1core_explicit_moment_route (max $MAX_RECON_PART1CORE_EXPLICIT_MOMENT_ROUTE)"
+echo "[route_bloat_guard] Reconstruction.Part1Core explicit Wick-model wrapper: $recon_part1core_explicit_wick_model_route (max $MAX_RECON_PART1CORE_EXPLICIT_WICK_MODEL_ROUTE)"
 echo "[route_bloat_guard] Reconstruction.Part1Core InteractionUV wrappers: $recon_part1core_interactionuv_wrappers (max $MAX_RECON_PART1CORE_INTERACTIONUV_WRAPPERS)"
 echo "[route_bloat_guard] Reconstruction.Part1Tail InteractionUV wrappers: $recon_part1tail_interactionuv_wrappers (max $MAX_RECON_PART1TAIL_INTERACTIONUV_WRAPPERS)"
 echo "[route_bloat_guard] Reconstruction.Part1Tail reconstructionInput routes: $recon_part1tail_input_routes (max $MAX_RECON_PART1TAIL_INPUT_ROUTES)"
@@ -131,6 +139,14 @@ if (( integrability_routes > MAX_INTEGRABILITY_ROUTES )); then
 fi
 if (( linear_growth_routes > MAX_LINEAR_GROWTH_ROUTES )); then
   echo "[FAIL] gap_phi4_linear_growth route count exceeded baseline." >&2
+  fail=1
+fi
+if (( recon_part1core_explicit_moment_route > MAX_RECON_PART1CORE_EXPLICIT_MOMENT_ROUTE )); then
+  echo "[FAIL] Reconstruction.Part1Core explicit shifted-moment wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( recon_part1core_explicit_wick_model_route > MAX_RECON_PART1CORE_EXPLICIT_WICK_MODEL_ROUTE )); then
+  echo "[FAIL] Reconstruction.Part1Core explicit Wick-model wrapper count exceeded baseline." >&2
   fail=1
 fi
 if (( recon_part1core_interactionuv_wrappers > MAX_RECON_PART1CORE_INTERACTIONUV_WRAPPERS )); then
