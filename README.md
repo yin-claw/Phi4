@@ -55,9 +55,10 @@ Local per-folder guides are available at:
 - Completion framing:
   - zero theorem-level `sorry` in core means no hidden placeholders in proved
     statements, not that the full construction is complete.
-  - remaining frontier obligations are explicit: `58` `...Model` interfaces and
-    `10` canonical theorem-level `gap_*` frontiers.
-  - route surface after current pruning: `34` `theorem .*_nonempty_of_`
+  - remaining frontier obligations are explicit: `58` legacy `...Model`
+    interfaces and `10` canonical theorem-level `gap_*` frontiers, with active
+    migration toward theorem-level frontier obligations.
+  - route surface after current pruning: `17` `theorem .*_nonempty_of_`
     constructors.
 - Dependency reproducibility:
   - `GaussianField` and `OSReconstruction` are pinned to commit hashes in
@@ -365,14 +366,12 @@ Local per-folder guides are available at:
   and
   `phi4_wightman_exists_of_interfaces_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets`.
 - `Phi4/Regularity.lean` now includes concrete constructor chains from explicit
-  Wick/EOM/exhaustion/global-bound data to regularity interfaces, including
-  `uniformGeneratingFunctionalBoundModel_nonempty_of_global_uniform`,
-  `nonlocalPhi4BoundModel_nonempty_of_global_uniform`, and
-  `regularityModel_nonempty_of_wick_eom_exhaustion_limit_global_uniform`.
-- `Phi4/FreeField.lean`, `Phi4/CovarianceOperators.lean`, and
-  `Phi4/CorrelationInequalities.lean` include `*_nonempty_of_data` constructors
-  so constructive proof data can be attached to interfaces without ad hoc
-  instance boilerplate.
+  Wick/EOM/exhaustion/global-bound data to regularity interfaces, plus explicit
+  exhaustion/global-bound bridge lemmas (for example
+  `generating_functional_bound_of_exhaustion_limit_global_uniform`).
+- `Phi4/CovarianceOperators.lean` and `Phi4/CorrelationInequalities.lean`
+  include `*_nonempty_of_data` constructors so constructive proof data can be
+  attached to interfaces without ad hoc instance boilerplate.
 - `Phi4/CorrelationInequalities.lean` now also includes all-arity monotonicity
   family interfaces and lattice-family bridge interfaces:
   `SchwingerNMonotoneFamilyModel` and
@@ -391,9 +390,6 @@ Local per-folder guides are available at:
 - Lattice iSup-form two-point convergence endpoints in
   `Phi4/InfiniteVolumeLimit.lean` now use shifted exhaustion sequences
   `(n + 1)` and no longer depend on `LatticeGriffithsFirstModel`.
-- `Phi4/FreeField.lean` now also includes
-  `freeCovarianceKernelModel_nonempty_of_two_point_kernel`, a direct bridge
-  from a free two-point kernel identity to `FreeCovarianceKernelModel`.
 - `Phi4/FreeField.lean` now also exposes public reusable free-kernel
   analytic lemmas:
   `freeCovKernel_eq_besselK0`,

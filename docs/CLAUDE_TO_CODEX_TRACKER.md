@@ -5,6 +5,80 @@ Date: 2026-02-27
 This tracker converts `claude_to_codex.md` into an execution matrix.
 Each line item is actionable, testable, and tied to concrete files/modules.
 
+## Session Update (2026-03-04, regularity data-wrapper prune follow-up)
+
+- Removed three additional zero-caller `PLUMBING` constructors from
+  `Phi4/Regularity.lean`:
+  - `generatingFunctionalBoundModel_nonempty_of_data`,
+  - `uniformGeneratingFunctionalBoundModel_nonempty_of_data`,
+  - `nonlocalPhi4BoundModel_nonempty_of_data`.
+- Route-surface reduction:
+  - `theorem .*_nonempty_of_` count `20 -> 17`.
+- Guard updates in `scripts/route_bloat_guard.sh`:
+  - tightened `_nonempty_of_` cap `20 -> 17`,
+  - added exact-zero checks for the three removed wrapper names above.
+- Verification passed:
+  - `bash scripts/route_bloat_guard.sh`,
+  - `bash scripts/quick_gate.sh`,
+  - `scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv`,
+  - `scripts/nonempty_route_inventory.sh --emit docs/route_inventory/nonempty_inventory.tsv`.
+
+## Session Update (2026-03-04, contentful zero-caller prune follow-up)
+
+- Removed four additional zero-caller `CONTENTFUL` constructors:
+  - `Phi4/FeynmanGraphs/LocalizedBounds.lean`:
+    `feynmanGraphEstimateModel_nonempty_of_expansion_and_degree_weighted`.
+  - `Phi4/Regularity.lean`:
+    `generatingFunctionalBoundModel_nonempty_of_exhaustion_limit_global_uniform`,
+    `uniformGeneratingFunctionalBoundModel_nonempty_of_global_uniform`,
+    `nonlocalPhi4BoundModel_nonempty_of_global_uniform`.
+- Route-surface reduction:
+  - `theorem .*_nonempty_of_` count `24 -> 20`.
+- Guard updates in `scripts/route_bloat_guard.sh`:
+  - tightened `_nonempty_of_` cap `24 -> 20`,
+  - added exact-zero checks for the four removed constructor names above.
+- Verification passed:
+  - `lake build Phi4.FreeField Phi4.Regularity Phi4.Interaction.Part1Core Phi4.Reconstruction.Part1Tail Phi4.ReconstructionUpstream Phi4.FeynmanGraphs.LocalizedBounds`,
+  - `bash scripts/route_bloat_guard.sh`,
+  - `bash scripts/quick_gate.sh`,
+  - `scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv`,
+  - `scripts/nonempty_route_inventory.sh --emit docs/route_inventory/nonempty_inventory.tsv`.
+
+## Session Update (2026-03-04, zero-caller route-constructor prune wave)
+
+- Removed ten additional zero-caller `_nonempty_of_` constructors:
+  - `Phi4/FeynmanGraphs/LocalizedBounds.lean`:
+    `feynmanGraphEstimateModel_nonempty_of_expansion_and_phi4_weighted`.
+  - `Phi4/FreeField.lean`:
+    `freeCovarianceKernelModel_nonempty_of_two_point_kernel`,
+    `freeCovarianceKernelModel_nonempty_of_data`.
+  - `Phi4/Interaction/Part1Core.lean`:
+    `interactionWeightModel_nonempty_of_tendsto_ae_and_geometric_integral_bound`.
+  - `Phi4/Regularity.lean`:
+    `regularityModel_nonempty_of_wick_eom_exhaustion_limit_global_uniform`,
+    `wickCubicConvergenceModel_nonempty_of_data`,
+    `euclideanEquationModel_nonempty_of_data`,
+    `regularityModel_nonempty_of_submodel_nonempty`.
+  - `Phi4/ReconstructionUpstream.lean`:
+    `wightmanReconstructionModel_nonempty_of_os_to_wightman`.
+  - `Phi4/Reconstruction/Part1Tail.lean`:
+    `wightmanReconstructionModel_nonempty_of_data`.
+- Route-surface reduction:
+  - `theorem .*_nonempty_of_` count `34 -> 24`,
+  - `interactionWeightModel_nonempty_of_*` route count `7 -> 6`,
+  - `interactionIntegrabilityModel_nonempty_of_*` route count `2 -> 1`.
+- Guard updates in `scripts/route_bloat_guard.sh`:
+  - tightened `_nonempty_of_` cap `34 -> 24`,
+  - tightened `interactionWeightModel_nonempty_of_*` cap `7 -> 6`,
+  - tightened `interactionIntegrabilityModel_nonempty_of_*` cap `2 -> 1`,
+  - added exact-zero checks for all ten removed wrapper names.
+- Verification passed:
+  - `lake build Phi4.FeynmanGraphs.LocalizedBounds Phi4.FreeField Phi4.Interaction.Part1Core Phi4.Regularity Phi4.ReconstructionUpstream`,
+  - `bash scripts/route_bloat_guard.sh`,
+  - `bash scripts/quick_gate.sh`,
+  - `scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv`,
+  - `scripts/nonempty_route_inventory.sh --emit docs/route_inventory/nonempty_inventory.tsv`.
+
 ## Session Update (2026-03-04, correlation no-caller prune follow-up)
 
 - Removed four additional no-caller constructor wrappers from
@@ -517,7 +591,7 @@ OSReconstruction maintenance items are tracked only as dependency-risk controls.
 
 | ID | Issue | Action | Status |
 |---|---|---|---|
-| CTC-WP2-01 | `FreeCovarianceKernelModel` not constructively instantiated | Develop CLM-to-kernel bridge from existing free-field kernel machinery; constructor scaffolds landed (`freeCovarianceKernelModel_nonempty_of_data`, `freeCovarianceKernelModel_nonempty_of_two_point_kernel`) and reusable free-kernel Bessel/off-diagonal bounds exported in `FreeField.lean` (`freeCovKernel_eq_besselK0` and `K₁` comparison consequences) | in_progress |
+| CTC-WP2-01 | `FreeCovarianceKernelModel` not constructively instantiated | Develop CLM-to-kernel bridge from existing free-field kernel machinery; keep `FreeField.lean` focused on reusable kernel/Bessel infrastructure (`freeCovKernel_eq_besselK0` and `K₁` comparison consequences) while avoiding zero-caller constructor wrappers | in_progress |
 | CTC-WP2-02 | Boundary comparison models remain interface-level | Ground `C_D ≤ C ≤ C_N` path in `CovarianceOperators.lean`; constructor scaffolds landed for boundary kernel/comparison/regularity/covariance models, with reusable off-diagonal free-kernel positivity/`K₁` comparison lemmas added | in_progress |
 
 ### WP3: Correlation + lattice bridge

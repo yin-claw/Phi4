@@ -137,16 +137,6 @@ theorem phi4_linear_growth (params : Phi4Params)
       Nonempty (OSLinearGrowthCondition 1 OS) := by
   exact ReconstructionLinearGrowthModel.phi4_linear_growth (params := params)
 
-/-- Construct `WightmanReconstructionModel` from an explicit reconstruction rule. -/
-theorem wightmanReconstructionModel_nonempty_of_data (params : Phi4Params)
-    (hreconstruct :
-      ∀ (OS : OsterwalderSchraderAxioms 1),
-        OSLinearGrowthCondition 1 OS →
-          ∃ (Wfn : WightmanFunctions 1),
-            IsWickRotationPair OS.S Wfn.W) :
-    Nonempty (WightmanReconstructionModel params) := by
-  exact ⟨{ wightman_reconstruction := hreconstruct }⟩
-
 /-- Honest frontier: reconstruction step from OS+linear-growth data via the
     abstract reconstruction backend interface.
     Assumptions are stated explicitly (no interface-class smuggling). -/

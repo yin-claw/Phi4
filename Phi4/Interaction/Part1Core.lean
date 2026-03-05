@@ -1124,52 +1124,6 @@ theorem interactionWeightModel_nonempty_of_standardSeq_succ_tendsto_ae_and_geome
       ⟨C, hCtop, hCbound⟩
     exact ⟨C, hCtop, hCbound⟩
 
-/-- Construct `InteractionWeightModel` from explicit real-parameterized a.e.
-    UV convergence, cutoff measurability data, and per-exponent geometric
-    shifted-cutoff integral bounds. This theorem bridges real-parameter UV data
-    to the shifted canonical-sequence geometric/Fatou route without class
-    bundles. Compatibility endpoint: prefer
-    `interactionWeightModel_nonempty_of_tendsto_ae_and_geometric_exp_moment_bound`
-    when hypotheses are naturally stated for real exponents `q > 0`. -/
-theorem interactionWeightModel_nonempty_of_tendsto_ae_and_geometric_integral_bound
-    (params : Phi4Params)
-    (hcutoff_tendsto_ae :
-      ∀ (Λ : Rectangle),
-        ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
-          Filter.Tendsto
-            (fun (κ : ℝ) => if h : 0 < κ then interactionCutoff params Λ ⟨κ, h⟩ ω else 0)
-            Filter.atTop
-            (nhds (interaction params Λ ω)))
-    (hcutoff_meas :
-      ∀ (Λ : Rectangle) (κ : UVCutoff),
-        AEStronglyMeasurable (interactionCutoff params Λ κ)
-          (freeFieldMeasure params.mass params.mass_pos))
-    (hgeom :
-      ∀ (Λ : Rectangle) {p : ℝ≥0∞}, p ≠ ⊤ →
-        ∃ D r : ℝ,
-          0 ≤ D ∧ 0 ≤ r ∧ r < 1 ∧
-          (∀ n : ℕ,
-            Integrable
-              (fun ω : FieldConfig2D =>
-                Real.exp (-(p.toReal * interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω)))
-              (freeFieldMeasure params.mass params.mass_pos)) ∧
-          (∀ n : ℕ,
-            ∫ ω : FieldConfig2D,
-              Real.exp (-(p.toReal * interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω))
-              ∂(freeFieldMeasure params.mass params.mass_pos) ≤ D * r ^ n)) :
-    Nonempty (InteractionWeightModel params) := by
-  refine interactionWeightModel_nonempty_of_standardSeq_succ_tendsto_ae_and_uniform_integral_bound
-    (params := params) ?_ ?_ ?_
-  · intro Λ
-    exact interactionCutoff_standardSeq_succ_tendsto_ae_of_tendsto_ae
-      (params := params) (Λ := Λ) (hcutoff_tendsto_ae Λ)
-  · intro Λ n
-    exact interactionCutoff_standardSeq_succ_aestronglyMeasurable
-      (params := params) hcutoff_meas Λ n
-  · intro Λ p hpTop
-    exact uniform_integral_bound_of_standardSeq_succ_geometric_integral_bound
-      (params := params) (Λ := Λ) (q := p.toReal) (hgeom := hgeom Λ hpTop)
-
 /-- If the canonical cutoff sequence is eventually bounded below almost surely,
     and one has explicit almost-everywhere convergence of that sequence to the
     limiting interaction, then the limit inherits the same lower bound.

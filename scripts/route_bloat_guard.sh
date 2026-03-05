@@ -6,9 +6,9 @@ cd "$ROOT_DIR"
 
 # Baselines captured after bloat-reduction refactor (2026-03-04):
 # - class .*Model count: 58
-# - theorem .*_nonempty_of_ count: 34
-# - interactionWeightModel_nonempty_of_* count: 7
-# - interactionIntegrabilityModel_nonempty_of_* count: 2
+# - theorem .*_nonempty_of_ count: 17
+# - interactionWeightModel_nonempty_of_* count: 6
+# - interactionIntegrabilityModel_nonempty_of_* count: 1
 # - gap_phi4_linear_growth variant count in Reconstruction/Part1Core.lean: 2
 # - Reconstruction/Part1Core explicit shifted-moment linear-growth wrapper count: 0
 # - Reconstruction/Part1Core explicit Wick-sublevel linear-growth-model wrapper count: 0
@@ -62,10 +62,27 @@ cd "$ROOT_DIR"
 #   - boundaryComparisonModel_nonempty_of_data
 #   - boundaryRegularityModel_nonempty_of_data
 #   - boundaryCovarianceModel_nonempty_of_data
+#   - feynmanGraphEstimateModel_nonempty_of_expansion_and_phi4_weighted
+#   - freeCovarianceKernelModel_nonempty_of_two_point_kernel
+#   - interactionWeightModel_nonempty_of_tendsto_ae_and_geometric_integral_bound
+#   - regularityModel_nonempty_of_wick_eom_exhaustion_limit_global_uniform
+#   - wightmanReconstructionModel_nonempty_of_os_to_wightman
+#   - wickCubicConvergenceModel_nonempty_of_data
+#   - euclideanEquationModel_nonempty_of_data
+#   - regularityModel_nonempty_of_submodel_nonempty
+#   - freeCovarianceKernelModel_nonempty_of_data
+#   - wightmanReconstructionModel_nonempty_of_data
+#   - feynmanGraphEstimateModel_nonempty_of_expansion_and_degree_weighted
+#   - generatingFunctionalBoundModel_nonempty_of_exhaustion_limit_global_uniform
+#   - uniformGeneratingFunctionalBoundModel_nonempty_of_global_uniform
+#   - nonlocalPhi4BoundModel_nonempty_of_global_uniform
+#   - generatingFunctionalBoundModel_nonempty_of_data
+#   - uniformGeneratingFunctionalBoundModel_nonempty_of_data
+#   - nonlocalPhi4BoundModel_nonempty_of_data
 MAX_MODEL_CLASSES=58
-MAX_NONEMPTY_CONSTRUCTORS=34
-MAX_WEIGHT_ROUTES=7
-MAX_INTEGRABILITY_ROUTES=2
+MAX_NONEMPTY_CONSTRUCTORS=17
+MAX_WEIGHT_ROUTES=6
+MAX_INTEGRABILITY_ROUTES=1
 MAX_LINEAR_GROWTH_ROUTES=2
 MAX_RECON_PART1CORE_EXPLICIT_MOMENT_ROUTE=0
 MAX_RECON_PART1CORE_EXPLICIT_WICK_MODEL_ROUTE=0
@@ -116,6 +133,23 @@ MAX_BOUNDARY_KERNEL_DATA_WRAPPER=0
 MAX_BOUNDARY_COMPARISON_DATA_WRAPPER=0
 MAX_BOUNDARY_REGULARITY_DATA_WRAPPER=0
 MAX_BOUNDARY_COVARIANCE_DATA_WRAPPER=0
+MAX_LOCALIZEDBOUNDS_GRAPH_ESTIMATE_WEIGHTED_WRAPPER=0
+MAX_FREEFIELD_COVARIANCE_KERNEL_TWOPOINT_WRAPPER=0
+MAX_INTERACTION_WEIGHT_TENDSTO_AE_GEOM_INTEGRAL_WRAPPER=0
+MAX_REGULARITY_FULL_PACKAGING_WRAPPER=0
+MAX_RECON_UPSTREAM_WIGHTMAN_MODEL_WRAPPER=0
+MAX_REGULARITY_WICKCUBIC_DATA_WRAPPER=0
+MAX_REGULARITY_EUCLIDEAN_DATA_WRAPPER=0
+MAX_REGULARITY_SUBMODEL_NONEMPTY_WRAPPER=0
+MAX_FREEFIELD_COVARIANCE_KERNEL_DATA_WRAPPER=0
+MAX_RECON_PART1TAIL_WIGHTMAN_DATA_WRAPPER=0
+MAX_LOCALIZEDBOUNDS_DEGREE_WEIGHTED_MODEL_WRAPPER=0
+MAX_REGULARITY_GFBOUND_EXHAUSTION_GLOBAL_WRAPPER=0
+MAX_REGULARITY_UNIFORM_GLOBAL_WRAPPER=0
+MAX_REGULARITY_NONLOCAL_GLOBAL_WRAPPER=0
+MAX_REGULARITY_GFBOUND_DATA_WRAPPER=0
+MAX_REGULARITY_UNIFORM_DATA_WRAPPER=0
+MAX_REGULARITY_NONLOCAL_DATA_WRAPPER=0
 
 model_classes="$( (rg -n '^class .*Model' Phi4 --glob '*.lean' || true) | wc -l | tr -d ' ' )"
 nonempty_ctors="$( (rg -n '^theorem[[:space:]]+.*_nonempty_of_' Phi4 --glob '*.lean' || true) | wc -l | tr -d ' ' )"
@@ -169,6 +203,23 @@ boundary_kernel_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+boundar
 boundary_comparison_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+boundaryComparisonModel_nonempty_of_data\\b' Phi4/CovarianceOperators.lean || true) | wc -l | tr -d ' ' )"
 boundary_regularity_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+boundaryRegularityModel_nonempty_of_data\\b' Phi4/CovarianceOperators.lean || true) | wc -l | tr -d ' ' )"
 boundary_covariance_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+boundaryCovarianceModel_nonempty_of_data\\b' Phi4/CovarianceOperators.lean || true) | wc -l | tr -d ' ' )"
+localizedbounds_graph_estimate_weighted_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+feynmanGraphEstimateModel_nonempty_of_expansion_and_phi4_weighted\\b' Phi4/FeynmanGraphs/LocalizedBounds.lean || true) | wc -l | tr -d ' ' )"
+freefield_covariance_kernel_twopoint_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+freeCovarianceKernelModel_nonempty_of_two_point_kernel\\b' Phi4/FreeField.lean || true) | wc -l | tr -d ' ' )"
+interaction_weight_tendsto_ae_geom_integral_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+interactionWeightModel_nonempty_of_tendsto_ae_and_geometric_integral_bound\\b' Phi4/Interaction/Part1Core.lean || true) | wc -l | tr -d ' ' )"
+regularity_full_packaging_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+regularityModel_nonempty_of_wick_eom_exhaustion_limit_global_uniform\\b' Phi4/Regularity.lean || true) | wc -l | tr -d ' ' )"
+recon_upstream_wightman_model_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+wightmanReconstructionModel_nonempty_of_os_to_wightman\\b' Phi4/ReconstructionUpstream.lean || true) | wc -l | tr -d ' ' )"
+regularity_wickcubic_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+wickCubicConvergenceModel_nonempty_of_data\\b' Phi4/Regularity.lean || true) | wc -l | tr -d ' ' )"
+regularity_euclidean_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+euclideanEquationModel_nonempty_of_data\\b' Phi4/Regularity.lean || true) | wc -l | tr -d ' ' )"
+regularity_submodel_nonempty_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+regularityModel_nonempty_of_submodel_nonempty\\b' Phi4/Regularity.lean || true) | wc -l | tr -d ' ' )"
+freefield_covariance_kernel_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+freeCovarianceKernelModel_nonempty_of_data\\b' Phi4/FreeField.lean || true) | wc -l | tr -d ' ' )"
+recon_part1tail_wightman_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+wightmanReconstructionModel_nonempty_of_data\\b' Phi4/Reconstruction/Part1Tail.lean || true) | wc -l | tr -d ' ' )"
+localizedbounds_degree_weighted_model_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+feynmanGraphEstimateModel_nonempty_of_expansion_and_degree_weighted\\b' Phi4/FeynmanGraphs/LocalizedBounds.lean || true) | wc -l | tr -d ' ' )"
+regularity_gfbound_exhaustion_global_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+generatingFunctionalBoundModel_nonempty_of_exhaustion_limit_global_uniform\\b' Phi4/Regularity.lean || true) | wc -l | tr -d ' ' )"
+regularity_uniform_global_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+uniformGeneratingFunctionalBoundModel_nonempty_of_global_uniform\\b' Phi4/Regularity.lean || true) | wc -l | tr -d ' ' )"
+regularity_nonlocal_global_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+nonlocalPhi4BoundModel_nonempty_of_global_uniform\\b' Phi4/Regularity.lean || true) | wc -l | tr -d ' ' )"
+regularity_gfbound_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+generatingFunctionalBoundModel_nonempty_of_data\\b' Phi4/Regularity.lean || true) | wc -l | tr -d ' ' )"
+regularity_uniform_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+uniformGeneratingFunctionalBoundModel_nonempty_of_data\\b' Phi4/Regularity.lean || true) | wc -l | tr -d ' ' )"
+regularity_nonlocal_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+nonlocalPhi4BoundModel_nonempty_of_data\\b' Phi4/Regularity.lean || true) | wc -l | tr -d ' ' )"
 part3_theorem_names="$(
   awk '
   /^[[:space:]]*theorem([[:space:]]|$)/{
@@ -250,6 +301,23 @@ echo "[route_bloat_guard] Boundary kernel data wrapper: $boundary_kernel_data_wr
 echo "[route_bloat_guard] Boundary comparison data wrapper: $boundary_comparison_data_wrapper (max $MAX_BOUNDARY_COMPARISON_DATA_WRAPPER)"
 echo "[route_bloat_guard] Boundary regularity data wrapper: $boundary_regularity_data_wrapper (max $MAX_BOUNDARY_REGULARITY_DATA_WRAPPER)"
 echo "[route_bloat_guard] Boundary covariance data wrapper: $boundary_covariance_data_wrapper (max $MAX_BOUNDARY_COVARIANCE_DATA_WRAPPER)"
+echo "[route_bloat_guard] LocalizedBounds weighted estimate wrapper: $localizedbounds_graph_estimate_weighted_wrapper (max $MAX_LOCALIZEDBOUNDS_GRAPH_ESTIMATE_WEIGHTED_WRAPPER)"
+echo "[route_bloat_guard] FreeField two-point covariance wrapper: $freefield_covariance_kernel_twopoint_wrapper (max $MAX_FREEFIELD_COVARIANCE_KERNEL_TWOPOINT_WRAPPER)"
+echo "[route_bloat_guard] Interaction tendsto-ae geometric-integral wrapper: $interaction_weight_tendsto_ae_geom_integral_wrapper (max $MAX_INTERACTION_WEIGHT_TENDSTO_AE_GEOM_INTEGRAL_WRAPPER)"
+echo "[route_bloat_guard] Regularity full-packaging wrapper: $regularity_full_packaging_wrapper (max $MAX_REGULARITY_FULL_PACKAGING_WRAPPER)"
+echo "[route_bloat_guard] ReconstructionUpstream wightman model wrapper: $recon_upstream_wightman_model_wrapper (max $MAX_RECON_UPSTREAM_WIGHTMAN_MODEL_WRAPPER)"
+echo "[route_bloat_guard] Regularity Wick-cubic data wrapper: $regularity_wickcubic_data_wrapper (max $MAX_REGULARITY_WICKCUBIC_DATA_WRAPPER)"
+echo "[route_bloat_guard] Regularity Euclidean-data wrapper: $regularity_euclidean_data_wrapper (max $MAX_REGULARITY_EUCLIDEAN_DATA_WRAPPER)"
+echo "[route_bloat_guard] Regularity submodel-nonempty wrapper: $regularity_submodel_nonempty_wrapper (max $MAX_REGULARITY_SUBMODEL_NONEMPTY_WRAPPER)"
+echo "[route_bloat_guard] FreeField covariance-kernel data wrapper: $freefield_covariance_kernel_data_wrapper (max $MAX_FREEFIELD_COVARIANCE_KERNEL_DATA_WRAPPER)"
+echo "[route_bloat_guard] Reconstruction.Part1Tail wightman-data wrapper: $recon_part1tail_wightman_data_wrapper (max $MAX_RECON_PART1TAIL_WIGHTMAN_DATA_WRAPPER)"
+echo "[route_bloat_guard] LocalizedBounds degree-weighted model wrapper: $localizedbounds_degree_weighted_model_wrapper (max $MAX_LOCALIZEDBOUNDS_DEGREE_WEIGHTED_MODEL_WRAPPER)"
+echo "[route_bloat_guard] Regularity exhaustion-global GF wrapper: $regularity_gfbound_exhaustion_global_wrapper (max $MAX_REGULARITY_GFBOUND_EXHAUSTION_GLOBAL_WRAPPER)"
+echo "[route_bloat_guard] Regularity uniform-global wrapper: $regularity_uniform_global_wrapper (max $MAX_REGULARITY_UNIFORM_GLOBAL_WRAPPER)"
+echo "[route_bloat_guard] Regularity nonlocal-global wrapper: $regularity_nonlocal_global_wrapper (max $MAX_REGULARITY_NONLOCAL_GLOBAL_WRAPPER)"
+echo "[route_bloat_guard] Regularity GF-bound data wrapper: $regularity_gfbound_data_wrapper (max $MAX_REGULARITY_GFBOUND_DATA_WRAPPER)"
+echo "[route_bloat_guard] Regularity uniform data wrapper: $regularity_uniform_data_wrapper (max $MAX_REGULARITY_UNIFORM_DATA_WRAPPER)"
+echo "[route_bloat_guard] Regularity nonlocal data wrapper: $regularity_nonlocal_data_wrapper (max $MAX_REGULARITY_NONLOCAL_DATA_WRAPPER)"
 
 fail=0
 if (( model_classes > MAX_MODEL_CLASSES )); then
@@ -466,6 +534,74 @@ if (( boundary_regularity_data_wrapper > MAX_BOUNDARY_REGULARITY_DATA_WRAPPER ))
 fi
 if (( boundary_covariance_data_wrapper > MAX_BOUNDARY_COVARIANCE_DATA_WRAPPER )); then
   echo "[FAIL] Boundary covariance data wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( localizedbounds_graph_estimate_weighted_wrapper > MAX_LOCALIZEDBOUNDS_GRAPH_ESTIMATE_WEIGHTED_WRAPPER )); then
+  echo "[FAIL] LocalizedBounds weighted-estimate wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( freefield_covariance_kernel_twopoint_wrapper > MAX_FREEFIELD_COVARIANCE_KERNEL_TWOPOINT_WRAPPER )); then
+  echo "[FAIL] FreeField two-point covariance wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( interaction_weight_tendsto_ae_geom_integral_wrapper > MAX_INTERACTION_WEIGHT_TENDSTO_AE_GEOM_INTEGRAL_WRAPPER )); then
+  echo "[FAIL] Interaction tendsto-ae geometric-integral wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( regularity_full_packaging_wrapper > MAX_REGULARITY_FULL_PACKAGING_WRAPPER )); then
+  echo "[FAIL] Regularity full-packaging wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( recon_upstream_wightman_model_wrapper > MAX_RECON_UPSTREAM_WIGHTMAN_MODEL_WRAPPER )); then
+  echo "[FAIL] ReconstructionUpstream wightman model wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( regularity_wickcubic_data_wrapper > MAX_REGULARITY_WICKCUBIC_DATA_WRAPPER )); then
+  echo "[FAIL] Regularity Wick-cubic data wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( regularity_euclidean_data_wrapper > MAX_REGULARITY_EUCLIDEAN_DATA_WRAPPER )); then
+  echo "[FAIL] Regularity Euclidean-data wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( regularity_submodel_nonempty_wrapper > MAX_REGULARITY_SUBMODEL_NONEMPTY_WRAPPER )); then
+  echo "[FAIL] Regularity submodel-nonempty wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( freefield_covariance_kernel_data_wrapper > MAX_FREEFIELD_COVARIANCE_KERNEL_DATA_WRAPPER )); then
+  echo "[FAIL] FreeField covariance-kernel data wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( recon_part1tail_wightman_data_wrapper > MAX_RECON_PART1TAIL_WIGHTMAN_DATA_WRAPPER )); then
+  echo "[FAIL] Reconstruction.Part1Tail wightman-data wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( localizedbounds_degree_weighted_model_wrapper > MAX_LOCALIZEDBOUNDS_DEGREE_WEIGHTED_MODEL_WRAPPER )); then
+  echo "[FAIL] LocalizedBounds degree-weighted model wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( regularity_gfbound_exhaustion_global_wrapper > MAX_REGULARITY_GFBOUND_EXHAUSTION_GLOBAL_WRAPPER )); then
+  echo "[FAIL] Regularity exhaustion-global GF wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( regularity_uniform_global_wrapper > MAX_REGULARITY_UNIFORM_GLOBAL_WRAPPER )); then
+  echo "[FAIL] Regularity uniform-global wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( regularity_nonlocal_global_wrapper > MAX_REGULARITY_NONLOCAL_GLOBAL_WRAPPER )); then
+  echo "[FAIL] Regularity nonlocal-global wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( regularity_gfbound_data_wrapper > MAX_REGULARITY_GFBOUND_DATA_WRAPPER )); then
+  echo "[FAIL] Regularity GF-bound data wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( regularity_uniform_data_wrapper > MAX_REGULARITY_UNIFORM_DATA_WRAPPER )); then
+  echo "[FAIL] Regularity uniform data wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( regularity_nonlocal_data_wrapper > MAX_REGULARITY_NONLOCAL_DATA_WRAPPER )); then
+  echo "[FAIL] Regularity nonlocal data wrapper count exceeded baseline." >&2
   fail=1
 fi
 

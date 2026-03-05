@@ -9,7 +9,9 @@ The primary goal is the Glimm-Jaffe `φ⁴₂` pipeline:
 3. reconstruct Wightman functions from the OS package.
 
 All work packages and checklists in this file are interpreted in that order.
-`...Model` classes represent explicit proof obligations in this pipeline.
+Legacy `...Model` classes are being migrated out; canonical open obligations
+should be represented by explicit theorem statements with theorem-level
+`by sorry` proofs where genuinely unresolved.
 Upstream blocker inventories are supporting context only and must not override
 the local Glimm-Jaffe objective.
 
@@ -18,9 +20,9 @@ the local Glimm-Jaffe objective.
 - Core modules (`Phi4/**/*.lean`, excluding `Phi4/Scratch`) have `0`
   theorem-level `sorry`.
 - This does not imply construction closure: open obligations are intentionally
-  explicit at the frontier boundary (`58` `...Model` interfaces, `10` canonical
-  theorem-level `gap_*` frontiers).
-- Route-surface status (post-prune): `34` `theorem .*_nonempty_of_`
+  explicit at the frontier boundary (`58` legacy `...Model` interfaces, `10`
+  canonical theorem-level `gap_*` frontiers, plus theorem-level migration work).
+- Route-surface status (post-prune): `17` `theorem .*_nonempty_of_`
   constructors.
 - Scratch modules (`Phi4/Scratch/**/*.lean`) have `0` theorem-level `sorry`.
 - `Phi4/**/*.lean` has `0` `axiom` declarations.
@@ -159,10 +161,9 @@ the local Glimm-Jaffe objective.
 - Upstream OS→Wightman bridge is isolated in `Phi4/ReconstructionUpstream.lean`;
   core reconstruction remains backend-abstract (`WightmanReconstructionModel`).
 - `Phi4/Regularity.lean` now includes concrete constructor chains from explicit
-  data to full regularity packaging, including
-  `uniformGeneratingFunctionalBoundModel_nonempty_of_global_uniform`,
-  `nonlocalPhi4BoundModel_nonempty_of_global_uniform`, and
-  `regularityModel_nonempty_of_wick_eom_exhaustion_limit_global_uniform`.
+  data to full regularity packaging, plus explicit exhaustion/global-bound
+  bridge lemmas (for example
+  `generating_functional_bound_of_exhaustion_limit_global_uniform`).
 - New WP1 infrastructure module `Phi4/FeynmanGraphs/LocalizedBounds.lean` adds
   reusable factorial occupancy bounds for localized graph estimates.
 - `Phi4/FeynmanGraphs/LocalizedBounds.lean` now also provides weighted occupancy
@@ -202,13 +203,11 @@ the local Glimm-Jaffe objective.
   giving `∃ C > 0` such that all degree-capped weighted-bound graphs satisfy
   `|I(G)| ≤ C^|lines(G)|`.
 - `Phi4/FeynmanGraphs/LocalizedBounds.lean` now adds direct model-bridge
-  constructors from weighted degree-capped assumptions:
-  `localized_graph_bound_of_degree_weighted_family` and
-  `feynmanGraphEstimateModel_nonempty_of_expansion_and_degree_weighted`.
+  infrastructure from weighted degree-capped assumptions:
+  `localized_graph_bound_of_degree_weighted_family`.
 - `Phi4/FeynmanGraphs/LocalizedBounds.lean` now also includes φ⁴-specialized
-  bridge wrappers (`d = 4`):
-  `localized_graph_bound_of_phi4_weighted_family` and
-  `feynmanGraphEstimateModel_nonempty_of_expansion_and_phi4_weighted`.
+  bridge infrastructure (`d = 4`):
+  `localized_graph_bound_of_phi4_weighted_family`.
 - `Phi4/FeynmanGraphs/LocalizedBounds.lean` now also includes **local** φ⁴
   weighted-bound bridges (per-graph/per-family hypotheses, without global
   valence assumptions):
@@ -520,9 +519,6 @@ the local Glimm-Jaffe objective.
 - `Phi4/CovarianceOperators.lean` now exposes boundary-covariance subinterfaces
   (`BoundaryKernelModel`, `BoundaryComparisonModel`, `BoundaryRegularityModel`)
   plus derived quadratic comparison lemmas (`C_D ≤ C ≤ C_N` consequences).
-- `Phi4/FreeField.lean` now includes a direct model-construction bridge from
-  two-point kernel identities:
-  `freeCovarianceKernelModel_nonempty_of_two_point_kernel`.
 - `Phi4/FreeField.lean` now exports reusable free-kernel Bessel
   representation/off-diagonal bounds (`freeCovKernel_eq_besselK0` and
   `K₁`-comparison consequences) for downstream covariance estimates.

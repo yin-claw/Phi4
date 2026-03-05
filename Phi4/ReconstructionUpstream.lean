@@ -27,11 +27,3 @@ theorem wightman_reconstruction_of_os_to_wightman (_params : Phi4Params)
           IsWickRotationPair OS.S Wfn.W := by
   intro OS hlg
   exact os_to_wightman_full OS hlg
-
-/-- Package the upstream OS→Wightman theorem as a
-    `WightmanReconstructionModel`. -/
-theorem wightmanReconstructionModel_nonempty_of_os_to_wightman
-    (params : Phi4Params) :
-    Nonempty (WightmanReconstructionModel params) := by
-  exact wightmanReconstructionModel_nonempty_of_data params
-    (wightman_reconstruction_of_os_to_wightman params)
