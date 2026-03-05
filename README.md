@@ -73,9 +73,9 @@ Local per-folder guides are available at:
 - Open frontier obligations are represented explicitly as theorem-level `gap_*`
   endpoints and interface assumptions (`...Model` classes), not hidden in
   definitions.
-- Upstream OS-to-Wightman adapter risk is isolated in
-  `Phi4/ReconstructionUpstream.lean`; core reconstruction remains
-  backend-abstract via `WightmanReconstructionModel`.
+- Upstream OS-to-Wightman reconstruction is intentionally kept out of the
+  trusted local closure path; core reconstruction remains backend-abstract via
+  `WightmanReconstructionModel`.
 - `Phi4/InfiniteVolumeLimit/Part1.lean` now tightens public endpoints to match
   true dependencies: `schwinger_uniformly_bounded` drops an unused limit input,
   `infinite_volume_schwinger_exists` drops an unused uniform-bound input, and

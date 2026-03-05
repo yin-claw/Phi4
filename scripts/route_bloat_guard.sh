@@ -227,7 +227,7 @@ localizedbounds_graph_estimate_weighted_wrapper="$( (rg -n '^[[:space:]]*theorem
 freefield_covariance_kernel_twopoint_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+freeCovarianceKernelModel_nonempty_of_two_point_kernel\\b' Phi4/FreeField.lean || true) | wc -l | tr -d ' ' )"
 interaction_weight_tendsto_ae_geom_integral_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+interactionWeightModel_nonempty_of_tendsto_ae_and_geometric_integral_bound\\b' Phi4/Interaction/Part1Core.lean || true) | wc -l | tr -d ' ' )"
 regularity_full_packaging_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+regularityModel_nonempty_of_wick_eom_exhaustion_limit_global_uniform\\b' Phi4/Regularity.lean || true) | wc -l | tr -d ' ' )"
-recon_upstream_wightman_model_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+wightmanReconstructionModel_nonempty_of_os_to_wightman\\b' Phi4/ReconstructionUpstream.lean || true) | wc -l | tr -d ' ' )"
+recon_upstream_wightman_model_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+wightmanReconstructionModel_nonempty_of_os_to_wightman\\b' Phi4 || true) | wc -l | tr -d ' ' )"
 regularity_wickcubic_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+wickCubicConvergenceModel_nonempty_of_data\\b' Phi4/Regularity.lean || true) | wc -l | tr -d ' ' )"
 regularity_euclidean_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+euclideanEquationModel_nonempty_of_data\\b' Phi4/Regularity.lean || true) | wc -l | tr -d ' ' )"
 regularity_submodel_nonempty_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+regularityModel_nonempty_of_submodel_nonempty\\b' Phi4/Regularity.lean || true) | wc -l | tr -d ' ' )"
@@ -325,7 +325,7 @@ echo "[route_bloat_guard] LocalizedBounds weighted estimate wrapper: $localizedb
 echo "[route_bloat_guard] FreeField two-point covariance wrapper: $freefield_covariance_kernel_twopoint_wrapper (max $MAX_FREEFIELD_COVARIANCE_KERNEL_TWOPOINT_WRAPPER)"
 echo "[route_bloat_guard] Interaction tendsto-ae geometric-integral wrapper: $interaction_weight_tendsto_ae_geom_integral_wrapper (max $MAX_INTERACTION_WEIGHT_TENDSTO_AE_GEOM_INTEGRAL_WRAPPER)"
 echo "[route_bloat_guard] Regularity full-packaging wrapper: $regularity_full_packaging_wrapper (max $MAX_REGULARITY_FULL_PACKAGING_WRAPPER)"
-echo "[route_bloat_guard] ReconstructionUpstream wightman model wrapper: $recon_upstream_wightman_model_wrapper (max $MAX_RECON_UPSTREAM_WIGHTMAN_MODEL_WRAPPER)"
+echo "[route_bloat_guard] Legacy upstream wightman model wrapper: $recon_upstream_wightman_model_wrapper (max $MAX_RECON_UPSTREAM_WIGHTMAN_MODEL_WRAPPER)"
 echo "[route_bloat_guard] Regularity Wick-cubic data wrapper: $regularity_wickcubic_data_wrapper (max $MAX_REGULARITY_WICKCUBIC_DATA_WRAPPER)"
 echo "[route_bloat_guard] Regularity Euclidean-data wrapper: $regularity_euclidean_data_wrapper (max $MAX_REGULARITY_EUCLIDEAN_DATA_WRAPPER)"
 echo "[route_bloat_guard] Regularity submodel-nonempty wrapper: $regularity_submodel_nonempty_wrapper (max $MAX_REGULARITY_SUBMODEL_NONEMPTY_WRAPPER)"
@@ -573,7 +573,7 @@ if (( regularity_full_packaging_wrapper > MAX_REGULARITY_FULL_PACKAGING_WRAPPER 
   fail=1
 fi
 if (( recon_upstream_wightman_model_wrapper > MAX_RECON_UPSTREAM_WIGHTMAN_MODEL_WRAPPER )); then
-  echo "[FAIL] ReconstructionUpstream wightman model wrapper count exceeded baseline." >&2
+  echo "[FAIL] Legacy upstream wightman model wrapper count exceeded baseline." >&2
   fail=1
 fi
 if (( regularity_wickcubic_data_wrapper > MAX_REGULARITY_WICKCUBIC_DATA_WRAPPER )); then

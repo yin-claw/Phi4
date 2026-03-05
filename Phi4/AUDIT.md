@@ -552,7 +552,9 @@ Update (2026-03-04, Reconstruction/Part1Core zero-caller theorem pruning):
 Update (2026-02-27):
 - Automated trust audit now reports theorem-level `sorry` count (core): `0`.
 - Trusted interface/bundle endpoints remain `sorryAx`-free.
-- The OS→Wightman upstream adapter is isolated in `Phi4/ReconstructionUpstream.lean`.
+- Upstream OS→Wightman reconstruction is kept outside the trusted local
+  closure path; core reconstruction remains backend-abstract via
+  `WightmanReconstructionModel`.
 
 Update (2026-02-28):
 - Re-audited with current tree state:
@@ -566,8 +568,8 @@ Update (2026-02-28):
   (`infinite_volume_schwinger_exists_four_of_models`,
   `infinite_volume_schwinger_exists_four_of_lattice_models`), restoring test-file
   compile.
-- Trust-boundary fix: `Phi4.lean` no longer imports `Phi4/ReconstructionUpstream.lean`;
-  upstream `sorryAx`-dependent reconstruction is now opt-in via explicit import.
+- Trust-boundary fix: `Phi4.lean` does not import upstream
+  `sorryAx`-dependent reconstruction into the trusted local closure path.
 
 Update (2026-03-03):
 - Re-audited with current tree state:
@@ -981,7 +983,10 @@ local `sorry`.
 1. FKG monotonicity statements were tightened in this audit pass: connected two-point nonnegativity now explicitly requires nonnegative test functions (`f, g ≥ 0`), removing an over-strong earlier statement.
 2. `ConnectedTwoPointDecayAtParams` was strengthened for soundness: decay now has a uniform positive mass gap with pair-dependent amplitudes (`C_{f,g}`), avoiding an unrealistically strong single global amplitude constant across all test-function pairs.
 3. The monotonicity order used in FKG interfaces is still abstract and not yet identified with a fully internalized lattice/field order construction; this remains a closure task.
-4. Upstream OS reconstruction bridge theorem `os_to_wightman` (OSReconstruction) currently depends on `sorryAx`; by project policy it cannot be used to discharge `gap_phi4_wightman_reconstruction_step` yet. This dependency is now isolated in `Phi4/ReconstructionUpstream.lean` rather than core `Phi4/Reconstruction.lean`.
+4. Upstream OS reconstruction bridge theorem `os_to_wightman`
+   (OSReconstruction) currently depends on `sorryAx`; by project policy it
+   cannot be used to discharge `gap_phi4_wightman_reconstruction_step` yet.
+   This dependency remains outside the trusted local closure path.
 5. New constructive infrastructure was added in `InfiniteVolumeLimit.lean` for exhausting-sequence convergence in the two-point channel (including lattice and `k = 2` `schwingerN` variants, plus interface-style `if h : 0 < n then ... else 0` endpoints), removing a previously external boundedness hypothesis in that local convergence path.
 6. `Reconstruction/Part3.lean` now keeps the interface endpoint surface to
    `phi4_wightman_exists_of_explicit_data` and the canonical top-level theorem

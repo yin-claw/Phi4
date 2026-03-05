@@ -24,8 +24,8 @@ and interfaces must be interpreted as obligations in that architecture:
 - `Phi4/**/*.lean` currently has `0` `axiom` declarations.
 - `Phi4/**/*.lean` currently has `0` `def/abbrev := by sorry`.
 - Main theorems are still conditional on `...Model` assumptions.
-- The upstream OS→Wightman adapter now lives in `Phi4/ReconstructionUpstream.lean`;
-  core `Phi4/Reconstruction.lean` remains backend-abstract via
+- Upstream OS→Wightman reconstruction is not imported into the trusted local
+  closure path; core `Phi4/Reconstruction.lean` remains backend-abstract via
   `WightmanReconstructionModel`.
 
 So the project has no theorem-level `sorry` frontiers and no explicit axiom
@@ -257,8 +257,8 @@ remaining debt to close for a full formal Glimm-Jaffe construction.
 7. Keep reconstruction step conditional only on fully proved upstream OS assumptions (or finish OSReconstruction dependencies that currently carry `sorry` upstream).
    - Current check: trusted Phi4 interface/bundle endpoints are `sorryAx`-free under
      `scripts/check_phi4_trust.sh`.
-   - Upstream `os_to_wightman` / `os_to_wightman_full` remain outside the trusted
-     closure path and are isolated in `Phi4/ReconstructionUpstream.lean`.
+   - Upstream `os_to_wightman` / `os_to_wightman_full` remain outside the
+     trusted closure path.
 
 ## 7. Audit Commands
 

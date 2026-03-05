@@ -148,8 +148,9 @@ the local Glimm-Jaffe objective.
   prompt/workpack generation is available via
   `scripts/upstream_blockers_prompt.sh` and
   `scripts/upstream_blockers_workpack.sh`.
-- Upstream OS→Wightman bridge is isolated in `Phi4/ReconstructionUpstream.lean`;
-  core reconstruction remains backend-abstract (`WightmanReconstructionModel`).
+- Upstream OS→Wightman reconstruction stays outside the trusted local closure
+  path; core reconstruction remains backend-abstract
+  (`WightmanReconstructionModel`).
 - `Phi4/Regularity.lean` now includes concrete constructor chains from explicit
   data to full regularity packaging, plus explicit exhaustion/global-bound
   bridge lemmas (for example
