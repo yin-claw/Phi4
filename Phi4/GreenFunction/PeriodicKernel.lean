@@ -70,20 +70,6 @@ theorem shiftPoint_add_indices (L₁ L₂ : ℝ)
   rw [periodicShift_add_indices]
   abel
 
-/-- Composition of two lattice shifts commutes (addition in `ℤ²` is abelian). -/
-theorem shiftPoint_comm_indices (L₁ L₂ : ℝ)
-    (m n a b : ℤ) (x : Spacetime2D) :
-    shiftPoint L₁ L₂ m n (shiftPoint L₁ L₂ a b x) =
-      shiftPoint L₁ L₂ a b (shiftPoint L₁ L₂ m n x) := by
-  calc
-    shiftPoint L₁ L₂ m n (shiftPoint L₁ L₂ a b x)
-        = shiftPoint L₁ L₂ (m + a) (n + b) x := by
-          simpa using (shiftPoint_add_indices L₁ L₂ m a n b x).symm
-    _ = shiftPoint L₁ L₂ (a + m) (b + n) x := by
-          simp [add_comm]
-    _ = shiftPoint L₁ L₂ a b (shiftPoint L₁ L₂ m n x) := by
-          simpa using (shiftPoint_add_indices L₁ L₂ a m b n x)
-
 @[simp] theorem shiftPoint_neg_cancel (L₁ L₂ : ℝ) (m n : ℤ) (x : Spacetime2D) :
     shiftPoint L₁ L₂ m n (shiftPoint L₁ L₂ (-m) (-n) x) = x := by
   simpa using (shiftPoint_add_indices L₁ L₂ m (-m) n (-n) x).symm

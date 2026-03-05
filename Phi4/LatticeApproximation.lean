@@ -189,52 +189,9 @@ theorem cell_area_pos (L : RectLattice Λ) (i : Fin L.Nt) (j : Fin L.Nx) :
     0 < (L.cell i j).area := by
   simpa [cell_area_eq_meshArea] using mul_pos L.timeStep_pos L.spaceStep_pos
 
-/-- The mesh cells partition `Λ` in total area:
-    the sum of all cell areas equals the rectangle area. -/
-theorem sum_cell_areas_eq_area (L : RectLattice Λ) :
-    (∑ i : Fin L.Nt, ∑ j : Fin L.Nx, (L.cell i j).area) = Λ.area := by
-  calc
-    (∑ i : Fin L.Nt, ∑ j : Fin L.Nx, (L.cell i j).area)
-        = ∑ i : Fin L.Nt, ∑ j : Fin L.Nx, L.timeStep * L.spaceStep := by
-            simp [cell_area_eq_meshArea]
-    _ = ∑ i : Fin L.Nt, ((L.Nx : ℝ) * (L.timeStep * L.spaceStep)) := by
-          refine Finset.sum_congr rfl ?_
-          intro i _
-          simp [Finset.sum_const, Finset.card_univ]
-    _ = (L.Nt : ℝ) * ((L.Nx : ℝ) * (L.timeStep * L.spaceStep)) := by
-          simp [Finset.sum_const, Finset.card_univ]
-    _ = ((L.Nt : ℝ) * L.timeStep) * ((L.Nx : ℝ) * L.spaceStep) := by ring
-    _ = Λ.width * Λ.height := by rw [L.timeStep_mul_Nt, L.spaceStep_mul_Nx]
-    _ = Λ.area := by simp [Rectangle.area]
-
 /-- Anchor point of cell `(i,j)`, chosen as its lower-left corner node. -/
 def cellAnchor (L : RectLattice Λ) (i : Fin L.Nt) (j : Fin L.Nx) : Spacetime2D :=
   L.node ⟨i.1, Nat.lt_succ_of_lt i.2⟩ ⟨j.1, Nat.lt_succ_of_lt j.2⟩
-
-/-- The cell anchor lies in the corresponding mesh cell. -/
-theorem cellAnchor_mem_cell (L : RectLattice Λ) (i : Fin L.Nt) (j : Fin L.Nx) :
-    L.cellAnchor i j ∈ (L.cell i j).toSet := by
-  constructor
-  · rfl
-  constructor
-  · have h : (i.1 : ℝ) * L.timeStep ≤ ((i.1 + 1 : ℕ) : ℝ) * L.timeStep := by
-      have hi : (i.1 : ℝ) ≤ ((i.1 + 1 : ℕ) : ℝ) := by exact_mod_cast Nat.le_succ i.1
-      exact mul_le_mul_of_nonneg_right hi (le_of_lt L.timeStep_pos)
-    simpa [cellAnchor, node, cell, sub_eq_add_neg, add_assoc, add_left_comm, add_comm] using
-      add_le_add_left h Λ.x_min
-  constructor
-  · rfl
-  · have h : (j.1 : ℝ) * L.spaceStep ≤ ((j.1 + 1 : ℕ) : ℝ) * L.spaceStep := by
-      have hj : (j.1 : ℝ) ≤ ((j.1 + 1 : ℕ) : ℝ) := by exact_mod_cast Nat.le_succ j.1
-      exact mul_le_mul_of_nonneg_right hj (le_of_lt L.spaceStep_pos)
-    simpa [cellAnchor, node, cell, sub_eq_add_neg, add_assoc, add_left_comm, add_comm] using
-      add_le_add_left h Λ.y_min
-
-/-- The cell anchor lies in the ambient cutoff rectangle `Λ`. -/
-theorem cellAnchor_mem_toSet (L : RectLattice Λ) (i : Fin L.Nt) (j : Fin L.Nx) :
-    L.cellAnchor i j ∈ Λ.toSet := by
-  simpa [cellAnchor] using
-    (L.node_mem_toSet ⟨i.1, Nat.lt_succ_of_lt i.2⟩ ⟨j.1, Nat.lt_succ_of_lt j.2⟩)
 
 /-- Node-sampling discretization of a test function on lattice nodes. -/
 def discretizeByNode (L : RectLattice Λ) (f : TestFun2D) :
@@ -322,13 +279,6 @@ theorem cellAverage_mono
     (L.cellIntegral_mono f g i j hfg)
     (le_of_lt (L.cell_area_pos i j))
 
-/-- Cell integral written as `area × average`. -/
-theorem cellIntegral_eq_area_mul_cellAverage
-    (L : RectLattice Λ) (f : TestFun2D) (i : Fin L.Nt) (j : Fin L.Nx) :
-    L.cellIntegral f i j = (L.cell i j).area * L.cellAverage f i j := by
-  unfold cellAverage
-  field_simp [ne_of_gt (L.cell_area_pos i j)]
-
 /-- Monotonicity of cell-average discretization under pointwise comparison. -/
 theorem discretizeByCellAverage_mono
     (L : RectLattice Λ)
@@ -362,21 +312,6 @@ theorem riemannSumCellAverage_smul
     L.riemannSumCellAverage (c • f) = c * L.riemannSumCellAverage f := by
   unfold riemannSumCellAverage discretizeByCellAverage
   simp [L.cellAverage_smul, Finset.mul_sum, mul_left_comm]
-
-/-- Monotonicity of cell-average Riemann sums under pointwise comparison. -/
-theorem riemannSumCellAverage_mono
-    (L : RectLattice Λ)
-    (f g : TestFun2D)
-    (hfg : ∀ x, f x ≤ g x) :
-    L.riemannSumCellAverage f ≤ L.riemannSumCellAverage g := by
-  unfold riemannSumCellAverage
-  refine Finset.sum_le_sum ?_
-  intro i _
-  refine Finset.sum_le_sum ?_
-  intro j _
-  exact mul_le_mul_of_nonneg_left
-    (L.discretizeByCellAverage_mono f g hfg i j)
-    (le_of_lt (L.cell_area_pos i j))
 
 /-- Total cell integral: sum of exact integrals over all mesh cells. -/
 def totalCellIntegral (L : RectLattice Λ) (f : TestFun2D) : ℝ :=
