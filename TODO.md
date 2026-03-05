@@ -96,21 +96,11 @@ the local Glimm-Jaffe objective.
   `partition_function_pos_of_sq_integrable_data_and_sq_moment_polynomial_bound_per_volume_and_uniform_partition_bound`,
   `partition_function_integrable_of_sq_integrable_data_and_sq_moment_polynomial_bound_per_volume_and_uniform_partition_bound`,
   and higher-moment (`2j`) counterparts.
-- `Phi4/Interaction/Part1Tail.lean` now also includes graph-index alignment
-  lemmas for hard-core per-volume WP1 assembly:
-  `natCast_succ_two_rpow_neg_le_succ_one_rpow_neg`,
-  `interactionWeightModel_nonempty_of_sq_moment_polynomial_bound_per_volume_and_uniform_partition_bound_of_succ_succ`,
-  and
-  `interactionWeightModel_nonempty_of_higher_moment_polynomial_bound_per_volume_and_uniform_partition_bound_of_succ_succ`,
-  so graph-natural `(n+2)^(-β)` decay hypotheses can be consumed by the
-  production `(n+1)^(-β)` constructors without ad hoc rewrites.
-  `Phi4/Interaction/Part3.lean` now also contains the matching integrability
-  constructors:
-  `interactionIntegrabilityModel_nonempty_of_sq_integrable_data_and_sq_moment_polynomial_bound_per_volume_and_uniform_partition_bound_of_succ_succ`
-  and
-  `interactionIntegrabilityModel_nonempty_of_sq_integrable_data_and_higher_moment_polynomial_bound_per_volume_and_uniform_partition_bound_of_succ_succ`.
-  The same `(n+2)^(-β)` route now also has concrete partition-function
-  endpoints:
+- Earlier graph-natural `(n+2)^(-β)` compatibility wrappers in
+  `Phi4/Interaction/Part1Tail.lean` and `Phi4/Interaction/Part3.lean` were
+  pruned as no-caller route variants; the canonical `(n+1)^(-β)` hard-core
+  routes remain the maintained entrypoints. The same WP1 route still has concrete
+  partition-function endpoints:
   `partition_function_pos_of_sq_integrable_data_and_sq_moment_polynomial_bound_per_volume_and_uniform_partition_bound_of_succ_succ`,
   `partition_function_integrable_of_sq_integrable_data_and_sq_moment_polynomial_bound_per_volume_and_uniform_partition_bound_of_succ_succ`,
   and higher-moment (`2j`) counterparts.
@@ -334,12 +324,9 @@ the local Glimm-Jaffe objective.
 - `Phi4/Interaction.lean` now also includes a globalized nonnegativity endpoint
   across all rectangles
   (`interaction_ae_nonneg_all_rectangles_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`)
-  and a direct square-integrable-data constructor for
-  `InteractionWeightModel` from the same shifted geometric-moment input
-  (`interactionWeightModel_nonempty_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`).
-  This removes unnecessary detours through full
-  `InteractionIntegrabilityModel` in the square-data partition-function and
-  finite-volume probability endpoints.
+  and the same shifted geometric-moment input now routes through the remaining
+  canonical weight/integrability chain (with no extra no-caller constructor
+  alias retained in `Interaction/Part3.lean`).
 - `Phi4/Interaction.lean` now also includes a square-integrable-data route
   driven by shifted-index exponential tails of Wick sublevel bad events:
   `interactionIntegrabilityModel_nonempty_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets`,
@@ -782,7 +769,6 @@ the local Glimm-Jaffe objective.
 - `Phi4/Reconstruction.lean` now also includes square-integrable-data variants
   of this shifted-geometric reconstruction chain, so the same WP1 bridge no
   longer requires a pre-installed `InteractionUVModel`:
-  `gap_phi4_linear_growth_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`,
   `reconstructionLinearGrowthModel_nonempty_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`,
   `reconstructionInputModel_nonempty_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`,
   `phi4_wightman_exists_of_os_and_productTensor_dense_and_normalized_order0_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`,
@@ -847,10 +833,8 @@ Distance-to-goal assessment:
    (`Phi4/Reconstruction/Part1Tail.lean`) and
    `phi4_wightman_exists_of_interfaces_of_sq_integrable_data_and_sq_moment_polynomial_bound_per_volume_and_uniform_partition_bound`
    (`Phi4/Reconstruction/Part3.lean`).
-   A generalized higher-moment (`2j`) version is also in place:
-   `interactionWeightModel_nonempty_of_higher_moment_polynomial_bound_per_volume_and_uniform_partition_bound`
-   and
-   `interactionIntegrabilityModel_nonempty_of_sq_integrable_data_and_higher_moment_polynomial_bound_per_volume_and_uniform_partition_bound`.
+   The previous no-caller higher-moment route aliases were pruned to keep the
+   canonical WP1 chain minimal.
 2. `WP1` localized graph bounds (GJ Theorem 8.5.5) are formalized in
    `Phi4/FeynmanGraphs/LocalizedBounds.lean`; remaining work is to connect
    this infrastructure to the uniform cutoff partition-function bound above.

@@ -46,7 +46,7 @@ classify() {
   awk -F'\t' 'NR > 1 && $1 == "nonempty_constructor" {print $2 "\t" $3 "\t" $4}' \
     docs/frontier_obligations/frontier.tsv | \
   while IFS=$'\t' read -r name file line; do
-    callers="$(rg -n "\\b${name}\\b" Phi4 --glob '*.lean' | awk -F: -v f="$file" -v l="$line" '!( $1 == f && $2 == l ) { c++ } END { print c + 0 }')"
+    callers="$(rg -n "\\b${name}\\b" Phi4 test --glob '*.lean' | awk -F: -v f="$file" -v l="$line" '!( $1 == f && $2 == l ) { c++ } END { print c + 0 }')"
     classification="$(classify "$name" "$callers")"
     printf "%s\t%s\t%s\t%s\t%s\n" "$name" "$file" "$line" "$callers" "$classification"
   done | sort -t$'\t' -k5,5 -k4,4n -k1,1

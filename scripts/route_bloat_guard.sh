@@ -6,9 +6,9 @@ cd "$ROOT_DIR"
 
 # Baselines captured after bloat-reduction refactor (2026-03-05, latest):
 # - class .*Model count: 58
-# - theorem .*_nonempty_of_ count: 5
-# - interactionWeightModel_nonempty_of_* count: 4
-# - interactionIntegrabilityModel_nonempty_of_* count: 0
+# - theorem .*_nonempty_of_ count: 7
+# - interactionWeightModel_nonempty_of_* count: 3
+# - interactionIntegrabilityModel_nonempty_of_* count: 2
 # - gap_phi4_linear_growth variant count in Reconstruction/Part1Core.lean: 2
 # - Reconstruction/Part1Core explicit shifted-moment linear-growth wrapper count: 0
 # - Reconstruction/Part1Core explicit Wick-sublevel linear-growth-model wrapper count: 0
@@ -80,9 +80,9 @@ cd "$ROOT_DIR"
 #   - uniformGeneratingFunctionalBoundModel_nonempty_of_data
 #   - nonlocalPhi4BoundModel_nonempty_of_data
 MAX_MODEL_CLASSES=58
-MAX_NONEMPTY_CONSTRUCTORS=5
-MAX_WEIGHT_ROUTES=4
-MAX_INTEGRABILITY_ROUTES=0
+MAX_NONEMPTY_CONSTRUCTORS=7
+MAX_WEIGHT_ROUTES=3
+MAX_INTEGRABILITY_ROUTES=2
 MAX_LINEAR_GROWTH_ROUTES=2
 MAX_RECON_PART1CORE_EXPLICIT_MOMENT_ROUTE=0
 MAX_RECON_PART1CORE_EXPLICIT_WICK_MODEL_ROUTE=0
@@ -152,10 +152,30 @@ MAX_REGULARITY_UNIFORM_DATA_WRAPPER=0
 MAX_REGULARITY_NONLOCAL_DATA_WRAPPER=0
 
 model_classes="$( (rg -n '^class .*Model' Phi4 --glob '*.lean' || true) | wc -l | tr -d ' ' )"
-nonempty_ctors="$( (rg -n '^theorem[[:space:]]+.*_nonempty_of_' Phi4 --glob '*.lean' || true) | wc -l | tr -d ' ' )"
-weight_routes="$( (rg -n '^theorem[[:space:]]+interactionWeightModel_nonempty_of_' Phi4/Interaction --glob '*.lean' || true) | wc -l | tr -d ' ' )"
-integrability_routes="$( (rg -n '^theorem[[:space:]]+interactionIntegrabilityModel_nonempty_of_' Phi4/Interaction --glob '*.lean' || true) | wc -l | tr -d ' ' )"
-linear_growth_routes="$( (rg -n '^theorem[[:space:]]+gap_phi4_linear_growth(_of_[A-Za-z0-9_]+)?' Phi4/Reconstruction/Part1Core.lean || true) | wc -l | tr -d ' ' )"
+nonempty_ctors="$(
+  {
+    rg -n --pcre2 -o -r '$1' '^theorem[[:space:]]+([A-Za-z0-9_]*_nonempty_of_[A-Za-z0-9_]*)' Phi4 --glob '*.lean' || true
+    rg -n -U --pcre2 -o -r '$1' '^theorem[[:space:]]*$\n[[:space:]]*([A-Za-z0-9_]*_nonempty_of_[A-Za-z0-9_]*)' Phi4 --glob '*.lean' || true
+  } | sort -u | wc -l | tr -d ' '
+)"
+weight_routes="$(
+  {
+    rg -n --pcre2 -o -r '$1' '^theorem[[:space:]]+(interactionWeightModel_nonempty_of_[A-Za-z0-9_]*)' Phi4/Interaction --glob '*.lean' || true
+    rg -n -U --pcre2 -o -r '$1' '^theorem[[:space:]]*$\n[[:space:]]*(interactionWeightModel_nonempty_of_[A-Za-z0-9_]*)' Phi4/Interaction --glob '*.lean' || true
+  } | sort -u | wc -l | tr -d ' '
+)"
+integrability_routes="$(
+  {
+    rg -n --pcre2 -o -r '$1' '^theorem[[:space:]]+(interactionIntegrabilityModel_nonempty_of_[A-Za-z0-9_]*)' Phi4/Interaction --glob '*.lean' || true
+    rg -n -U --pcre2 -o -r '$1' '^theorem[[:space:]]*$\n[[:space:]]*(interactionIntegrabilityModel_nonempty_of_[A-Za-z0-9_]*)' Phi4/Interaction --glob '*.lean' || true
+  } | sort -u | wc -l | tr -d ' '
+)"
+linear_growth_routes="$(
+  {
+    rg -n --pcre2 -o -r '$1' '^theorem[[:space:]]+(gap_phi4_linear_growth(_of_[A-Za-z0-9_]+)?)' Phi4/Reconstruction/Part1Core.lean || true
+    rg -n -U --pcre2 -o -r '$1' '^theorem[[:space:]]*$\n[[:space:]]*(gap_phi4_linear_growth(_of_[A-Za-z0-9_]+)?)' Phi4/Reconstruction/Part1Core.lean || true
+  } | sort -u | wc -l | tr -d ' '
+)"
 recon_part1core_explicit_moment_route="$( (rg -n 'gap_phi4_linear_growth_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound_of_aestronglyMeasurable_and_standardSeq_tendsto_ae' Phi4/Reconstruction/Part1Core.lean || true) | wc -l | tr -d ' ' )"
 recon_part1core_explicit_wick_model_route="$( (rg -n 'reconstructionLinearGrowthModel_nonempty_of_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets_of_aestronglyMeasurable_and_standardSeq_tendsto_ae' Phi4/Reconstruction/Part1Core.lean || true) | wc -l | tr -d ' ' )"
 recon_part1core_interactionuv_wrappers="$( (rg -n '^[[:space:]]*\\[InteractionUVModel params\\]' Phi4/Reconstruction/Part1Core.lean || true) | wc -l | tr -d ' ' )"

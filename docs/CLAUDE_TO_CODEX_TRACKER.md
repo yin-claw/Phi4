@@ -1129,3 +1129,37 @@ primary local Glimm-Jaffe work queue.
   - `scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv` passes.
   - `scripts/nonempty_route_inventory.sh --emit docs/route_inventory/nonempty_inventory.tsv` passes.
   - `bash scripts/quick_gate.sh` passes.
+
+### Hidden-route parser fix and no-caller prune wave (2026-03-05, follow-up 4)
+
+- Removed five additional no-caller route variants:
+  - `interactionWeightModel_nonempty_of_sq_moment_polynomial_bound_per_volume_and_uniform_partition_bound_of_succ_succ`
+    (`Phi4/Interaction/Part1Tail.lean`),
+  - `interactionWeightModel_nonempty_of_higher_moment_polynomial_bound_per_volume_and_uniform_partition_bound_of_succ_succ`
+    (`Phi4/Interaction/Part1Tail.lean`),
+  - `interactionWeightModel_nonempty_of_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets_of_aestronglyMeasurable_and_standardSeq_tendsto_ae`
+    (`Phi4/Interaction/Part2.lean`),
+  - `interactionWeightModel_nonempty_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`
+    (`Phi4/Interaction/Part3.lean`),
+  - `gap_phi4_linear_growth_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`
+    (`Phi4/Reconstruction/Part1Core.lean`).
+- Fixed route/frontier counting to include split-line theorem declarations:
+  - `scripts/frontier_report.sh`,
+  - `scripts/route_bloat_guard.sh`.
+- Fixed nonempty caller inventory to include test callers:
+  - `scripts/nonempty_route_inventory.sh` now scans `Phi4` and `test`.
+- Regenerated inventories/reports with corrected parsing:
+  - `docs/frontier_obligations/frontier.tsv` now reports
+    `_nonempty_of_ count = 7`.
+  - `docs/route_inventory/nonempty_inventory.tsv` now reports total routes `7`,
+    zero-caller `0`, plumbing `0`.
+- Tightened/reset guard baselines to corrected measured surface:
+  - `_nonempty_of_` max set to `7`,
+  - `interactionWeightModel_nonempty_of_*` max set to `3`,
+  - `interactionIntegrabilityModel_nonempty_of_*` max set to `2`.
+- Verification:
+  - `lake build Phi4.Interaction.Part1Core Phi4.Interaction.Part1Tail Phi4.Interaction.Part2 Phi4.Interaction.Part3 Phi4.Reconstruction.Part1Core Phi4.Reconstruction.Part1Tail Phi4.Reconstruction.Part3` passes.
+  - `bash scripts/route_bloat_guard.sh` passes.
+  - `scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv` passes.
+  - `scripts/nonempty_route_inventory.sh --emit docs/route_inventory/nonempty_inventory.tsv` passes.
+  - `bash scripts/quick_gate.sh` passes.
