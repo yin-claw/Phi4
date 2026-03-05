@@ -176,22 +176,6 @@ class CorrelationLebowitzModel (params : Phi4Params) where
         schwingerTwo params Λ f₁ f₃ * schwingerTwo params Λ f₂ f₄ +
         schwingerTwo params Λ f₁ f₄ * schwingerTwo params Λ f₂ f₃
 
-/-- Four-point correlation-inequality input: one GKS-II pairing channel and the
-    Lebowitz four-point upper bound. -/
-class CorrelationFourPointInequalityModel (params : Phi4Params)
-    extends CorrelationGKSSecondModel params, CorrelationLebowitzModel params
-
-/-- Full four-point input: GKS-II/Lebowitz inequalities plus
-    finite-volume four-point monotonicity under domain inclusion. -/
-class CorrelationFourPointModel (params : Phi4Params)
-    extends CorrelationFourPointInequalityModel params where
-  schwinger_four_monotone : ∀ (Λ₁ Λ₂ : Rectangle)
-      (_h : Λ₁.toSet ⊆ Λ₂.toSet)
-      (f : Fin 4 → TestFun2D)
-      (_hf : ∀ i, ∀ x, 0 ≤ f i x)
-      (_hfΛ : ∀ i, ∀ x ∉ Λ₁.toSet, f i x = 0),
-      schwingerN params Λ₁ 4 f ≤ schwingerN params Λ₂ 4 f
-
 /-- FKG positive-correlation input for finite-volume observables. -/
 class CorrelationFKGModel (params : Phi4Params) where
   fkg_inequality : ∀ (Λ : Rectangle)
@@ -204,58 +188,12 @@ class CorrelationFKGModel (params : Phi4Params) where
         (∫ ω, G ω ∂(finiteVolumeMeasure params Λ)) ≤
       ∫ ω, F ω * G ω ∂(finiteVolumeMeasure params Λ)
 
-/-- Atomic GKS-II and Lebowitz interfaces reconstruct the combined four-point
-    inequality class. -/
-instance (priority := 100) correlationFourPointInequalityModel_of_atomic
-    (params : Phi4Params)
-    [CorrelationGKSSecondModel params]
-    [CorrelationLebowitzModel params] :
-    CorrelationFourPointInequalityModel params where
-  toCorrelationGKSSecondModel := inferInstance
-  toCorrelationLebowitzModel := inferInstance
-
-/-- Atomic four-point inequality inputs plus explicit `k = 4` Schwinger
-    monotonicity reconstruct the full four-point model. -/
-instance (priority := 100) correlationFourPointModel_of_inequality_and_schwingerFourMonotone
-    (params : Phi4Params)
-    [CorrelationGKSSecondModel params]
-    [CorrelationLebowitzModel params]
-    [SchwingerNMonotoneModel params 4] :
-    CorrelationFourPointModel params := by
-  exact {
-    toCorrelationFourPointInequalityModel := inferInstance
-    schwinger_four_monotone := by
-      intro Λ₁ Λ₂ h f hf hfΛ
-      exact SchwingerNMonotoneModel.schwingerN_monotone
-        (params := params) (k := 4) Λ₁ Λ₂ h f hf hfΛ
-  }
-
-/-- Four-point monotonicity assumptions imply `k = 4` Schwinger-moment
-    monotonicity. -/
-instance (priority := 100) schwingerNMonotoneModel_four_of_correlationFourPoint
-    (params : Phi4Params) [CorrelationFourPointModel params] :
-    SchwingerNMonotoneModel params 4 where
-  schwingerN_monotone := by
-    intro Λ₁ Λ₂ h f hf hfΛ
-    exact CorrelationFourPointModel.schwinger_four_monotone
-      (params := params) Λ₁ Λ₂ h f hf hfΛ
-
 /-- Any full correlation-inequality model provides the two-point subinterface. -/
 instance (priority := 100) correlationTwoPointModel_of_full
     (params : Phi4Params) [CorrelationInequalityModel params] :
     CorrelationTwoPointModel params where
   griffiths_first := CorrelationInequalityModel.griffiths_first (params := params)
   schwinger_two_monotone := CorrelationInequalityModel.schwinger_two_monotone (params := params)
-
-/-- Any full correlation-inequality model provides the four-point subinterface. -/
-instance (priority := 100) correlationFourPointModel_of_full
-    (params : Phi4Params) [CorrelationInequalityModel params] :
-    CorrelationFourPointModel params where
-  toCorrelationFourPointInequalityModel := {
-    griffiths_second := CorrelationInequalityModel.griffiths_second (params := params)
-    lebowitz_inequality := CorrelationInequalityModel.lebowitz_inequality (params := params)
-  }
-  schwinger_four_monotone := CorrelationInequalityModel.schwinger_four_monotone (params := params)
 
 /-- Any full correlation-inequality model provides the FKG subinterface. -/
 instance (priority := 100) correlationFKGModel_of_full
@@ -542,17 +480,6 @@ instance (priority := 100) correlationTwoPointModel_of_lattice
     CorrelationTwoPointModel params where
   griffiths_first := griffiths_first_from_lattice (params := params)
   schwinger_two_monotone := schwinger_two_monotone_from_lattice (params := params)
-
-/-- Core assumptions provide the four-point correlation-inequality subinterface. -/
-instance (priority := 100) correlationFourPointModel_of_core
-    (params : Phi4Params)
-    [CorrelationInequalityCoreModel params] :
-    CorrelationFourPointModel params where
-  toCorrelationFourPointInequalityModel := {
-    griffiths_second := CorrelationGKSSecondModel.griffiths_second (params := params)
-    lebowitz_inequality := CorrelationLebowitzModel.lebowitz_inequality (params := params)
-  }
-  schwinger_four_monotone := CorrelationInequalityCoreModel.schwinger_four_monotone (params := params)
 
 /-- Core assumptions directly provide `k = 4` Schwinger-moment monotonicity. -/
 instance (priority := 100) schwingerNMonotoneModel_four_of_core
