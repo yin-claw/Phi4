@@ -282,21 +282,6 @@ def os4WeakCouplingThreshold (params : Phi4Params)
     [OSE4ClusterModel params] : ℝ :=
   OSE4ClusterModel.weak_coupling_threshold (params := params)
 
-/-- E4 cluster property extracted from `OSE4ClusterModel` under weak coupling. -/
-theorem phi4_e4_cluster_of_weak_coupling (params : Phi4Params)
-    [SchwingerFunctionModel params]
-    [OSE4ClusterModel params]
-    (hsmall : params.coupling < os4WeakCouplingThreshold params) :
-    ∀ (n m : ℕ) (f : SchwartzNPoint 1 n) (g : SchwartzNPoint 1 m),
-      ∀ ε : ℝ, ε > 0 → ∃ R : ℝ, R > 0 ∧
-        ∀ a : SpacetimeDim 1, a 0 = 0 → (∑ i : Fin 1, (a (Fin.succ i))^2) > R^2 →
-          ∀ (g_a : SchwartzNPoint 1 m),
-            (∀ x : NPointDomain 1 m, g_a x = g (fun i => x i - a)) →
-            ‖phi4SchwingerFunctions params (n + m) (f.tensorProduct g_a) -
-              phi4SchwingerFunctions params n f * phi4SchwingerFunctions params m g‖ < ε := by
-  simpa [phi4SchwingerFunctions, os4WeakCouplingThreshold] using
-    OSE4ClusterModel.e4_cluster_of_weak_coupling (params := params) hsmall
-
 /-- Interface-level OS package theorem: if Schwinger/OS0/OS2/E3/E2/E4 interfaces
     are provided and weak coupling is available, the packaged Schwinger functions
     satisfy OS0-OS4. -/
@@ -314,7 +299,9 @@ theorem phi4_satisfies_OS (params : Phi4Params)
     E1_rotation_invariant := phi4_os2_rotation params
     E2_reflection_positive := phi4_e2_distributional params
     E3_symmetric := OSE3SymmetryModel.e3_symmetric (params := params)
-    E4_cluster := phi4_e4_cluster_of_weak_coupling params hsmall
+    E4_cluster := by
+      simpa [phi4SchwingerFunctions, os4WeakCouplingThreshold] using
+        OSE4ClusterModel.e4_cluster_of_weak_coupling (params := params) hsmall
   }, rfl⟩
 
 /-- Honest frontier: construction of the core Schwinger OS package from
