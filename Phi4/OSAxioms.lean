@@ -217,13 +217,12 @@ theorem phi4_os0_linear (params : Phi4Params)
     It is the most technically demanding of the OS axioms to verify. -/
 theorem phi4_os1 (params : Phi4Params)
     [InfiniteVolumeMeasureModel params]
-    [GeneratingFunctionalBoundModel params] :
+    [RegularityModel params] :
     ∃ c : ℝ, ∀ f : TestFun2D,
       |∫ ω, Real.exp (ω f) ∂(infiniteVolumeMeasure params)| ≤
         Real.exp (c * normFunctional f) := by
   simpa [normFunctional] using
-    (GeneratingFunctionalBoundModel.generating_functional_bound
-      (params := params))
+    (RegularityModel.generating_functional_bound (params := params))
 
 /-! ## OS2: Euclidean Covariance -/
 

@@ -411,8 +411,8 @@ Update (2026-03-04, regularity/OS interface-wrapper trim):
   - `OSAxioms.lean`:
     `phi4_os1_of_interface`,
     `os4_weak_coupling_small_of_assumption`.
-- Rewired downstream OS1 access to direct model-field usage:
-  - `GeneratingFunctionalBoundModel.generating_functional_bound`.
+- Rewired downstream OS1 access to direct regularity-field usage:
+  - `RegularityModel.generating_functional_bound`.
 - Verification:
   - `lake build Phi4.Regularity Phi4.OSAxioms` passes.
   - `bash scripts/quick_gate.sh` passes.

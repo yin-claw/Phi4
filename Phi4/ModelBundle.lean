@@ -146,36 +146,6 @@ instance (params : Phi4Params) [h : Phi4ModelBundle params] :
   exact h.wickPowers
 
 instance (params : Phi4Params) [h : Phi4ModelBundle params] :
-    WickCubicConvergenceModel params := by
-  letI : InfiniteVolumeLimitModel params := h.infiniteVolumeLimit
-  letI : RegularityModel params := h.regularity
-  infer_instance
-
-instance (params : Phi4Params) [h : Phi4ModelBundle params] :
-    EuclideanEquationModel params := by
-  letI : InfiniteVolumeLimitModel params := h.infiniteVolumeLimit
-  letI : RegularityModel params := h.regularity
-  infer_instance
-
-instance (params : Phi4Params) [h : Phi4ModelBundle params] :
-    GeneratingFunctionalBoundModel params := by
-  letI : InfiniteVolumeLimitModel params := h.infiniteVolumeLimit
-  letI : RegularityModel params := h.regularity
-  infer_instance
-
-instance (params : Phi4Params) [h : Phi4ModelBundle params] :
-    NonlocalPhi4BoundModel params := by
-  letI : InfiniteVolumeLimitModel params := h.infiniteVolumeLimit
-  letI : RegularityModel params := h.regularity
-  infer_instance
-
-instance (params : Phi4Params) [h : Phi4ModelBundle params] :
-    UniformGeneratingFunctionalBoundModel params := by
-  letI : InfiniteVolumeLimitModel params := h.infiniteVolumeLimit
-  letI : RegularityModel params := h.regularity
-  infer_instance
-
-instance (params : Phi4Params) [h : Phi4ModelBundle params] :
     RegularityModel params := by
   exact h.regularity
 
