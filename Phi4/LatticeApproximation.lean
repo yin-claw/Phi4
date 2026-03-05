@@ -143,13 +143,6 @@ private theorem node_space_le_upper (L : RectLattice Λ)
     exact hbound.trans (by simp [hupper])
   simpa [node] using this
 
-/-- Every lattice node lies in the cutoff rectangle `Λ`. -/
-theorem node_mem_toSet (L : RectLattice Λ)
-    (i : Fin (L.Nt + 1)) (j : Fin (L.Nx + 1)) :
-    L.node i j ∈ Λ.toSet := by
-  exact ⟨L.node_time_ge_lower i j, L.node_time_le_upper i j,
-    L.node_space_ge_lower i j, L.node_space_le_upper i j⟩
-
 /-- Mesh cell `(i,j)` as a sub-rectangle of `Λ`. -/
 def cell (L : RectLattice Λ) (i : Fin L.Nt) (j : Fin L.Nx) : Rectangle where
   x_min := Λ.x_min + (i.1 : ℝ) * L.timeStep
@@ -267,18 +260,6 @@ theorem cellIntegral_mono
       (SchwartzMap.integrable (μ := (volume : Measure Spacetime2D)) g))
     (Filter.Eventually.of_forall hfg)
 
-/-- Monotonicity of cell averages under pointwise comparison. -/
-theorem cellAverage_mono
-    (L : RectLattice Λ)
-    (f g : TestFun2D)
-    (i : Fin L.Nt) (j : Fin L.Nx)
-    (hfg : ∀ x, f x ≤ g x) :
-    L.cellAverage f i j ≤ L.cellAverage g i j := by
-  unfold cellAverage
-  exact div_le_div_of_nonneg_right
-    (L.cellIntegral_mono f g i j hfg)
-    (le_of_lt (L.cell_area_pos i j))
-
 /-- Cell-anchor Riemann sum on the finite lattice. -/
 def riemannSumCellAnchor (L : RectLattice Λ) (f : TestFun2D) : ℝ :=
   ∑ i : Fin L.Nt, ∑ j : Fin L.Nx,
@@ -322,17 +303,6 @@ theorem totalCellIntegral_smul
   unfold totalCellIntegral
   simp [cellIntegral_smul, Finset.mul_sum]
 
-/-- Monotonicity of total cell integrals under pointwise comparison. -/
-theorem totalCellIntegral_mono
-    (L : RectLattice Λ) (f g : TestFun2D) (hfg : ∀ x, f x ≤ g x) :
-    L.totalCellIntegral f ≤ L.totalCellIntegral g := by
-  unfold totalCellIntegral
-  refine Finset.sum_le_sum ?_
-  intro i _
-  refine Finset.sum_le_sum ?_
-  intro j _
-  exact L.cellIntegral_mono f g i j hfg
-
 /-- Linear map given by total exact cell integration. -/
 def totalCellIntegralLM (L : RectLattice Λ) : TestFun2D →ₗ[ℝ] ℝ where
   toFun := fun f => L.totalCellIntegral f
@@ -358,70 +328,6 @@ def riemannSumCellAverageLM (L : RectLattice Λ) : TestFun2D →ₗ[ℝ] ℝ whe
 
 @[simp] theorem riemannSumCellAverageLM_apply (L : RectLattice Λ) (f : TestFun2D) :
     L.riemannSumCellAverageLM f = L.riemannSumCellAverage f := rfl
-
-/-- Each lattice cell is contained in the ambient rectangle `Λ`. -/
-theorem cell_subset (L : RectLattice Λ) (i : Fin L.Nt) (j : Fin L.Nx) :
-    (L.cell i j).toSet ⊆ Λ.toSet := by
-  intro x hx
-  rcases hx with ⟨hx0min, hx0max, hx1min, hx1max⟩
-
-  have hcell_xmin_ge : Λ.x_min ≤ (L.cell i j).x_min := by
-    have hnonneg : 0 ≤ (i.1 : ℝ) * L.timeStep := by
-      exact mul_nonneg (Nat.cast_nonneg i.1) (le_of_lt L.timeStep_pos)
-    simpa [cell] using add_le_add_left hnonneg Λ.x_min
-
-  have hcell_ymin_ge : Λ.y_min ≤ (L.cell i j).y_min := by
-    have hnonneg : 0 ≤ (j.1 : ℝ) * L.spaceStep := by
-      exact mul_nonneg (Nat.cast_nonneg j.1) (le_of_lt L.spaceStep_pos)
-    simpa [cell] using add_le_add_left hnonneg Λ.y_min
-
-  have hx0lower : Λ.x_min ≤ x 0 := hcell_xmin_ge.trans hx0min
-  have hx1lower : Λ.y_min ≤ x 1 := hcell_ymin_ge.trans hx1min
-
-  have hi1_le_nat : i.1 + 1 ≤ L.Nt := Nat.succ_le_of_lt i.2
-  have hj1_le_nat : j.1 + 1 ≤ L.Nx := Nat.succ_le_of_lt j.2
-  have hi1_le : (((i.1 + 1 : ℕ) : ℝ)) ≤ L.Nt := by exact_mod_cast hi1_le_nat
-  have hj1_le : (((j.1 + 1 : ℕ) : ℝ)) ≤ L.Nx := by exact_mod_cast hj1_le_nat
-
-  have htime : (((i.1 + 1 : ℕ) : ℝ)) * L.timeStep ≤ (L.Nt : ℝ) * L.timeStep :=
-    mul_le_mul_of_nonneg_right hi1_le (le_of_lt L.timeStep_pos)
-  have hspace : (((j.1 + 1 : ℕ) : ℝ)) * L.spaceStep ≤ (L.Nx : ℝ) * L.spaceStep :=
-    mul_le_mul_of_nonneg_right hj1_le (le_of_lt L.spaceStep_pos)
-
-  have hNt : (L.Nt : ℝ) * L.timeStep = Λ.width := L.timeStep_mul_Nt
-  have hNx : (L.Nx : ℝ) * L.spaceStep = Λ.height := L.spaceStep_mul_Nx
-
-  have hx0upper : x 0 ≤ Λ.x_max := by
-    have hcellTop : x 0 ≤ Λ.x_min + (((i.1 + 1 : ℕ) : ℝ)) * L.timeStep := by
-      simpa [cell] using hx0max
-    have hbound : Λ.x_min + (((i.1 + 1 : ℕ) : ℝ)) * L.timeStep ≤ Λ.x_max := by
-      calc
-        Λ.x_min + (((i.1 + 1 : ℕ) : ℝ)) * L.timeStep ≤
-            Λ.x_min + (L.Nt : ℝ) * L.timeStep := by
-              simpa [add_comm, add_left_comm, add_assoc] using
-                add_le_add_left htime Λ.x_min
-        _ = Λ.x_min + Λ.width := by rw [hNt]
-        _ = Λ.x_max := by
-          unfold Rectangle.width
-          ring
-    exact hcellTop.trans hbound
-
-  have hx1upper : x 1 ≤ Λ.y_max := by
-    have hcellTop : x 1 ≤ Λ.y_min + (((j.1 + 1 : ℕ) : ℝ)) * L.spaceStep := by
-      simpa [cell] using hx1max
-    have hbound : Λ.y_min + (((j.1 + 1 : ℕ) : ℝ)) * L.spaceStep ≤ Λ.y_max := by
-      calc
-        Λ.y_min + (((j.1 + 1 : ℕ) : ℝ)) * L.spaceStep ≤
-            Λ.y_min + (L.Nx : ℝ) * L.spaceStep := by
-              simpa [add_comm, add_left_comm, add_assoc] using
-                add_le_add_left hspace Λ.y_min
-        _ = Λ.y_min + Λ.height := by rw [hNx]
-        _ = Λ.y_max := by
-          unfold Rectangle.height
-          ring
-    exact hcellTop.trans hbound
-
-  exact ⟨hx0lower, hx0upper, hx1lower, hx1upper⟩
 
 end RectLattice
 

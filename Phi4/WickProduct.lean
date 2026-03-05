@@ -657,22 +657,4 @@ theorem rewick_ordering_bounds (Λ : Rectangle) (mass : ℝ) (hmass : 0 < mass)
   obtain ⟨C, hCpos, hC⟩ := wickMonomial_bound n (regularizedPointCovariance mass κ)
   exact ⟨C, fun ω x => hC (rawFieldEval mass κ ω x)⟩
 
-/-! ## Integration by parts
-
-The fundamental formula for Gaussian measures:
-  ∫ φ(f) A(φ) dφ_C = ∫ ⟨Cf, δA/δφ⟩ dφ_C
-
-For Wick products, this gives the Euclidean equation of motion:
-  (-Δ + m²) ⟨φ(x) A(φ)⟩ = ⟨A(φ)⟩ δ(x-y) + ⟨P'(φ(x)) A(φ)⟩
--/
-
-/-- Integration by parts for the free Gaussian measure.
-    ∫ ω(f) · A(ω) dφ_C = ∫ ⟨Cf, δA/δω⟩ dφ_C.
-    Here δA/δω denotes the functional derivative. -/
-theorem integration_by_parts_free (mass : ℝ) (hmass : 0 < mass)
-    (f g : TestFun2D) :
-    ∫ ω, ω f * ω g ∂(freeFieldMeasure mass hmass) =
-      GaussianField.covariance (freeCovarianceCLM mass hmass) f g := by
-  exact freeField_two_point mass hmass f g
-
 end

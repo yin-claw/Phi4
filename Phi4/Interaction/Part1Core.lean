@@ -308,20 +308,6 @@ theorem interactionCutoff_standardSeq_tendsto_ae_of_tendsto_ae
       simp [standardUVCutoffSeq, hn])
   exact hseq_raw.congr' hseq_eq
 
-/-- Almost-everywhere convergence of the canonical cutoff sequence
-    `κ_n = n + 1` to the limiting interaction. -/
-theorem interactionCutoff_standardSeq_tendsto_ae
-    (params : Phi4Params) (Λ : Rectangle)
-    [InteractionUVModel params] :
-    ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
-      Filter.Tendsto
-        (fun n : ℕ => interactionCutoff params Λ (standardUVCutoffSeq n) ω)
-        Filter.atTop
-        (nhds (interaction params Λ ω)) := by
-  exact interactionCutoff_standardSeq_tendsto_ae_of_tendsto_ae
-    (params := params) (Λ := Λ)
-    (InteractionUVModel.interactionCutoff_tendsto_ae (params := params) Λ)
-
 /-- Shifted canonical-sequence (`κ_{n+1}`) measurability transfer:
     UV-cutoff measurability data yields measurability for each shifted
     canonical cutoff `interactionCutoff(κ_{n+1})`. -/

@@ -321,7 +321,10 @@ theorem exp_interaction_Lp_of_sq_integrable_data_and_uv_cutoff_seq_shifted_expon
     simpa using
       (interaction_ae_nonneg_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound_of_standardSeq_tendsto_ae
         (params := params) (Λ := Λ)
-        (interactionCutoff_standardSeq_tendsto_ae params Λ) hmom)
+        (interactionCutoff_standardSeq_tendsto_ae_of_tendsto_ae
+          (params := params) (Λ := Λ)
+          (InteractionUVModel.interactionCutoff_tendsto_ae (params := params) Λ))
+        hmom)
   exact exp_interaction_Lp_of_ae_lower_bound_of_aestronglyMeasurable
     (params := params) (Λ := Λ)
     (hinteraction_meas Λ) (B := 0) hbound
