@@ -74,17 +74,6 @@ theorem num_pairings (n : ℕ) :
   refine ⟨allPairings n, ?_⟩
   simpa [allPairings] using PairingEnumerationModel.pairing_card n
 
-/-- Wick recursion for the free Gaussian field:
-    pair the first insertion with one partner and recurse on the remaining factors. -/
-theorem wicks_recursive (mass : ℝ) (hmass : 0 < mass)
-    (n : ℕ) (f₀ : TestFun2D) (g : Fin (n + 1) → TestFun2D) :
-    ∫ ω, ω f₀ * (∏ i, ω (g i)) ∂(freeFieldMeasure mass hmass) =
-      ∑ j : Fin (n + 1),
-        GaussianField.covariance (freeCovarianceCLM mass hmass) f₀ (g j) *
-          ∫ ω, (∏ i : Fin n, ω (g (Fin.succAbove j i))) ∂(freeFieldMeasure mass hmass) := by
-  simpa [GaussianField.covariance] using
-    (GaussianField.wick_recursive (freeCovarianceCLM mass hmass) n f₀ g)
-
 theorem wicks_theorem_odd (mass : ℝ) (hmass : 0 < mass)
     (n : ℕ) (f : Fin (2 * n + 1) → TestFun2D) :
     ∫ ω, (∏ i, ω (f i)) ∂(freeFieldMeasure mass hmass) = 0 :=

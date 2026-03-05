@@ -416,12 +416,6 @@ theorem total_legs_eq_two_mul_lines_card (G : FeynmanGraph r) :
     (∑ v : Fin r, G.legs v) = 2 * G.lines.card := by
   simpa [Nat.mul_comm] using (two_mul_lines_card_eq_total_legs G).symm
 
-/-- The total number of legs is even. -/
-theorem total_legs_even (G : FeynmanGraph r) :
-    Even (∑ v : Fin r, G.legs v) := by
-  refine ⟨G.lines.card, ?_⟩
-  simpa [two_mul] using total_legs_eq_two_mul_lines_card G
-
 /-- Number of lines is half the total number of legs. -/
 theorem lines_card_eq_total_legs_half (G : FeynmanGraph r) :
     G.lines.card = (∑ v : Fin r, G.legs v) / 2 := by

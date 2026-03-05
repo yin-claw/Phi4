@@ -132,10 +132,6 @@ def halfSplitPairing (n : ℕ) : Pairing (2 * n) where
     show i.1 < n + i.1
     omega
 
-/-- Pairings exist on every even number of labels. -/
-theorem pairing_even_exists (n : ℕ) : Nonempty (Pairing (2 * n)) := by
-  exact ⟨halfSplitPairing n⟩
-
 /-- There is at least one pairing on `2n` labels. -/
 theorem pairing_card_pos_even (n : ℕ) :
     0 < Fintype.card (Pairing (2 * n)) := by
