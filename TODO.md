@@ -126,7 +126,7 @@ the local Glimm-Jaffe objective.
   `shifted_cutoff_bad_event_geometric_bound_of_exponential_moment_abs_bound`.
 - `Phi4/Interaction.lean` now also includes direct shifted absolute-moment to
   signed-moment WP1 bridges and downstream interfaces/endpoints:
-  `shifted_exponential_moment_geometric_bound_of_abs`,
+  `shifted_exponential_moment_geometric_bound_of_abs_at_theta`,
   `exp_interaction_Lp_of_uv_cutoff_seq_shifted_exponential_moment_abs_geometric_bound`,
   `interactionWeightModel_nonempty_of_uv_cutoff_seq_shifted_exponential_moment_abs_geometric_bound`,
   and

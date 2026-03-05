@@ -16,7 +16,7 @@ cd "$ROOT_DIR"
 # - Reconstruction/Part1Tail InteractionUVModel wrapper count: 0
 # - Reconstruction/Part1Tail reconstructionInputModel_nonempty_of_* route count: 0
 # - Interaction/Part1Core integrability-to-submodel wrappers: 0
-# - Interaction/Part2 top-level theorem count: 6
+# - Interaction/Part2 top-level theorem count: 5
 # - Interaction/Part2 zero-caller weight routes kept at exact zero:
 #   - interactionWeightModel_nonempty_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_wick_sublevel_bad_sets
 #   - interactionWeightModel_nonempty_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound_of_aestronglyMeasurable_and_standardSeq_tendsto_ae
@@ -91,7 +91,7 @@ MAX_RECON_PART1TAIL_INTERACTIONUV_WRAPPERS=0
 MAX_RECON_PART1TAIL_INPUT_ROUTES=0
 MAX_INTERACTION_PART1CORE_UV_FROM_INTEGRABILITY_WRAPPER=0
 MAX_INTERACTION_PART1CORE_WEIGHT_FROM_INTEGRABILITY_WRAPPER=0
-MAX_INTERACTION_PART2_THEOREMS=6
+MAX_INTERACTION_PART2_THEOREMS=5
 MAX_INTERACTION_PART2_SQDATA_WICK_WEIGHT_ROUTE=0
 MAX_INTERACTION_PART2_EXPLICIT_GEOM_WEIGHT_ROUTE=0
 MAX_INTERACTION_PART3_SQMOMENT_SUCCSUCC_ROUTE=0

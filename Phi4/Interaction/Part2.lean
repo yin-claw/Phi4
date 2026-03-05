@@ -217,48 +217,6 @@ theorem shifted_exponential_moment_geometric_bound_of_abs_at_theta
     integral_mono_ae (hIntNeg n) (hIntAbs n) hle_ae
   exact hIntBound.trans (by simpa [X, μ] using hMAbs n)
 
-/-- Convert shifted-index geometric bounds on absolute exponential moments
-    `E[exp(θ |interactionCutoff(κ_{n+1})|)]` into shifted-index geometric
-    bounds on signed moments `E[exp(-θ interactionCutoff(κ_{n+1}))]`. -/
-theorem shifted_exponential_moment_geometric_bound_of_abs
-    (params : Phi4Params) (Λ : Rectangle)
-    (hcutoff_meas :
-      ∀ n : ℕ,
-        AEStronglyMeasurable
-          (fun ω : FieldConfig2D =>
-            interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω)
-          (freeFieldMeasure params.mass params.mass_pos))
-    (hmomAbs :
-      ∃ θ D r : ℝ,
-        0 < θ ∧ 0 ≤ D ∧ 0 ≤ r ∧ r < 1 ∧
-        (∀ n : ℕ,
-          Integrable
-            (fun ω : FieldConfig2D =>
-              Real.exp (θ * |interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω|))
-            (freeFieldMeasure params.mass params.mass_pos)) ∧
-        (∀ n : ℕ,
-          ∫ ω : FieldConfig2D,
-            Real.exp (θ * |interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω|)
-            ∂(freeFieldMeasure params.mass params.mass_pos) ≤ D * r ^ n)) :
-    ∃ θ D r : ℝ,
-      0 < θ ∧ 0 ≤ D ∧ 0 ≤ r ∧ r < 1 ∧
-      (∀ n : ℕ,
-        Integrable
-          (fun ω : FieldConfig2D =>
-            Real.exp ((-θ) * interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω))
-          (freeFieldMeasure params.mass params.mass_pos)) ∧
-      (∀ n : ℕ,
-        ∫ ω : FieldConfig2D,
-          Real.exp ((-θ) * interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω)
-          ∂(freeFieldMeasure params.mass params.mass_pos) ≤ D * r ^ n) := by
-  rcases hmomAbs with ⟨θ, D, r, hθ, hD, hr0, hr1, hIntAbs, hMAbs⟩
-  rcases
-      shifted_exponential_moment_geometric_bound_of_abs_at_theta
-        (params := params) (Λ := Λ) (θ := θ) (D := D) (r := r)
-        (hcutoff_meas := hcutoff_meas) hθ hIntAbs hMAbs with
-    ⟨hIntNeg, hMNeg⟩
-  exact ⟨θ, D, r, hθ, hD, hr0, hr1, hIntNeg, hMNeg⟩
-
 /-- `Lᵖ` integrability from geometric decay of shifted-index exponential moments
     of the cutoff interaction, given explicit measurability of `interaction`
     and explicit a.e. convergence of the canonical cutoff sequence. -/
@@ -422,13 +380,17 @@ theorem
     {p : ℝ≥0∞} :
     MemLp (fun ω => Real.exp (-(interaction params Λ ω)))
       p (freeFieldMeasure params.mass params.mass_pos) := by
+  rcases hmomAbs with ⟨θ, D, r, hθ, hD, hr0, hr1, hIntAbs, hMAbs⟩
+  rcases
+      shifted_exponential_moment_geometric_bound_of_abs_at_theta
+        (params := params) (Λ := Λ) (θ := θ) (D := D) (r := r)
+        (hcutoff_meas := fun n => by
+          exact interactionCutoff_standardSeq_succ_aestronglyMeasurable
+            (params := params) hcutoff_meas Λ n)
+        hθ hIntAbs hMAbs with
+    ⟨hIntNeg, hMNeg⟩
   exact exp_interaction_Lp_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_moment_geometric_bound
     (params := params) (Λ := Λ)
     hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
     hinteraction_meas hinteraction_sq
-    (shifted_exponential_moment_geometric_bound_of_abs
-      (params := params) (Λ := Λ)
-      (hcutoff_meas := fun n => by
-        exact interactionCutoff_standardSeq_succ_aestronglyMeasurable
-          (params := params) hcutoff_meas Λ n)
-      hmomAbs)
+    ⟨θ, D, r, hθ, hD, hr0, hr1, hIntNeg, hMNeg⟩

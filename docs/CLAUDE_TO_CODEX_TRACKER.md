@@ -1205,3 +1205,20 @@ primary local Glimm-Jaffe work queue.
   - `bash scripts/route_bloat_guard.sh` passes.
   - `scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv` passes.
   - `scripts/nonempty_route_inventory.sh --emit docs/route_inventory/nonempty_inventory.tsv` passes.
+
+### Interaction absolute-moment wrapper collapse (2026-03-05, follow-up 7)
+
+- Removed single-caller absolute-moment wrapper in `Phi4/Interaction/Part2.lean`:
+  - deleted `shifted_exponential_moment_geometric_bound_of_abs`.
+- Inlined the existential unpacking + `*_at_theta` bridge directly into:
+  - `exp_interaction_Lp_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_moment_abs_geometric_bound`.
+- Surface reduction:
+  - `Interaction/Part2` top-level theorem count reduced `6 -> 5`.
+- Guard tightening:
+  - `scripts/route_bloat_guard.sh`: `MAX_INTERACTION_PART2_THEOREMS` set `6 -> 5`.
+- Doc sync:
+  - `TODO.md` now references
+    `shifted_exponential_moment_geometric_bound_of_abs_at_theta`.
+- Verification:
+  - `lake build Phi4.Interaction.Part2` passes.
+  - `bash scripts/route_bloat_guard.sh` passes.
