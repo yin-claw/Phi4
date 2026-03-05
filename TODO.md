@@ -619,8 +619,6 @@ the local Glimm-Jaffe objective.
   `infinite_volume_schwinger_exists_k_of_models`,
   `infinite_volume_schwinger_exists_all_k_of_family_models`,
   `infinite_volume_schwinger_exists_all_k_of_lattice_family_models`,
-  `infinite_volume_schwinger_exists_four_of_models`,
-  `infinite_volume_schwinger_exists_four_of_lattice_models`,
   and routes two-point endpoints through these generic theorems; the
   specialized `k = 2` / `k = 4` existence wrappers now use the minimal
   monotonicity assumptions (`SchwingerNMonotoneModel params 2/4`) rather than
@@ -636,8 +634,7 @@ the local Glimm-Jaffe objective.
 - In `Phi4/InfiniteVolumeLimit.lean`, lattice iSup-form two-point convergence
   theorems now use shifted exhaustion sequences `(n + 1)` and no longer require
   `LatticeGriffithsFirstModel`
-  (`schwingerTwo_tendsto_if_exhaustion_of_lattice_models`,
-   `schwingerN_two_tendsto_if_exhaustion_of_lattice_models`).
+  (`schwingerTwo_tendsto_if_exhaustion_of_lattice_models`).
 - The legacy lattice+core `k = 4` IV endpoint
   `infinite_volume_schwinger_exists_four_of_lattice_and_core_models` now uses
   only `CorrelationInequalityCoreModel` + `MultipleReflectionModel`; the

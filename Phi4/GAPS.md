@@ -208,8 +208,7 @@ These are not independent proof gaps; they can be reconstructed from smaller pie
    - lattice-model variants and `schwingerN` (`k = 2`) model variants
    - lattice iSup-form shifted-sequence variants no longer require
      `LatticeGriffithsFirstModel`:
-     `schwingerTwo_tendsto_if_exhaustion_of_lattice_models`,
-     `schwingerN_two_tendsto_if_exhaustion_of_lattice_models`
+     `schwingerTwo_tendsto_if_exhaustion_of_lattice_models`
    - specialized existence wrappers now depend on minimal monotonicity
      interfaces (`SchwingerNMonotoneModel params 2/4`) instead of stronger
      correlation bundles where unused

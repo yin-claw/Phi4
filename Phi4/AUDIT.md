@@ -565,9 +565,8 @@ Update (2026-02-28):
 - Upstream blocker inventory moved to `82` unique declarations (`open=80`, `in_progress=2`); the TODO inventory section has been resynced.
 - Regression fix: `test/task2_k4_iv_existence.lean` was converted from duplicate
   theorem redeclarations to compile-checked `example` usage of production theorems
-  (`infinite_volume_schwinger_exists_four_of_models`,
-  `infinite_volume_schwinger_exists_four_of_lattice_models`), restoring test-file
-  compile.
+  (`infinite_volume_schwinger_exists_k_of_models` with `k = 4`), restoring
+  test-file compile.
 - Trust-boundary fix: `Phi4.lean` does not import upstream
   `sorryAx`-dependent reconstruction into the trusted local closure path.
 

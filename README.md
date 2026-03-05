@@ -384,9 +384,8 @@ Local per-folder guides are available at:
 - `CorrelationFourPointModel` now explicitly carries
   `schwinger_four_monotone`; this induces
   `SchwingerNMonotoneModel params 4` directly and supports dedicated
-  `k = 4` infinite-volume endpoints:
-  `infinite_volume_schwinger_exists_four_of_models` and
-  `infinite_volume_schwinger_exists_four_of_lattice_models`.
+  `k = 4` infinite-volume existence routes through
+  `infinite_volume_schwinger_exists_k_of_models`.
 - Lattice iSup-form two-point convergence endpoints in
   `Phi4/InfiniteVolumeLimit.lean` now use shifted exhaustion sequences
   `(n + 1)` and no longer depend on `LatticeGriffithsFirstModel`.

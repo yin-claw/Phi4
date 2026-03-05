@@ -295,27 +295,6 @@ theorem schwingerTwo_tendsto_if_exhaustion_of_lattice_models
     hfvec hsuppvec
   simpa [schwingerN_two_eq_schwingerTwo] using hlim
 
-/-- Lattice-bridge `schwingerN` (`k = 2`) shifted-exhaustion convergence form. -/
-theorem schwingerN_two_tendsto_if_exhaustion_of_lattice_models
-    (params : Phi4Params)
-    [LatticeSchwingerTwoMonotoneModel params]
-    [MultipleReflectionModel params]
-    (f g : TestFun2D)
-    (hf : ∀ x, 0 ≤ f x) (hg : ∀ x, 0 ≤ g x)
-    (hfsupp : ∀ x ∉ (exhaustingRectangles 1 (Nat.succ_pos 0)).toSet, f x = 0)
-    (hgsupp : ∀ x ∉ (exhaustingRectangles 1 (Nat.succ_pos 0)).toSet, g x = 0) :
-    Filter.Tendsto
-      (fun n : ℕ =>
-        schwingerN params (exhaustingRectangles (n + 1) (Nat.succ_pos n)) 2
-          (![f, g] : Fin 2 → TestFun2D))
-      Filter.atTop
-      (nhds (⨆ n : ℕ,
-        schwingerN params (exhaustingRectangles (n + 1) (Nat.succ_pos n)) 2
-          (![f, g] : Fin 2 → TestFun2D))) := by
-  have hlimA := schwingerTwo_tendsto_if_exhaustion_of_lattice_models
-    params f g hf hg hfsupp hgsupp
-  simpa [schwingerN_two_eq_schwingerTwo] using hlimA
-
 /-! ## Uniform upper bounds -/
 
 /-- Infinite-volume Schwinger data: uniform bounds, limiting moments, and
@@ -529,76 +508,6 @@ theorem infinite_volume_schwinger_exists_k_of_models (params : Phi4Params)
       Filter.atTop (nhds S) := by
   exact schwingerN_limit_exists_if_exhaustion_of_models
     (params := params) (k := k) f hf hfsupp
-
-/-- Constructive `k = 4` infinite-volume Schwinger existence in the
-    interface sequence form `if h : 0 < n then ... else 0`, from explicit
-    four-point monotonicity and multiple-reflection bounds. -/
-theorem infinite_volume_schwinger_exists_four_of_models (params : Phi4Params)
-    [SchwingerNMonotoneModel params 4]
-    [MultipleReflectionModel params]
-    (f₁ f₂ f₃ f₄ : TestFun2D)
-    (hf₁ : ∀ x, 0 ≤ f₁ x) (hf₂ : ∀ x, 0 ≤ f₂ x)
-    (hf₃ : ∀ x, 0 ≤ f₃ x) (hf₄ : ∀ x, 0 ≤ f₄ x)
-    (hf₁supp : ∀ x ∉ (exhaustingRectangles 1 (Nat.succ_pos 0)).toSet, f₁ x = 0)
-    (hf₂supp : ∀ x ∉ (exhaustingRectangles 1 (Nat.succ_pos 0)).toSet, f₂ x = 0)
-    (hf₃supp : ∀ x ∉ (exhaustingRectangles 1 (Nat.succ_pos 0)).toSet, f₃ x = 0)
-    (hf₄supp : ∀ x ∉ (exhaustingRectangles 1 (Nat.succ_pos 0)).toSet, f₄ x = 0) :
-    ∃ S : ℝ, Filter.Tendsto
-      (fun n : ℕ =>
-        if h : 0 < n then schwingerN params (exhaustingRectangles n h) 4
-          (![f₁, f₂, f₃, f₄] : Fin 4 → TestFun2D) else 0)
-      Filter.atTop (nhds S) := by
-  exact infinite_volume_schwinger_exists_k_of_models
-    (params := params) (k := 4) (![f₁, f₂, f₃, f₄] : Fin 4 → TestFun2D)
-    (by
-      intro i x
-      fin_cases i
-      · exact hf₁ x
-      · exact hf₂ x
-      · exact hf₃ x
-      · exact hf₄ x)
-    (by
-      intro i x hx
-      fin_cases i
-      · simpa using hf₁supp x hx
-      · simpa using hf₂supp x hx
-      · simpa using hf₃supp x hx
-      · simpa using hf₄supp x hx)
-
-/-- Lattice-bridge counterpart of
-    `infinite_volume_schwinger_exists_four_of_models`. -/
-theorem infinite_volume_schwinger_exists_four_of_lattice_models
-    (params : Phi4Params)
-    [LatticeSchwingerNMonotoneModel params 4]
-    [MultipleReflectionModel params]
-    (f₁ f₂ f₃ f₄ : TestFun2D)
-    (hf₁ : ∀ x, 0 ≤ f₁ x) (hf₂ : ∀ x, 0 ≤ f₂ x)
-    (hf₃ : ∀ x, 0 ≤ f₃ x) (hf₄ : ∀ x, 0 ≤ f₄ x)
-    (hf₁supp : ∀ x ∉ (exhaustingRectangles 1 (Nat.succ_pos 0)).toSet, f₁ x = 0)
-    (hf₂supp : ∀ x ∉ (exhaustingRectangles 1 (Nat.succ_pos 0)).toSet, f₂ x = 0)
-    (hf₃supp : ∀ x ∉ (exhaustingRectangles 1 (Nat.succ_pos 0)).toSet, f₃ x = 0)
-    (hf₄supp : ∀ x ∉ (exhaustingRectangles 1 (Nat.succ_pos 0)).toSet, f₄ x = 0) :
-    ∃ S : ℝ, Filter.Tendsto
-      (fun n : ℕ =>
-        if h : 0 < n then schwingerN params (exhaustingRectangles n h) 4
-          (![f₁, f₂, f₃, f₄] : Fin 4 → TestFun2D) else 0)
-      Filter.atTop (nhds S) := by
-  exact infinite_volume_schwinger_exists_k_of_models
-    (params := params) (k := 4) (![f₁, f₂, f₃, f₄] : Fin 4 → TestFun2D)
-    (by
-      intro i x
-      fin_cases i
-      · exact hf₁ x
-      · exact hf₂ x
-      · exact hf₃ x
-      · exact hf₄ x)
-    (by
-      intro i x hx
-      fin_cases i
-      · simpa using hf₁supp x hx
-      · simpa using hf₂supp x hx
-      · simpa using hf₃supp x hx
-      · simpa using hf₄supp x hx)
 
 /-- The infinite volume Schwinger function. -/
 def infiniteVolumeSchwinger (params : Phi4Params)
