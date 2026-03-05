@@ -300,7 +300,7 @@ theorem phi4_e4_cluster_of_weak_coupling (params : Phi4Params)
 /-- Interface-level OS package theorem: if Schwinger/OS0/OS2/E3/E2/E4 interfaces
     are provided and weak coupling is available, the packaged Schwinger functions
     satisfy OS0-OS4. -/
-private theorem phi4_satisfies_OS_from_interfaces (params : Phi4Params)
+theorem phi4_satisfies_OS (params : Phi4Params)
     [OSAxiomCoreModel params]
     [OSDistributionE2Model params]
     [OSE4ClusterModel params]
@@ -446,20 +446,8 @@ theorem phi4_satisfies_OS_of_explicit_data (params : Phi4Params)
   letI : OSE4ClusterModel params := e4model
   have hsmall' : params.coupling < os4WeakCouplingThreshold params := by
     simpa [os4WeakCouplingThreshold, e4model] using hsmall
-  rcases phi4_satisfies_OS_from_interfaces params hsmall' with ⟨OS, hOS⟩
+  rcases phi4_satisfies_OS params hsmall' with ⟨OS, hOS⟩
   refine ⟨OS, ?_⟩
   simpa [phi4SchwingerFunctions, core] using hOS
-
-/-- **Theorem 12.1.1 (Glimm-Jaffe), interface form**: under weak coupling and
-    explicit OS subinterfaces, the φ⁴₂ generating functional satisfies
-    Euclidean axioms OS0-OS4. -/
-theorem phi4_satisfies_OS (params : Phi4Params)
-    [OSAxiomCoreModel params]
-    [OSDistributionE2Model params]
-    [OSE4ClusterModel params]
-    (hsmall : params.coupling < os4WeakCouplingThreshold params) :
-    ∃ OS : OsterwalderSchraderAxioms 1,
-      OS.S = phi4SchwingerFunctions params := by
-  exact phi4_satisfies_OS_from_interfaces params hsmall
 
 end
