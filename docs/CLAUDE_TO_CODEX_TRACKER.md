@@ -1066,3 +1066,40 @@ primary local Glimm-Jaffe work queue.
   - `lake build Phi4.Interaction.Part1Core Phi4.Interaction.Part2 Phi4.Interaction.Part3 Phi4.FiniteVolumeMeasure Phi4.InfiniteVolumeLimit.Part1 Phi4.Regularity Phi4.OSAxioms Phi4.Reconstruction.Part1Core Phi4.Reconstruction.Part1Tail Phi4.Reconstruction.Part3` passes.
   - `bash scripts/route_bloat_guard.sh` passes with tightened maxima.
   - `scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv` passes.
+
+### Constructor-surface collapse wave (2026-03-05, follow-up 2)
+
+- Removed five additional constructor wrappers and inlined their call paths:
+  - `correlationFourPointModel_nonempty_of_inequality_and_schwingerFourMonotone`
+    (`Phi4/CorrelationInequalities.lean`), with direct construction in
+    `correlationFourPointModel_of_inequality_and_schwingerFourMonotone`.
+  - `latticeSchwingerNMonotoneModel_nonempty_of_data`
+    (`Phi4/CorrelationInequalities.lean`), with direct local construction in
+    `schwingerNMonotoneModel_two_nonempty_of_lattice`.
+  - `interactionUVModel_nonempty_of_data`
+    (`Phi4/Interaction/Part1Core.lean`), with direct construction in
+    `interactionUVModel_nonempty_of_sq_integrable_data`.
+  - `interactionWeightModel_nonempty_of_data`
+    (`Phi4/Interaction/Part1Core.lean`), with direct structure construction in
+    retained endpoints.
+  - `interactionIntegrabilityModel_nonempty_of_uv_weight_nonempty`
+    (`Phi4/Interaction/Part1Core.lean`), with direct nonempty UV+weight
+    composition in `Phi4/Interaction/Part3.lean`.
+- Regenerated inventories/reports:
+  - `docs/route_inventory/nonempty_inventory.tsv` now reports total routes `6`
+    (zero-caller `0`, plumbing `0`).
+  - `docs/frontier_obligations/frontier.tsv` now reports
+    `theorem .*_nonempty_of_ count = 6` (down from `11`).
+- Tightened guard baselines in `scripts/route_bloat_guard.sh`:
+  - `_nonempty_of_` max `11 -> 6`,
+  - `interactionWeightModel_nonempty_of_*` max `5 -> 4`,
+  - `interactionIntegrabilityModel_nonempty_of_*` max `1 -> 0`,
+  - `CorrelationInequalities` theorem max `34 -> 32`.
+- Doc sync:
+  - Updated stale references in `Phi4/GAPS.md` and `TODO.md` to match the
+    inlined constructor routes.
+- Verification:
+  - `lake build Phi4.CorrelationInequalities Phi4.Interaction.Part1Core Phi4.Interaction.Part2 Phi4.Interaction.Part3 Phi4.FiniteVolumeMeasure Phi4.InfiniteVolumeLimit.Part1 Phi4.Regularity Phi4.OSAxioms Phi4.Reconstruction.Part1Core Phi4.Reconstruction.Part1Tail Phi4.Reconstruction.Part3` passes.
+  - `bash scripts/route_bloat_guard.sh` passes with tightened maxima.
+  - `scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv` passes.
+  - `bash scripts/quick_gate.sh` passes.

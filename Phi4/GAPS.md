@@ -166,10 +166,12 @@ These are not independent proof gaps; they can be reconstructed from smaller pie
    - `interactionUVModel_of_integrability`
    - `interactionWeightModel_of_integrability`
    - `interactionIntegrabilityModel_of_uv_weight`
-   - constructors:
-     `interactionUVModel_nonempty_of_data`,
-     `interactionWeightModel_nonempty_of_data`,
-     `interactionIntegrabilityModel_nonempty_of_data`
+   - retained explicit constructors:
+     `interactionUVModel_nonempty_of_sq_integrable_data`,
+     `interactionWeightModel_nonempty_of_standardSeq_succ_tendsto_ae_and_uniform_integral_bound`,
+     `interactionWeightModel_nonempty_of_standardSeq_succ_tendsto_ae_and_geometric_exp_moment_bound`
+   - UV+weight nonempty composition is now inlined at call sites (no dedicated
+     wrapper constructor)
    - in `Phi4/Interaction.lean`
 
 2. `BoundaryCovarianceModel` from boundary submodels
@@ -188,7 +190,6 @@ These are not independent proof gaps; they can be reconstructed from smaller pie
      `CorrelationFKGModel` with only explicit 4-point monotonicity as
      additional core data
    - `correlationInequalityModel_of_submodels`
-   - `correlationFourPointModel_nonempty_of_inequality_and_schwingerFourMonotone`
    - `schwingerNMonotoneModel_four_of_correlationFourPoint`
    - `schwingerNNonnegModel_two_of_correlationTwoPoint`
    - `schwingerNMonotoneModel_of_family`
@@ -196,7 +197,6 @@ These are not independent proof gaps; they can be reconstructed from smaller pie
    - constructors:
      `latticeGriffithsFirstModel_nonempty_of_data`,
      `latticeSchwingerTwoMonotoneModel_nonempty_of_data`,
-     `latticeSchwingerNMonotoneModel_nonempty_of_data`,
      `latticeSchwingerNMonotoneFamilyModel_nonempty_of_data`,
      `latticeSchwingerNMonotoneFamilyModel_nonempty_of_models`,
      `schwingerNMonotoneModel_nonempty_of_data`,

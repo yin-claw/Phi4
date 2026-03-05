@@ -300,7 +300,8 @@ the local Glimm-Jaffe objective.
   constructors across UV/weight/full interfaces:
   `interactionUVModel_nonempty_of_integrability_nonempty`,
   `interactionWeightModel_nonempty_of_integrability_nonempty`,
-  `interactionIntegrabilityModel_nonempty_of_uv_weight_nonempty`.
+  and direct UV+weight composition is now inlined at call sites (no dedicated
+  `interactionIntegrabilityModel_nonempty_of_uv_weight_nonempty` wrapper).
 - `Phi4/Interaction.lean` now also includes square-integrability-to-`L²`
   constructor routes for UV/full interaction packaging:
   `interactionCutoff_memLp_two_of_sq_integrable`,

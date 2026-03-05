@@ -227,22 +227,6 @@ instance (priority := 100) correlationFourPointInequalityModel_of_atomic
   toCorrelationGKSSecondModel := inferInstance
   toCorrelationLebowitzModel := inferInstance
 
-/-- Construct `CorrelationFourPointModel` from inequality data plus an explicit
-    `k = 4` monotonicity interface. -/
-theorem correlationFourPointModel_nonempty_of_inequality_and_schwingerFourMonotone
-    (params : Phi4Params)
-    [CorrelationGKSSecondModel params]
-    [CorrelationLebowitzModel params]
-    [SchwingerNMonotoneModel params 4] :
-    Nonempty (CorrelationFourPointModel params) := by
-  exact ⟨{
-    toCorrelationFourPointInequalityModel := inferInstance
-    schwinger_four_monotone := by
-      intro Λ₁ Λ₂ h f hf hfΛ
-      exact SchwingerNMonotoneModel.schwingerN_monotone
-        (params := params) (k := 4) Λ₁ Λ₂ h f hf hfΛ
-  }⟩
-
 /-- Atomic four-point inequality inputs plus explicit `k = 4` Schwinger
     monotonicity reconstruct the full four-point model. -/
 instance (priority := 100) correlationFourPointModel_of_inequality_and_schwingerFourMonotone
@@ -251,9 +235,13 @@ instance (priority := 100) correlationFourPointModel_of_inequality_and_schwinger
     [CorrelationLebowitzModel params]
     [SchwingerNMonotoneModel params 4] :
     CorrelationFourPointModel params := by
-  rcases correlationFourPointModel_nonempty_of_inequality_and_schwingerFourMonotone
-      (params := params) with ⟨hfour⟩
-  exact hfour
+  exact {
+    toCorrelationFourPointInequalityModel := inferInstance
+    schwinger_four_monotone := by
+      intro Λ₁ Λ₂ h f hf hfΛ
+      exact SchwingerNMonotoneModel.schwingerN_monotone
+        (params := params) (k := 4) Λ₁ Λ₂ h f hf hfΛ
+  }
 
 /-- Four-point monotonicity assumptions imply `k = 4` Schwinger-moment
     monotonicity. -/
@@ -458,26 +446,6 @@ theorem schwinger_two_monotone_from_lattice
     LatticeSchwingerTwoMonotoneModel.latticeTwo (params := params) Λ₂ L₂ f g,
     hmon, hclose₁, hclose₂⟩
 
-/-- Construct `LatticeSchwingerNMonotoneModel` from explicit lattice `k`-point
-    data and ordered approximation pairs for nested volumes. -/
-theorem latticeSchwingerNMonotoneModel_nonempty_of_data
-    (params : Phi4Params) (k : ℕ)
-    (latticeN : ∀ Λ : Rectangle, Phi4.RectLattice Λ → (Fin k → TestFun2D) → ℝ)
-    (happrox_pair : ∀ (Λ₁ Λ₂ : Rectangle)
-      (_h : Λ₁.toSet ⊆ Λ₂.toSet)
-      (f : Fin k → TestFun2D) (_hf : ∀ i, ∀ x, 0 ≤ f i x)
-      (_hfΛ : ∀ i, ∀ x ∉ Λ₁.toSet, f i x = 0)
-      (ε : ℝ), 0 < ε →
-      ∃ L₁ : Phi4.RectLattice Λ₁, ∃ L₂ : Phi4.RectLattice Λ₂,
-        latticeN Λ₁ L₁ f ≤ latticeN Λ₂ L₂ f ∧
-        |schwingerN params Λ₁ k f - latticeN Λ₁ L₁ f| < ε ∧
-        |schwingerN params Λ₂ k f - latticeN Λ₂ L₂ f| < ε) :
-    Nonempty (LatticeSchwingerNMonotoneModel params k) := by
-  exact ⟨{
-    latticeN := latticeN
-    approx_monotone_pair := happrox_pair
-  }⟩
-
 /-- Continuum `k`-point monotonicity from lattice-ordered approximation pairs. -/
 theorem schwingerN_monotone_from_lattice
     (params : Phi4Params) (k : ℕ)
@@ -522,17 +490,19 @@ theorem schwingerNMonotoneModel_two_nonempty_of_lattice
     [LatticeSchwingerTwoMonotoneModel params] :
     Nonempty (SchwingerNMonotoneModel params 2) := by
   have hmonoN_nonempty : Nonempty (LatticeSchwingerNMonotoneModel params 2) := by
-    refine latticeSchwingerNMonotoneModel_nonempty_of_data params 2
-      (fun Λ L f => LatticeSchwingerTwoMonotoneModel.latticeTwo (params := params) Λ L (f 0) (f 1))
-      ?_
-    intro Λ₁ Λ₂ h f hf hfΛ ε hε
-    rcases LatticeSchwingerTwoMonotoneModel.approx_monotone_pair
-        (params := params) Λ₁ Λ₂ h
-        (f 0) (f 1) (hf 0) (hf 1) (hfΛ 0) (hfΛ 1) ε hε with
-        ⟨L₁, L₂, hmon, hclose₁, hclose₂⟩
-    refine ⟨L₁, L₂, hmon, ?_, ?_⟩
-    · simpa [schwingerN_two_eq_schwingerTwo] using hclose₁
-    · simpa [schwingerN_two_eq_schwingerTwo] using hclose₂
+    exact ⟨{
+      latticeN := fun Λ L f =>
+        LatticeSchwingerTwoMonotoneModel.latticeTwo (params := params) Λ L (f 0) (f 1)
+      approx_monotone_pair := by
+        intro Λ₁ Λ₂ h f hf hfΛ ε hε
+        rcases LatticeSchwingerTwoMonotoneModel.approx_monotone_pair
+            (params := params) Λ₁ Λ₂ h
+            (f 0) (f 1) (hf 0) (hf 1) (hfΛ 0) (hfΛ 1) ε hε with
+            ⟨L₁, L₂, hmon, hclose₁, hclose₂⟩
+        refine ⟨L₁, L₂, hmon, ?_, ?_⟩
+        · simpa [schwingerN_two_eq_schwingerTwo] using hclose₁
+        · simpa [schwingerN_two_eq_schwingerTwo] using hclose₂
+    }⟩
   rcases hmonoN_nonempty with ⟨hmonoN⟩
   letI : LatticeSchwingerNMonotoneModel params 2 := hmonoN
   exact ⟨inferInstance⟩

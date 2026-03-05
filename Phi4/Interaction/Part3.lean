@@ -62,19 +62,21 @@ theorem
             Real.exp ((-θ) * interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω)
             ∂(freeFieldMeasure params.mass params.mass_pos) ≤ D * r ^ n)) :
     Nonempty (InteractionWeightModel params) := by
-  refine interactionWeightModel_nonempty_of_data params ?_
-  intro Λ p _hp
-  exact exp_interaction_Lp_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_moment_geometric_bound
-    (params := params) (Λ := Λ)
-    hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
-    hinteraction_meas hinteraction_sq (hmom Λ)
+  exact ⟨{
+    exp_interaction_Lp := by
+      intro Λ p _hp
+      exact exp_interaction_Lp_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_moment_geometric_bound
+        (params := params) (Λ := Λ)
+        hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
+        hinteraction_meas hinteraction_sq (hmom Λ)
+  }⟩
 
 /-
   NOTE:
   Thin `[InteractionUVModel params]` forwarding wrappers into
   `interactionWeightModel_nonempty_of_*` were removed to limit route bloat.
   Canonical path: construct `InteractionWeightModel` via an assumption-explicit
-  theorem, then lift with `interactionIntegrabilityModel_nonempty_of_uv_weight_nonempty`.
+  theorem, then combine explicit nonempty UV+weight witnesses directly.
 -/
 
 /-- Core square-data composition: once UV data is promoted to
@@ -120,8 +122,10 @@ theorem interactionIntegrabilityModel_nonempty_from_sq_integrable_data_and_weigh
       (params := params)
       hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
       hinteraction_meas hinteraction_sq with ⟨huv⟩
-  exact interactionIntegrabilityModel_nonempty_of_uv_weight_nonempty
-    (params := params) ⟨huv⟩ hW
+  rcases hW with ⟨hweight⟩
+  letI : InteractionUVModel params := huv
+  letI : InteractionWeightModel params := hweight
+  exact ⟨inferInstance⟩
 
 /-- Construct `InteractionIntegrabilityModel` from:
     1. square-integrability/measurability UV data (promoted to

@@ -289,40 +289,6 @@ class InteractionWeightModel (params : Phi4Params) where
       MemLp (fun ω => Real.exp (-(interaction params Λ ω)))
         p (freeFieldMeasure params.mass params.mass_pos)
 
-/-- Construct `InteractionUVModel` from explicit UV/L² interaction data. -/
-theorem interactionUVModel_nonempty_of_data (params : Phi4Params)
-    (hcutoff_in_L2 :
-      ∀ (Λ : Rectangle) (κ : UVCutoff),
-        MemLp (interactionCutoff params Λ κ) 2
-          (freeFieldMeasure params.mass params.mass_pos))
-    (hcutoff_conv :
-      ∀ (Λ : Rectangle),
-        Filter.Tendsto
-          (fun (κ : ℝ) => if h : 0 < κ then
-            ∫ ω, (interactionCutoff params Λ ⟨κ, h⟩ ω - interaction params Λ ω) ^ 2
-              ∂(freeFieldMeasure params.mass params.mass_pos)
-            else 0)
-          Filter.atTop
-          (nhds 0))
-    (hcutoff_ae :
-      ∀ (Λ : Rectangle),
-        ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
-          Filter.Tendsto
-            (fun (κ : ℝ) => if h : 0 < κ then interactionCutoff params Λ ⟨κ, h⟩ ω else 0)
-            Filter.atTop
-            (nhds (interaction params Λ ω)))
-    (hinteraction_L2 :
-      ∀ (Λ : Rectangle),
-        MemLp (interaction params Λ) 2
-          (freeFieldMeasure params.mass params.mass_pos)) :
-    Nonempty (InteractionUVModel params) := by
-  exact ⟨{
-    interactionCutoff_in_L2 := hcutoff_in_L2
-    interactionCutoff_converges_L2 := hcutoff_conv
-    interactionCutoff_tendsto_ae := hcutoff_ae
-    interaction_in_L2 := hinteraction_L2
-  }⟩
-
 /-- Build cutoff `L²` control from a square-integrability hypothesis. -/
 theorem interactionCutoff_memLp_two_of_sq_integrable
     (params : Phi4Params) (Λ : Rectangle) (κ : UVCutoff)
@@ -390,25 +356,20 @@ theorem interactionUVModel_nonempty_of_sq_integrable_data
         Integrable (fun ω => (interaction params Λ ω) ^ 2)
           (freeFieldMeasure params.mass params.mass_pos)) :
     Nonempty (InteractionUVModel params) := by
-  refine interactionUVModel_nonempty_of_data params ?_ hcutoff_conv hcutoff_ae ?_
-  · intro Λ κ
-    exact interactionCutoff_memLp_two_of_sq_integrable
-      (params := params) (Λ := Λ) (κ := κ)
-      (hcutoff_meas Λ κ) (hcutoff_sq Λ κ)
-  · intro Λ
-    exact interaction_memLp_two_of_sq_integrable
-      (params := params) (Λ := Λ)
-      (hinteraction_meas Λ) (hinteraction_sq Λ)
-
-/-- Construct `InteractionWeightModel` from explicit Boltzmann-weight
-    `Lᵖ` integrability data. -/
-theorem interactionWeightModel_nonempty_of_data (params : Phi4Params)
-    (hexp :
-      ∀ (Λ : Rectangle) {p : ℝ≥0∞}, p ≠ ⊤ →
-        MemLp (fun ω => Real.exp (-(interaction params Λ ω)))
-          p (freeFieldMeasure params.mass params.mass_pos)) :
-    Nonempty (InteractionWeightModel params) := by
-  exact ⟨{ exp_interaction_Lp := hexp }⟩
+  exact ⟨{
+    interactionCutoff_in_L2 := by
+      intro Λ κ
+      exact interactionCutoff_memLp_two_of_sq_integrable
+        (params := params) (Λ := Λ) (κ := κ)
+        (hcutoff_meas Λ κ) (hcutoff_sq Λ κ)
+    interactionCutoff_converges_L2 := hcutoff_conv
+    interactionCutoff_tendsto_ae := hcutoff_ae
+    interaction_in_L2 := by
+      intro Λ
+      exact interaction_memLp_two_of_sq_integrable
+        (params := params) (Λ := Λ)
+        (hinteraction_meas Λ) (hinteraction_sq Λ)
+  }⟩
 
 /-- Any full interaction-integrability model provides the weight-integrability
     subinterface. -/
@@ -432,19 +393,6 @@ instance (priority := 100) interactionIntegrabilityModel_of_uv_weight
     InteractionUVModel.interactionCutoff_tendsto_ae (params := params)
   interaction_in_L2 := InteractionUVModel.interaction_in_L2 (params := params)
   exp_interaction_Lp := InteractionWeightModel.exp_interaction_Lp (params := params)
-
-/-- Combine nonempty UV/L² and weight-integrability witnesses into a nonempty
-    full interaction-integrability witness. -/
-theorem interactionIntegrabilityModel_nonempty_of_uv_weight_nonempty
-    (params : Phi4Params)
-    (huv : Nonempty (InteractionUVModel params))
-    (hweight : Nonempty (InteractionWeightModel params)) :
-    Nonempty (InteractionIntegrabilityModel params) := by
-  rcases huv with ⟨huvInst⟩
-  rcases hweight with ⟨hweightInst⟩
-  letI : InteractionUVModel params := huvInst
-  letI : InteractionWeightModel params := hweightInst
-  exact ⟨inferInstance⟩
 
 /-! ## The interaction is in Lᵖ -/
 
@@ -916,23 +864,25 @@ theorem interactionWeightModel_nonempty_of_standardSeq_succ_tendsto_ae_and_unifo
               Real.exp (-(p.toReal * interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω))
               ∂(freeFieldMeasure params.mass params.mass_pos) ≤ D)) :
     Nonempty (InteractionWeightModel params) := by
-  refine interactionWeightModel_nonempty_of_data (params := params) ?_
-  intro Λ p hpTop
-  by_cases hp0 : p = 0
-  · rw [hp0]
-    rw [memLp_zero_iff_aestronglyMeasurable]
-    have hmeas_cut : ∀ n : ℕ,
-        AEStronglyMeasurable
-          (fun ω : FieldConfig2D => interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω)
-          (freeFieldMeasure params.mass params.mass_pos) :=
-      hcutoff_meas Λ
-    have hmeas_lim : AEStronglyMeasurable (interaction params Λ)
-        (freeFieldMeasure params.mass params.mass_pos) :=
-      aestronglyMeasurable_of_tendsto_ae Filter.atTop hmeas_cut (htend Λ)
-    exact (hmeas_lim.aemeasurable.neg.exp).aestronglyMeasurable
-  · exact memLp_exp_neg_interaction_of_standardSeq_succ_tendsto_ae_of_uniform_integral_bound
-      (params := params) (Λ := Λ) (hp0 := hp0) (hpTop := hpTop)
-      (htend Λ) (hcutoff_meas Λ) (hbound Λ hpTop)
+  exact ⟨{
+    exp_interaction_Lp := by
+      intro Λ p hpTop
+      by_cases hp0 : p = 0
+      · rw [hp0]
+        rw [memLp_zero_iff_aestronglyMeasurable]
+        have hmeas_cut : ∀ n : ℕ,
+            AEStronglyMeasurable
+              (fun ω : FieldConfig2D => interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω)
+              (freeFieldMeasure params.mass params.mass_pos) :=
+          hcutoff_meas Λ
+        have hmeas_lim : AEStronglyMeasurable (interaction params Λ)
+            (freeFieldMeasure params.mass params.mass_pos) :=
+          aestronglyMeasurable_of_tendsto_ae Filter.atTop hmeas_cut (htend Λ)
+        exact (hmeas_lim.aemeasurable.neg.exp).aestronglyMeasurable
+      · exact memLp_exp_neg_interaction_of_standardSeq_succ_tendsto_ae_of_uniform_integral_bound
+          (params := params) (Λ := Λ) (hp0 := hp0) (hpTop := hpTop)
+          (htend Λ) (hcutoff_meas Λ) (hbound Λ hpTop)
+  }⟩
 
 /-- Convert geometric shifted-cutoff real-integral bounds
     `∫ exp(-(q)*V_{n+1}) ≤ D * r^n` with `0 ≤ r < 1` to uniform
