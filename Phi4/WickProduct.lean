@@ -109,10 +109,6 @@ def wickFourth (mass : ℝ) (κ : UVCutoff)
     (ω : FieldConfig2D) (x : Spacetime2D) : ℝ :=
   wickPower 4 mass κ ω x
 
-/-- wickFourth is wickPower 4. -/
-theorem wickFourth_eq (mass : ℝ) (κ : UVCutoff) (ω : FieldConfig2D) (x : Spacetime2D) :
-    wickFourth mass κ ω x = wickPower 4 mass κ ω x := rfl
-
 /-! ## Wick product properties -/
 
 /-- Helper: the regularized point covariance equals the GaussianField covariance
@@ -502,13 +498,6 @@ theorem wickPower_zero_expectation (n : ℕ) (hn : 0 < n)
   rw [hc]
   exact wickMonomial_zero_expectation n hn mass hmass f
 
-/-- Origin specialization of `wickPower_zero_expectation`. -/
-theorem wickPower_zero_expectation_origin (n : ℕ) (hn : 0 < n)
-    (mass : ℝ) (hmass : 0 < mass) (κ : UVCutoff) :
-    ∫ ω, wickPower n mass κ ω 0 ∂(freeFieldMeasure mass hmass) = 0 := by
-  apply wickPower_zero_expectation n hn mass hmass κ 0
-  exact regularizedPointCovariance_covariance_origin mass hmass κ
-
 /-- Hölder triple: `(2p)⁻¹ + (2p)⁻¹ = p⁻¹`. Used for products via Hölder's inequality. -/
 instance holderTriple_double (p : ℝ≥0∞) : ENNReal.HolderTriple (2 * p) (2 * p) p where
   inv_add_inv_eq_inv := by
@@ -586,16 +575,6 @@ theorem wickMonomial_rewick_four (c₁ c₂ x : ℝ) :
       + 3 * (c₁ - c₂) ^ 2 := by
   simp [wickMonomial_four, wickMonomial_two]; ring
 
-/-- Re-Wick-ordering at the field level: when the raw field φ(x) is the same but the
-    Wick-ordering covariance changes from c₁ to c₂, we have
-      :φ⁴:_{c₁} = :φ⁴:_{c₂} - 6δc :φ²:_{c₂} + 3δc²
-    where δc = c₁ - c₂. This restates `wickMonomial_rewick_four` for `wickPower`. -/
-theorem rewick_fourth (c₁ c₂ : ℝ) (φ : ℝ) :
-    wickMonomial 4 c₁ φ =
-      wickMonomial 4 c₂ φ - 6 * (c₁ - c₂) * wickMonomial 2 c₂ φ
-      + 3 * (c₁ - c₂) ^ 2 :=
-  wickMonomial_rewick_four c₁ c₂ φ
-
 /-- **Wick monomials are bounded by a polynomial in |x| of the same degree.**
     For any variance parameter c and degree n, there exists C > 0 such that
       |wickMonomial n c x| ≤ C * (1 + |x|)ⁿ  for all x.
@@ -644,17 +623,5 @@ theorem wickMonomial_bound : ∀ (n : ℕ) (c : ℝ),
                 (pow_le_pow_right₀ hge1 (Nat.le_add_right n 2)) hC₂pos.le)
               (by positivity)
       _ = (C₁ + (↑n + 1) * |c| * C₂) * (1 + |x|) ^ (n + 2) := by ring
-
-/-- Quantitative bounds on re-Wick-ordering (Proposition 8.6.1 of Glimm-Jaffe).
-    The n-th Wick power is bounded by a polynomial in the raw field value:
-      |:φⁿ:| ≤ C · (1 + |φ_κ(x)|)ⁿ
-    when the covariance change δc is bounded.
-    Here rawFieldEval gives the un-Wick-ordered field value φ_κ(x). -/
-theorem rewick_ordering_bounds (Λ : Rectangle) (mass : ℝ) (hmass : 0 < mass)
-    (n : ℕ) (κ : UVCutoff) (δc : ℝ) (hδc : |δc| ≤ 1) :
-    ∃ C : ℝ, ∀ (ω : FieldConfig2D) (x : Spacetime2D),
-      |wickPower n mass κ ω x| ≤ C * (1 + |rawFieldEval mass κ ω x|) ^ n := by
-  obtain ⟨C, hCpos, hC⟩ := wickMonomial_bound n (regularizedPointCovariance mass κ)
-  exact ⟨C, fun ω x => hC (rawFieldEval mass κ ω x)⟩
 
 end
