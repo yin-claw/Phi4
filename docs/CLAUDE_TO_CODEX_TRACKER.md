@@ -5,6 +5,26 @@ Date: 2026-02-27
 This tracker converts `claude_to_codex.md` into an execution matrix.
 Each line item is actionable, testable, and tied to concrete files/modules.
 
+## Session Update (2026-03-04, correlation no-caller prune follow-up)
+
+- Removed four additional no-caller constructor wrappers from
+  `Phi4/CorrelationInequalities.lean`:
+  - `correlationGKSSecondModel_nonempty_of_data`,
+  - `correlationLebowitzModel_nonempty_of_data`,
+  - `correlationFourPointInequalityModel_nonempty_of_models`,
+  - `correlationFKGModel_nonempty_of_data`.
+- Route-surface reduction:
+  - `theorem .*_nonempty_of_` count `38 -> 34`,
+  - `CorrelationInequalities` theorem count `39 -> 35`.
+- Guard updates in `scripts/route_bloat_guard.sh`:
+  - tightened `_nonempty_of_` cap `38 -> 34`,
+  - tightened `CorrelationInequalities` theorem cap `39 -> 35`,
+  - added exact-zero checks for the four removed wrapper names above.
+- Verification passed:
+  - `lake env lean Phi4/CorrelationInequalities.lean`,
+  - `bash scripts/route_bloat_guard.sh`,
+  - `bash scripts/quick_gate.sh`.
+
 ## Session Update (2026-03-04, week-0 bloat execution and wrapper-module cleanup)
 
 - Added deterministic nonempty-route inventory tooling:

@@ -57,7 +57,7 @@ Local per-folder guides are available at:
     statements, not that the full construction is complete.
   - remaining frontier obligations are explicit: `58` `...Model` interfaces and
     `10` canonical theorem-level `gap_*` frontiers.
-  - route surface after current pruning: `38` `theorem .*_nonempty_of_`
+  - route surface after current pruning: `34` `theorem .*_nonempty_of_`
     constructors.
 - Dependency reproducibility:
   - `GaussianField` and `OSReconstruction` are pinned to commit hashes in

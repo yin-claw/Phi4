@@ -20,7 +20,7 @@ the local Glimm-Jaffe objective.
 - This does not imply construction closure: open obligations are intentionally
   explicit at the frontier boundary (`58` `...Model` interfaces, `10` canonical
   theorem-level `gap_*` frontiers).
-- Route-surface status (post-prune): `38` `theorem .*_nonempty_of_`
+- Route-surface status (post-prune): `34` `theorem .*_nonempty_of_`
   constructors.
 - Scratch modules (`Phi4/Scratch/**/*.lean`) have `0` theorem-level `sorry`.
 - `Phi4/**/*.lean` has `0` `axiom` declarations.

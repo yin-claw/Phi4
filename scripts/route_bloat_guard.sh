@@ -6,7 +6,7 @@ cd "$ROOT_DIR"
 
 # Baselines captured after bloat-reduction refactor (2026-03-04):
 # - class .*Model count: 58
-# - theorem .*_nonempty_of_ count: 38
+# - theorem .*_nonempty_of_ count: 34
 # - interactionWeightModel_nonempty_of_* count: 7
 # - interactionIntegrabilityModel_nonempty_of_* count: 2
 # - gap_phi4_linear_growth variant count in Reconstruction/Part1Core.lean: 2
@@ -37,7 +37,7 @@ cd "$ROOT_DIR"
 # - InfiniteVolumeLimit/Part1 infinite_volume_schwinger_exists_*_of_* theorem count: 4
 # - InfiniteVolumeLimit/Part2 top-level theorem count: 11
 # - InfiniteVolumeLimit/Part3 top-level theorem count: 16
-# - CorrelationInequalities top-level theorem count: 39
+# - CorrelationInequalities top-level theorem count: 35
 # - Interaction/Part3 abs-moment forwarding wrapper count: 0
 # - OSAxioms removed no-caller `_of_data` wrappers kept at exact zero:
 #   - osaCoreModel_nonempty_of_data
@@ -51,6 +51,10 @@ cd "$ROOT_DIR"
 # - CorrelationInequalities removed no-caller lattice nonempty wrapper kept at exact zero:
 #   - correlationInequalityModel_nonempty_of_lattice
 # - Additional removed no-caller data constructors kept at exact zero:
+#   - correlationGKSSecondModel_nonempty_of_data
+#   - correlationLebowitzModel_nonempty_of_data
+#   - correlationFourPointInequalityModel_nonempty_of_models
+#   - correlationFKGModel_nonempty_of_data
 #   - correlationFourPointInequalityModel_nonempty_of_data
 #   - correlationInequalityCoreModel_nonempty_of_data
 #   - interactionIntegrabilityModel_nonempty_of_data
@@ -59,7 +63,7 @@ cd "$ROOT_DIR"
 #   - boundaryRegularityModel_nonempty_of_data
 #   - boundaryCovarianceModel_nonempty_of_data
 MAX_MODEL_CLASSES=58
-MAX_NONEMPTY_CONSTRUCTORS=38
+MAX_NONEMPTY_CONSTRUCTORS=34
 MAX_WEIGHT_ROUTES=7
 MAX_INTEGRABILITY_ROUTES=2
 MAX_LINEAR_GROWTH_ROUTES=2
@@ -89,7 +93,7 @@ MAX_IVL_PART1_SCHWINGERTWO_ROUTES=1
 MAX_IVL_PART1_EXISTS_ROUTES=4
 MAX_IVL_PART2_THEOREMS=11
 MAX_IVL_PART3_THEOREMS=16
-MAX_CORRELATION_THEOREMS=39
+MAX_CORRELATION_THEOREMS=35
 MAX_INTERACTION_PART2_EVENTUAL_LOWER_WRAPPER=0
 MAX_INTERACTION_PART2_GLOBAL_NONNEG_WRAPPER=0
 MAX_IVL_PART1_LATTICE_MONO_TWO_WRAPPER=0
@@ -104,6 +108,10 @@ MAX_CORRELATION_LATTICE_NONEMPTY_WRAPPER=0
 MAX_CORRELATION_FOURPOINT_INEQ_DATA_WRAPPER=0
 MAX_CORRELATION_CORE_DATA_WRAPPER=0
 MAX_INTERACTION_INTEGRABILITY_DATA_WRAPPER=0
+MAX_CORRELATION_GKS_DATA_WRAPPER=0
+MAX_CORRELATION_LEBOWITZ_DATA_WRAPPER=0
+MAX_CORRELATION_FOURPOINT_MODELS_WRAPPER=0
+MAX_CORRELATION_FKG_DATA_WRAPPER=0
 MAX_BOUNDARY_KERNEL_DATA_WRAPPER=0
 MAX_BOUNDARY_COMPARISON_DATA_WRAPPER=0
 MAX_BOUNDARY_REGULARITY_DATA_WRAPPER=0
@@ -153,6 +161,10 @@ correlation_lattice_nonempty_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]
 correlation_fourpoint_ineq_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+correlationFourPointInequalityModel_nonempty_of_data\\b' Phi4/CorrelationInequalities.lean || true) | wc -l | tr -d ' ' )"
 correlation_core_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+correlationInequalityCoreModel_nonempty_of_data\\b' Phi4/CorrelationInequalities.lean || true) | wc -l | tr -d ' ' )"
 interaction_integrability_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+interactionIntegrabilityModel_nonempty_of_data\\b' Phi4/Interaction/Part1Core.lean || true) | wc -l | tr -d ' ' )"
+correlation_gks_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+correlationGKSSecondModel_nonempty_of_data\\b' Phi4/CorrelationInequalities.lean || true) | wc -l | tr -d ' ' )"
+correlation_lebowitz_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+correlationLebowitzModel_nonempty_of_data\\b' Phi4/CorrelationInequalities.lean || true) | wc -l | tr -d ' ' )"
+correlation_fourpoint_models_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+correlationFourPointInequalityModel_nonempty_of_models\\b' Phi4/CorrelationInequalities.lean || true) | wc -l | tr -d ' ' )"
+correlation_fkg_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+correlationFKGModel_nonempty_of_data\\b' Phi4/CorrelationInequalities.lean || true) | wc -l | tr -d ' ' )"
 boundary_kernel_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+boundaryKernelModel_nonempty_of_data\\b' Phi4/CovarianceOperators.lean || true) | wc -l | tr -d ' ' )"
 boundary_comparison_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+boundaryComparisonModel_nonempty_of_data\\b' Phi4/CovarianceOperators.lean || true) | wc -l | tr -d ' ' )"
 boundary_regularity_data_wrapper="$( (rg -n '^[[:space:]]*theorem[[:space:]]+boundaryRegularityModel_nonempty_of_data\\b' Phi4/CovarianceOperators.lean || true) | wc -l | tr -d ' ' )"
@@ -230,6 +242,10 @@ echo "[route_bloat_guard] Correlation lattice nonempty wrapper: $correlation_lat
 echo "[route_bloat_guard] Correlation four-point inequality data wrapper: $correlation_fourpoint_ineq_data_wrapper (max $MAX_CORRELATION_FOURPOINT_INEQ_DATA_WRAPPER)"
 echo "[route_bloat_guard] Correlation core data wrapper: $correlation_core_data_wrapper (max $MAX_CORRELATION_CORE_DATA_WRAPPER)"
 echo "[route_bloat_guard] Interaction integrability data wrapper: $interaction_integrability_data_wrapper (max $MAX_INTERACTION_INTEGRABILITY_DATA_WRAPPER)"
+echo "[route_bloat_guard] Correlation GKS data wrapper: $correlation_gks_data_wrapper (max $MAX_CORRELATION_GKS_DATA_WRAPPER)"
+echo "[route_bloat_guard] Correlation Lebowitz data wrapper: $correlation_lebowitz_data_wrapper (max $MAX_CORRELATION_LEBOWITZ_DATA_WRAPPER)"
+echo "[route_bloat_guard] Correlation four-point models wrapper: $correlation_fourpoint_models_wrapper (max $MAX_CORRELATION_FOURPOINT_MODELS_WRAPPER)"
+echo "[route_bloat_guard] Correlation FKG data wrapper: $correlation_fkg_data_wrapper (max $MAX_CORRELATION_FKG_DATA_WRAPPER)"
 echo "[route_bloat_guard] Boundary kernel data wrapper: $boundary_kernel_data_wrapper (max $MAX_BOUNDARY_KERNEL_DATA_WRAPPER)"
 echo "[route_bloat_guard] Boundary comparison data wrapper: $boundary_comparison_data_wrapper (max $MAX_BOUNDARY_COMPARISON_DATA_WRAPPER)"
 echo "[route_bloat_guard] Boundary regularity data wrapper: $boundary_regularity_data_wrapper (max $MAX_BOUNDARY_REGULARITY_DATA_WRAPPER)"
@@ -418,6 +434,22 @@ if (( correlation_core_data_wrapper > MAX_CORRELATION_CORE_DATA_WRAPPER )); then
 fi
 if (( interaction_integrability_data_wrapper > MAX_INTERACTION_INTEGRABILITY_DATA_WRAPPER )); then
   echo "[FAIL] Interaction integrability data wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( correlation_gks_data_wrapper > MAX_CORRELATION_GKS_DATA_WRAPPER )); then
+  echo "[FAIL] Correlation GKS data wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( correlation_lebowitz_data_wrapper > MAX_CORRELATION_LEBOWITZ_DATA_WRAPPER )); then
+  echo "[FAIL] Correlation Lebowitz data wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( correlation_fourpoint_models_wrapper > MAX_CORRELATION_FOURPOINT_MODELS_WRAPPER )); then
+  echo "[FAIL] Correlation four-point models wrapper count exceeded baseline." >&2
+  fail=1
+fi
+if (( correlation_fkg_data_wrapper > MAX_CORRELATION_FKG_DATA_WRAPPER )); then
+  echo "[FAIL] Correlation FKG data wrapper count exceeded baseline." >&2
   fail=1
 fi
 if (( boundary_kernel_data_wrapper > MAX_BOUNDARY_KERNEL_DATA_WRAPPER )); then

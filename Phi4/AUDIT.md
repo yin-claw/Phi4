@@ -2,6 +2,24 @@
 
 Date: 2026-03-03
 
+Update (2026-03-04, correlation zero-caller constructor prune follow-up):
+- Removed four additional no-caller constructor wrappers from
+  `Phi4/CorrelationInequalities.lean`:
+  - `correlationGKSSecondModel_nonempty_of_data`,
+  - `correlationLebowitzModel_nonempty_of_data`,
+  - `correlationFourPointInequalityModel_nonempty_of_models`,
+  - `correlationFKGModel_nonempty_of_data`.
+- Route-surface reduction:
+  - `theorem .*_nonempty_of_`: `38 -> 34`,
+  - `CorrelationInequalities` theorem count: `39 -> 35`.
+- Guard hardening:
+  - tightened `scripts/route_bloat_guard.sh` caps to the new counts,
+  - added exact-zero checks for the four removed constructor names.
+- Verification:
+  - `lake env lean Phi4/CorrelationInequalities.lean` passes,
+  - `bash scripts/route_bloat_guard.sh` passes,
+  - `bash scripts/quick_gate.sh` passes.
+
 Update (2026-03-04, aggressive route-pruning + import-wrapper removal):
 - Removed 18 no-caller constructor/wrapper routes with no in-repo usage:
   - `CorrelationInequalities.lean`: 13 removals,

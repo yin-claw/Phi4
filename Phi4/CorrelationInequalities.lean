@@ -217,44 +217,6 @@ class CorrelationFKGModel (params : Phi4Params) where
         (∫ ω, G ω ∂(finiteVolumeMeasure params Λ)) ≤
       ∫ ω, F ω * G ω ∂(finiteVolumeMeasure params Λ)
 
-/-- Construct `CorrelationGKSSecondModel` from explicit four-point GKS-II data. -/
-theorem correlationGKSSecondModel_nonempty_of_data
-    (params : Phi4Params)
-    (hgriffiths_second : ∀ (Λ : Rectangle)
-      (f₁ f₂ f₃ f₄ : TestFun2D)
-      (_hf₁ : ∀ x, 0 ≤ f₁ x) (_hf₂ : ∀ x, 0 ≤ f₂ x)
-      (_hf₃ : ∀ x, 0 ≤ f₃ x) (_hf₄ : ∀ x, 0 ≤ f₄ x),
-      schwingerTwo params Λ f₁ f₂ * schwingerTwo params Λ f₃ f₄ ≤
-        schwingerN params Λ 4 ![f₁, f₂, f₃, f₄]) :
-    Nonempty (CorrelationGKSSecondModel params) := by
-  exact ⟨{ griffiths_second := hgriffiths_second }⟩
-
-/-- Construct `CorrelationLebowitzModel` from explicit four-point Lebowitz data. -/
-theorem correlationLebowitzModel_nonempty_of_data
-    (params : Phi4Params)
-    (hlebowitz : ∀ (Λ : Rectangle)
-      (f₁ f₂ f₃ f₄ : TestFun2D)
-      (_hf₁ : ∀ x, 0 ≤ f₁ x) (_hf₂ : ∀ x, 0 ≤ f₂ x)
-      (_hf₃ : ∀ x, 0 ≤ f₃ x) (_hf₄ : ∀ x, 0 ≤ f₄ x),
-      schwingerN params Λ 4 ![f₁, f₂, f₃, f₄] ≤
-        schwingerTwo params Λ f₁ f₂ * schwingerTwo params Λ f₃ f₄ +
-        schwingerTwo params Λ f₁ f₃ * schwingerTwo params Λ f₂ f₄ +
-        schwingerTwo params Λ f₁ f₄ * schwingerTwo params Λ f₂ f₃) :
-    Nonempty (CorrelationLebowitzModel params) := by
-  exact ⟨{ lebowitz_inequality := hlebowitz }⟩
-
-/-- Construct `CorrelationFourPointInequalityModel` from atomic four-point
-    GKS-II and Lebowitz subinterfaces. -/
-theorem correlationFourPointInequalityModel_nonempty_of_models
-    (params : Phi4Params)
-    [CorrelationGKSSecondModel params]
-    [CorrelationLebowitzModel params] :
-    Nonempty (CorrelationFourPointInequalityModel params) := by
-  exact ⟨{
-    toCorrelationGKSSecondModel := inferInstance
-    toCorrelationLebowitzModel := inferInstance
-  }⟩
-
 /-- Atomic GKS-II and Lebowitz interfaces reconstruct the combined four-point
     inequality class. -/
 instance (priority := 100) correlationFourPointInequalityModel_of_atomic
@@ -292,22 +254,6 @@ instance (priority := 100) correlationFourPointModel_of_inequality_and_schwinger
   rcases correlationFourPointModel_nonempty_of_inequality_and_schwingerFourMonotone
       (params := params) with ⟨hfour⟩
   exact hfour
-
-/-- Construct `CorrelationFKGModel` from an explicit finite-volume FKG
-    positive-correlation inequality. -/
-theorem correlationFKGModel_nonempty_of_data
-    (params : Phi4Params)
-    (hfkg : ∀ (Λ : Rectangle)
-      (F G : FieldConfig2D → ℝ)
-      (_hF_mono : ∀ ω₁ ω₂ : FieldConfig2D,
-        (∀ f, (∀ x, 0 ≤ f x) → ω₁ f ≤ ω₂ f) → F ω₁ ≤ F ω₂)
-      (_hG_mono : ∀ ω₁ ω₂ : FieldConfig2D,
-        (∀ f, (∀ x, 0 ≤ f x) → ω₁ f ≤ ω₂ f) → G ω₁ ≤ G ω₂),
-      (∫ ω, F ω ∂(finiteVolumeMeasure params Λ)) *
-        (∫ ω, G ω ∂(finiteVolumeMeasure params Λ)) ≤
-      ∫ ω, F ω * G ω ∂(finiteVolumeMeasure params Λ)) :
-    Nonempty (CorrelationFKGModel params) := by
-  exact ⟨{ fkg_inequality := hfkg }⟩
 
 /-- Four-point monotonicity assumptions imply `k = 4` Schwinger-moment
     monotonicity. -/
