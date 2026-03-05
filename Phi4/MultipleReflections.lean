@@ -62,30 +62,6 @@ class MultipleReflectionModel (params : Phi4Params) where
 
 /-! ## Chessboard estimates -/
 
-/-- **Chessboard estimate** (Theorem 10.5.5 of Glimm-Jaffe):
-    For functionals A₁,...,Aₙ localized in disjoint unit squares of a rectangle Λ
-    that can be reached from a single square by reflections,
-      |⟨∏ᵢ Aᵢ⟩_Λ| ≤ ∏ᵢ ⟨|Aᵢ|ᴺ⟩_Λ^{1/N}
-    where N is determined by the tiling geometry (number of reflections).
-
-    The hypothesis `hN_geo` asserts that N arises from the chessboard tiling:
-    Λ is tiled by N copies of a unit square, with each copy reached by
-    a sequence of reflections. The hypothesis `hA_Lp` asserts that each Aᵢ
-    is in L^N, which is necessary for the RHS to be finite.
-
-    This follows from iterated application of reflection positivity and
-    the Schwarz inequality for the RP inner product. -/
-theorem chessboard_estimate (params : Phi4Params) (Λ : Rectangle)
-    [MultipleReflectionModel params]
-    (hΛ : Λ.IsTimeSymmetric)
-    (n : ℕ) (A : Fin n → FieldConfig2D → ℝ) (N : ℕ) (hN : 0 < N)
-    (hN_geo : (N : ℝ) ≤ Λ.area)
-    (hA_Lp : ∀ i, MemLp (A i) N (finiteVolumeMeasure params Λ)) :
-    |∫ ω, (∏ i, A i ω) ∂(finiteVolumeMeasure params Λ)| ≤
-      ∏ i, (∫ ω, |A i ω| ^ N ∂(finiteVolumeMeasure params Λ)) ^ ((1 : ℝ) / N) := by
-  exact MultipleReflectionModel.chessboard_estimate
-    (params := params) Λ hΛ n A N hN hN_geo hA_Lp
-
 /-! ## Determinant bounds -/
 
 /-- **Determinant bound** (Theorem 10.6.2 of Glimm-Jaffe):
@@ -127,24 +103,6 @@ theorem determinant_bound (params : Phi4Params) (Λ : Rectangle)
       exact Real.exp_log hmax_pos
 
 /-! ## Uniform bounds on Schwinger functions -/
-
-/-- **Multiple reflection upper bound**: The n-point Schwinger function S_n^Λ
-    is uniformly bounded in Λ for fixed test functions:
-      |S_n^Λ(f₁,...,fₙ)| ≤ C(f₁,...,fₙ)
-    where C does not depend on Λ.
-
-    The proof combines:
-    1. Chessboard estimate to reduce to single-square expectations
-    2. Finite-volume Lᵖ bounds (Theorem 8.6.2) for each square
-    3. Exponential decay of the propagator to control cross-square contributions -/
-theorem schwinger_uniform_bound (params : Phi4Params)
-    [MultipleReflectionModel params]
-    (n : ℕ) (f : Fin n → TestFun2D) :
-    ∃ C : ℝ, ∀ (Λ : Rectangle), Λ.IsTimeSymmetric →
-      (∀ i, ∀ x ∉ Λ.toSet, f i x = 0) →
-        |schwingerN params Λ n f| ≤ C := by
-  exact MultipleReflectionModel.schwinger_uniform_bound
-    (params := params) n f
 
 /-- The partition function ratio Z_Λ₁/Z_Λ₂ is controlled for Λ₁ ⊂ Λ₂,
     using conditioning and the determinant bound. -/

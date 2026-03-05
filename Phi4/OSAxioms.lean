@@ -262,26 +262,6 @@ theorem phi4_os2_rotation (params : Phi4Params)
   simpa [phi4SchwingerFunctions] using
     (OSEuclideanCovarianceModel.os2_rotation (params := params) n R horth hdet f g hfg)
 
-/-! ## OS3: Reflection Positivity -/
-
-/-- **OS3 (Reflection positivity)**: For any test function sequence F = (F₀, F₁, ...)
-    supported in positive Euclidean time {τ > 0},
-      Σₙₘ ∫ (θF_n)* F_m S_{n+m} ≥ 0
-    where θ is time reflection τ ↦ -τ.
-
-    This is inherited from the finite-volume reflection positivity
-    (Theorem 10.4 / ReflectionPositivity.lean) and passes to the
-    infinite volume limit by the convergence of S_n^Λ → S_n. -/
-theorem phi4_os3 (params : Phi4Params)
-    [InfiniteVolumeMeasureModel params]
-    [MeasureOS3Model params]
-    (n : ℕ) (f : Fin n → TestFun2D) (c : Fin n → ℂ)
-    (hf : ∀ i, supportedInPositiveTime (f i)) :
-    0 ≤ (∑ i, ∑ j, c i * starRingEnd ℂ (c j) *
-      ∫ ω, ω (testFunTimeReflect (f i)) * ω (f j)
-        ∂(infiniteVolumeMeasure params)).re := by
-  exact MeasureOS3Model.os3 (params := params) n f c hf
-
 /-- Distributional E2 reflection positivity for the packaged φ⁴₂ Schwinger functions. -/
 theorem phi4_e2_distributional (params : Phi4Params)
     [SchwingerFunctionModel params]

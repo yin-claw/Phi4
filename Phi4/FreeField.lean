@@ -208,15 +208,6 @@ class FreeCovarianceKernelModel (mass : ℝ) (hmass : 0 < mass) where
       GaussianField.covariance (freeCovarianceCLM mass hmass) f g =
         ∫ x, ∫ y, f x * freeCovKernel mass x y * g y
 
-/-- Bridge theorem: free-field covariance equals the Green-kernel bilinear form. -/
-theorem freeCovariance_eq_kernel (mass : ℝ) (hmass : 0 < mass)
-    [FreeCovarianceKernelModel mass hmass]
-    (f g : TestFun2D) :
-    GaussianField.covariance (freeCovarianceCLM mass hmass) f g =
-      ∫ x, ∫ y, f x * freeCovKernel mass x y * g y := by
-  exact FreeCovarianceKernelModel.covariance_eq_kernel
-    (mass := mass) (hmass := hmass) f g
-
 /-- Kernel-form two-point identity for the free field:
     `E[ω(f)ω(g)] = ∬ f(x) C(x,y) g(y) dx dy`. -/
 theorem freeField_two_point_kernel (mass : ℝ) (hmass : 0 < mass)
@@ -225,7 +216,8 @@ theorem freeField_two_point_kernel (mass : ℝ) (hmass : 0 < mass)
     ∫ ω, ω f * ω g ∂(freeFieldMeasure mass hmass) =
       ∫ x, ∫ y, f x * freeCovKernel mass x y * g y := by
   rw [freeField_two_point]
-  exact freeCovariance_eq_kernel mass hmass f g
+  exact FreeCovarianceKernelModel.covariance_eq_kernel
+    (mass := mass) (hmass := hmass) f g
 
 /-- The covariance kernel is symmetric. -/
 theorem freeCovKernel_symm (mass : ℝ) (x y : Spacetime2D) :
@@ -436,7 +428,8 @@ theorem freeCovKernel_pos_def_integral (mass : ℝ) (hmass : 0 < mass)
     intro i _
     refine Finset.sum_congr rfl ?_
     intro j _
-    rw [freeCovariance_eq_kernel mass hmass (f i) (f j)]
+    rw [FreeCovarianceKernelModel.covariance_eq_kernel
+      (mass := mass) (hmass := hmass) (f i) (f j)]
   rw [hrewrite] at hcov
   exact hcov
 

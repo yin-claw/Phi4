@@ -411,25 +411,6 @@ instance (priority := 100) correlationTwoPointModel_of_lattice
   griffiths_first := griffiths_first_from_lattice (params := params)
   schwinger_two_monotone := schwinger_two_monotone_from_lattice (params := params)
 
-/-! ## Griffiths' Second Inequality (GKS-II) -/
-
-/-- **GKS-II** in the `(12)(34)` channel:
-    ⟨φ(f₁)φ(f₂)φ(f₃)φ(f₄)⟩ ≥ ⟨φ(f₁)φ(f₂)⟩⟨φ(f₃)φ(f₄)⟩
-    for non-negative test functions f₁,...,f₄ ≥ 0.
-
-    Equivalently, the `(12)(34)` pairing-subtracted quantity is nonnegative.
-    This channel inequality is one of the core inputs in the monotonicity
-    arguments used for the infinite-volume limit. -/
-theorem griffiths_second (params : Phi4Params) (Λ : Rectangle)
-    [CorrelationGKSSecondModel params]
-    (f₁ f₂ f₃ f₄ : TestFun2D)
-    (hf₁ : ∀ x, 0 ≤ f₁ x) (hf₂ : ∀ x, 0 ≤ f₂ x)
-    (hf₃ : ∀ x, 0 ≤ f₃ x) (hf₄ : ∀ x, 0 ≤ f₄ x) :
-    schwingerTwo params Λ f₁ f₂ * schwingerTwo params Λ f₃ f₄ ≤
-      schwingerN params Λ 4 ![f₁, f₂, f₃, f₄] := by
-  exact CorrelationGKSSecondModel.griffiths_second
-    (params := params) Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
-
 private def fin4_1 : Fin 4 := ⟨1, by decide⟩
 private def fin4_2 : Fin 4 := ⟨2, by decide⟩
 private def fin4_3 : Fin 4 := ⟨3, by decide⟩
@@ -461,7 +442,7 @@ theorem griffiths_second_13_24 (params : Phi4Params) (Λ : Rectangle)
     (hf₃ : ∀ x, 0 ≤ f₃ x) (hf₄ : ∀ x, 0 ≤ f₄ x) :
     schwingerTwo params Λ f₁ f₃ * schwingerTwo params Λ f₂ f₄ ≤
       schwingerN params Λ 4 ![f₁, f₂, f₃, f₄] := by
-  have h := griffiths_second params Λ f₁ f₃ f₂ f₄ hf₁ hf₃ hf₂ hf₄
+  have h := CorrelationGKSSecondModel.griffiths_second (params := params) Λ f₁ f₃ f₂ f₄ hf₁ hf₃ hf₂ hf₄
   calc
     schwingerTwo params Λ f₁ f₃ * schwingerTwo params Λ f₂ f₄
         ≤ schwingerN params Λ 4 ![f₁, f₃, f₂, f₄] := h
@@ -476,7 +457,7 @@ theorem griffiths_second_14_23 (params : Phi4Params) (Λ : Rectangle)
     (hf₃ : ∀ x, 0 ≤ f₃ x) (hf₄ : ∀ x, 0 ≤ f₄ x) :
     schwingerTwo params Λ f₁ f₄ * schwingerTwo params Λ f₂ f₃ ≤
       schwingerN params Λ 4 ![f₁, f₂, f₃, f₄] := by
-  have h := griffiths_second params Λ f₁ f₄ f₂ f₃ hf₁ hf₄ hf₂ hf₃
+  have h := CorrelationGKSSecondModel.griffiths_second (params := params) Λ f₁ f₄ f₂ f₃ hf₁ hf₄ hf₂ hf₃
   calc
     schwingerTwo params Λ f₁ f₄ * schwingerTwo params Λ f₂ f₃
         ≤ schwingerN params Λ 4 ![f₁, f₄, f₂, f₃] := h
@@ -514,7 +495,7 @@ theorem pairing_subtracted_four_point_nonneg (params : Phi4Params) (Λ : Rectang
     (hf₁ : ∀ x, 0 ≤ f₁ x) (hf₂ : ∀ x, 0 ≤ f₂ x)
     (hf₃ : ∀ x, 0 ≤ f₃ x) (hf₄ : ∀ x, 0 ≤ f₄ x) :
     0 ≤ truncatedFourPoint12 params Λ f₁ f₂ f₃ f₄ := by
-  have h := griffiths_second params Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
+  have h := CorrelationGKSSecondModel.griffiths_second (params := params) Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
   unfold truncatedFourPoint12
   linarith
 
@@ -544,28 +525,6 @@ theorem pairing_subtracted_four_point_nonneg_14_23
   unfold truncatedFourPoint14
   linarith
 
-/-! ## FKG Inequality -/
-
-/-- **FKG inequality**: For the φ⁴₂ measure, monotone increasing functions
-    are positively correlated:
-      ⟨F · G⟩ ≥ ⟨F⟩ · ⟨G⟩
-    for F, G monotone increasing (in the sense of distributions).
-
-    This is a far-reaching generalization of GKS-I and implies, among other things,
-    that the 2-point function dominates the truncated 4-point function. -/
-theorem fkg_inequality (params : Phi4Params) (Λ : Rectangle)
-    [CorrelationFKGModel params]
-    (F G : FieldConfig2D → ℝ)
-    (hF_mono : ∀ ω₁ ω₂ : FieldConfig2D,
-      (∀ f, (∀ x, 0 ≤ f x) → ω₁ f ≤ ω₂ f) → F ω₁ ≤ F ω₂)
-    (hG_mono : ∀ ω₁ ω₂ : FieldConfig2D,
-      (∀ f, (∀ x, 0 ≤ f x) → ω₁ f ≤ ω₂ f) → G ω₁ ≤ G ω₂) :
-    (∫ ω, F ω ∂(finiteVolumeMeasure params Λ)) *
-      (∫ ω, G ω ∂(finiteVolumeMeasure params Λ)) ≤
-    ∫ ω, F ω * G ω ∂(finiteVolumeMeasure params Λ) := by
-  exact CorrelationFKGModel.fkg_inequality
-    (params := params) Λ F G hF_mono hG_mono
-
 /-- FKG implies nonnegativity of the connected finite-volume two-point function
     for nonnegative test functions. -/
 theorem connectedSchwingerTwo_nonneg
@@ -586,7 +545,7 @@ theorem connectedSchwingerTwo_nonneg
         (fun ω : FieldConfig2D => ω g) ω₁ ≤ (fun ω : FieldConfig2D => ω g) ω₂ := by
     intro ω₁ ω₂ hω
     exact hω g hg
-  have hfkg := fkg_inequality params Λ
+  have hfkg := CorrelationFKGModel.fkg_inequality (params := params) Λ
     (fun ω : FieldConfig2D => ω f)
     (fun ω : FieldConfig2D => ω g)
     hmonoF hmonoG
@@ -595,30 +554,6 @@ theorem connectedSchwingerTwo_nonneg
     simpa [schwingerN, schwingerTwo] using hfkg
   unfold connectedSchwingerTwo
   exact sub_nonneg.mpr hfkg'
-
-/-! ## Lebowitz Inequality -/
-
-/-- **Lebowitz inequality**: The 4-point Schwinger function is bounded by the
-    Gaussian (free field) prediction:
-      ⟨φ(f₁)φ(f₂)φ(f₃)φ(f₄)⟩ ≤ ⟨φ(f₁)φ(f₂)⟩⟨φ(f₃)φ(f₄)⟩
-                                    + ⟨φ(f₁)φ(f₃)⟩⟨φ(f₂)φ(f₄)⟩
-                                    + ⟨φ(f₁)φ(f₄)⟩⟨φ(f₂)φ(f₃)⟩
-    for f₁,...,f₄ ≥ 0.
-
-    This is the upper bound complementing GKS-II (which gives a lower bound).
-    Together, they "squeeze" the 4-point function near its Gaussian value
-    for weak coupling. -/
-theorem lebowitz_inequality (params : Phi4Params) (Λ : Rectangle)
-    [CorrelationLebowitzModel params]
-    (f₁ f₂ f₃ f₄ : TestFun2D)
-    (hf₁ : ∀ x, 0 ≤ f₁ x) (hf₂ : ∀ x, 0 ≤ f₂ x)
-    (hf₃ : ∀ x, 0 ≤ f₃ x) (hf₄ : ∀ x, 0 ≤ f₄ x) :
-    schwingerN params Λ 4 ![f₁, f₂, f₃, f₄] ≤
-      schwingerTwo params Λ f₁ f₂ * schwingerTwo params Λ f₃ f₄ +
-      schwingerTwo params Λ f₁ f₃ * schwingerTwo params Λ f₂ f₄ +
-      schwingerTwo params Λ f₁ f₄ * schwingerTwo params Λ f₂ f₃ := by
-  exact CorrelationLebowitzModel.lebowitz_inequality
-    (params := params) Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
 
 /-- Upper bound on the `(12)(34)` pairing-subtracted expression from Lebowitz:
     `S₄ - S₂(12)S₂(34) ≤ S₂(13)S₂(24) + S₂(14)S₂(23)`. -/
@@ -631,7 +566,7 @@ theorem pairing_subtracted_four_point_upper_bound
     truncatedFourPoint12 params Λ f₁ f₂ f₃ f₄ ≤
       schwingerTwo params Λ f₁ f₃ * schwingerTwo params Λ f₂ f₄ +
       schwingerTwo params Λ f₁ f₄ * schwingerTwo params Λ f₂ f₃ := by
-  have h := lebowitz_inequality params Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
+  have h := CorrelationLebowitzModel.lebowitz_inequality (params := params) Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
   unfold truncatedFourPoint12
   linarith
 
@@ -646,7 +581,7 @@ theorem pairing_subtracted_four_point_upper_bound_13_24
     truncatedFourPoint13 params Λ f₁ f₂ f₃ f₄ ≤
       schwingerTwo params Λ f₁ f₂ * schwingerTwo params Λ f₃ f₄ +
       schwingerTwo params Λ f₁ f₄ * schwingerTwo params Λ f₂ f₃ := by
-  have h := lebowitz_inequality params Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
+  have h := CorrelationLebowitzModel.lebowitz_inequality (params := params) Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
   unfold truncatedFourPoint13
   linarith
 
@@ -661,7 +596,7 @@ theorem pairing_subtracted_four_point_upper_bound_14_23
     truncatedFourPoint14 params Λ f₁ f₂ f₃ f₄ ≤
       schwingerTwo params Λ f₁ f₂ * schwingerTwo params Λ f₃ f₄ +
       schwingerTwo params Λ f₁ f₃ * schwingerTwo params Λ f₂ f₄ := by
-  have h := lebowitz_inequality params Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
+  have h := CorrelationLebowitzModel.lebowitz_inequality (params := params) Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
   unfold truncatedFourPoint14
   linarith
 
@@ -757,7 +692,7 @@ theorem cumulantFourPoint_nonpos
     (hf₁ : ∀ x, 0 ≤ f₁ x) (hf₂ : ∀ x, 0 ≤ f₂ x)
     (hf₃ : ∀ x, 0 ≤ f₃ x) (hf₄ : ∀ x, 0 ≤ f₄ x) :
     cumulantFourPoint params Λ f₁ f₂ f₃ f₄ ≤ 0 := by
-  have hleb := lebowitz_inequality params Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
+  have hleb := CorrelationLebowitzModel.lebowitz_inequality (params := params) Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
   unfold cumulantFourPoint
   linarith
 
@@ -771,7 +706,7 @@ theorem cumulantFourPoint_lower_bound
     -(schwingerTwo params Λ f₁ f₃ * schwingerTwo params Λ f₂ f₄ +
       schwingerTwo params Λ f₁ f₄ * schwingerTwo params Λ f₂ f₃) ≤
       cumulantFourPoint params Λ f₁ f₂ f₃ f₄ := by
-  have hgks := griffiths_second params Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
+  have hgks := CorrelationGKSSecondModel.griffiths_second (params := params) Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
   unfold cumulantFourPoint
   linarith
 
@@ -810,10 +745,10 @@ theorem schwinger_four_bounds_all_channels
       schwingerTwo params Λ f₁ f₂ * schwingerTwo params Λ f₃ f₄ +
       schwingerTwo params Λ f₁ f₃ * schwingerTwo params Λ f₂ f₄ +
       schwingerTwo params Λ f₁ f₄ * schwingerTwo params Λ f₂ f₃ := by
-  have h12 := griffiths_second params Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
+  have h12 := CorrelationGKSSecondModel.griffiths_second (params := params) Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
   have h13 := griffiths_second_13_24 params Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
   have h14 := griffiths_second_14_23 params Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
-  have hupper := lebowitz_inequality params Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
+  have hupper := CorrelationLebowitzModel.lebowitz_inequality (params := params) Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
   constructor
   · exact max_le h12 (max_le h13 h14)
   · exact hupper
@@ -834,7 +769,7 @@ theorem cumulantFourPoint_lower_bounds_all_channels
     -(schwingerTwo params Λ f₁ f₂ * schwingerTwo params Λ f₃ f₄ +
       schwingerTwo params Λ f₁ f₃ * schwingerTwo params Λ f₂ f₄)
       ≤ cumulantFourPoint params Λ f₁ f₂ f₃ f₄ := by
-  have h12 := griffiths_second params Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
+  have h12 := CorrelationGKSSecondModel.griffiths_second (params := params) Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
   have h13 := griffiths_second_13_24 params Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
   have h14 := griffiths_second_14_23 params Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
   unfold cumulantFourPoint

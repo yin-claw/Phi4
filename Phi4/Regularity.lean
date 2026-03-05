@@ -41,23 +41,6 @@ class WickPowersModel (params : Phi4Params)
       ∃ (W : ℕ → FieldConfig2D → Spacetime2D → ℝ),
         ∀ x : Spacetime2D, MemLp (fun ω => W j ω x) p (infiniteVolumeMeasure params)
 
-/-! ## Wick powers in infinite volume -/
-
-/-- **Wick powers exist in infinite volume** (Glimm-Jaffe 12.2):
-    :φ(x)ʲ: = lim_{κ→∞} :φ_κ(x)ʲ: exists as a limit in Lᵖ(dμ)
-    for the infinite-volume measure dμ and for all p < ∞.
-
-    The key is that the UV limit and the infinite volume limit commute:
-    the UV-regularized Wick power converges in Lᵖ uniformly in the volume. -/
-theorem wick_powers_infinite_volume (params : Phi4Params) (j : ℕ)
-    [InfiniteVolumeMeasureModel params]
-    [WickPowersModel params]
-    {p : ℝ≥0∞} (hp : p ≠ ⊤) :
-    ∃ (W : ℕ → FieldConfig2D → Spacetime2D → ℝ),
-      ∀ x : Spacetime2D, MemLp (fun ω => W j ω x) p (infiniteVolumeMeasure params) := by
-  exact WickPowersModel.wick_powers_infinite_volume
-    (params := params) j hp
-
 /-! ## Integration by parts in infinite volume -/
 
 /-- The Wick cubic smeared against a test function: ∫ :φ(x)³: f(x) dx

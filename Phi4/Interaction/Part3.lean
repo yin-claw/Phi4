@@ -282,15 +282,6 @@ theorem
               simp [bad, μ, measure_toMeasurable]
       _ ≤ Cb * rb ^ n := hbadEvent n
 
-/-- Core L^p integrability endpoint from `InteractionWeightModel`. -/
-theorem exp_interaction_Lp (params : Phi4Params) (Λ : Rectangle)
-    [InteractionWeightModel params]
-    {p : ℝ≥0∞} (hp : p ≠ ⊤) :
-    MemLp (fun ω => Real.exp (-(interaction params Λ ω)))
-      p (freeFieldMeasure params.mass params.mass_pos) := by
-  exact InteractionWeightModel.exp_interaction_Lp
-    (params := params) Λ hp
-
 /-- Positivity of the partition function: Z_Λ = ∫ e^{-V_Λ} dφ_C > 0. -/
 theorem partition_function_pos (params : Phi4Params)
     [InteractionWeightModel params]
@@ -301,7 +292,8 @@ theorem partition_function_pos (params : Phi4Params)
     freeFieldMeasure_isProbability params.mass params.mass_pos
   have hLp : MemLp (fun ω => Real.exp (-(interaction params Λ ω)))
       (1 : ℝ≥0∞) (freeFieldMeasure params.mass params.mass_pos) :=
-    exp_interaction_Lp params Λ (p := (1 : ℝ≥0∞)) (by norm_num)
+    InteractionWeightModel.exp_interaction_Lp
+      (params := params) (Λ := Λ) (p := (1 : ℝ≥0∞)) (by norm_num)
   have hIntExp : Integrable (fun ω => Real.exp (-(interaction params Λ ω)))
       (freeFieldMeasure params.mass params.mass_pos) :=
     (memLp_one_iff_integrable.mp hLp)
@@ -316,7 +308,8 @@ theorem partition_function_integrable (params : Phi4Params)
         (freeFieldMeasure params.mass params.mass_pos) := by
   have hLp : MemLp (fun ω => Real.exp (-(interaction params Λ ω)))
       (1 : ℝ≥0∞) (freeFieldMeasure params.mass params.mass_pos) :=
-    exp_interaction_Lp params Λ (p := (1 : ℝ≥0∞)) (by norm_num)
+    InteractionWeightModel.exp_interaction_Lp
+      (params := params) (Λ := Λ) (p := (1 : ℝ≥0∞)) (by norm_num)
   exact (memLp_one_iff_integrable.mp hLp)
 
 end

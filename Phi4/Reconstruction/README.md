@@ -1,27 +1,16 @@
 # Reconstruction Module Guide
 
 This folder contains the split implementation of the reconstruction stage
-(`Phi4/Reconstruction.lean` now imports `Part3`, which imports the earlier parts).
+(`Part3` imports `Part2`, which imports `Part1Core`).
 
 Goal: formalize the Glimm-Jaffe/OS route from Euclidean Schwinger data to
 Wightman QFT data for `phi^4_2`.
 
 ## File map
 
-- `Part1.lean`
-  - Thin compatibility import shim for the `Part1*` split.
 - `Part1Core.lean`
   - Linear-growth and product-tensor infrastructure.
   - Interfaces and bridge lemmas used to feed reconstruction inputs.
-- `Part1Tail.lean`
-  - Continuation of Part 1 infrastructure:
-    shifted-moment/Wick-sublevel constructive routes to
-    `ReconstructionLinearGrowthModel` and `ReconstructionInputModel`,
-    plus reconstruction-step endpoint bridges.
-  - Key declarations include
-    `gap_phi4_linear_growth_of_zero_mode_normalization`,
-    `gap_phi4_linear_growth`,
-    and `gap_phi4_wightman_reconstruction_step`.
 - `Part2.lean`
   - OS4 weak-coupling clustering and connected/cumulant bounds.
   - Infinite-volume 2-point bilinear/positivity inequalities reused downstream.
@@ -36,7 +25,7 @@ Wightman QFT data for `phi^4_2`.
 
 ## Dependency flow
 
-1. `Part1` builds explicit linear-growth/reconstruction inputs.
+1. `Part1Core` builds explicit linear-growth/reconstruction inputs.
 2. `Part2` supplies OS4 decay and positivity/cumulant controls.
 3. `Part3` consumes those inputs to produce Wightman existence and axiom-level outputs.
 

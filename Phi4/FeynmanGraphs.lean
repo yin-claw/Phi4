@@ -85,19 +85,6 @@ theorem wicks_recursive (mass : ℝ) (hmass : 0 < mass)
   simpa [GaussianField.covariance] using
     (GaussianField.wick_recursive (freeCovarianceCLM mass hmass) n f₀ g)
 
-/-- **Wick's theorem** (Proposition 8.3.1): For the Gaussian measure dφ_C,
-    ∫ φ(f₁)⋯φ(f_{2n}) dφ_C = Σ_{pairings π} Π_{(i,j)∈π} C(fᵢ, fⱼ)
-    and the integral vanishes for odd numbers of fields. -/
-theorem wicks_theorem_even (mass : ℝ) (hmass : 0 < mass)
-    [GaussianWickExpansionModel mass hmass]
-    (n : ℕ) (f : Fin (2 * n) → TestFun2D) :
-    ∃ (pairings : Finset (Pairing (2 * n))),
-      ∫ ω, (∏ i, ω (f i)) ∂(freeFieldMeasure mass hmass) =
-        ∑ π ∈ pairings, ∏ p ∈ π.pairs,
-          GaussianField.covariance (freeCovarianceCLM mass hmass) (f p.1) (f p.2) := by
-  exact GaussianWickExpansionModel.wicks_theorem_even
-    (mass := mass) (hmass := hmass) n f
-
 theorem wicks_theorem_odd (mass : ℝ) (hmass : 0 < mass)
     (n : ℕ) (f : Fin (2 * n + 1) → TestFun2D) :
     ∫ ω, (∏ i, ω (f i)) ∂(freeFieldMeasure mass hmass) = 0 :=
@@ -150,40 +137,10 @@ class FeynmanGraphEstimateModel (mass : ℝ) (hmass : 0 < mass) where
     ∃ C : ℝ, 0 < C ∧ ∀ (r : ℕ) (G : FeynmanGraph r),
       |graphIntegral G mass| ≤ C ^ G.lines.card
 
-/-- **Proposition 8.3.1**: The Gaussian integral of a product of Wick monomials
-    equals the sum of Feynman graph integrals:
-      ∫ A(φ) dφ_C = Σ_G I(G) -/
-theorem feynman_graph_expansion (mass : ℝ) (hmass : 0 < mass)
-    [FeynmanGraphEstimateModel mass hmass]
-    (r : ℕ) (f : Fin r → TestFun2D) :
-    ∃ (graphs : Finset (FeynmanGraph r)),
-      ∫ ω, (∏ i, ω (f i)) ∂(freeFieldMeasure mass hmass) =
-        ∑ G ∈ graphs, graphIntegral G mass := by
-  exact FeynmanGraphEstimateModel.feynman_graph_expansion
-    (mass := mass) (hmass := hmass) r f
-
 /-! ## Localized graph estimates
 
 The key improvement over raw Feynman graph bounds: when the test functions are
 localized in unit squares Δᵢ, the graph integral I(G) decays exponentially with
 the total distance between the squares. -/
-
-/-- **Theorem 8.5.5** (Localized graph bounds):
-    For R = ∫ w(x) Π :φ(xᵢ)^{nᵢ}: dx with w supported in Δ_{i₁} × ⋯ × Δ_{iᵣ},
-    |∫ R dφ_C| ≤ ‖w‖_{Lp} Π_{Δ} N(Δ)! × (const × m^{-1/q})^{N(Δ)}
-    where N(Δ) is the number of legs localized in square Δ.
-
-    The crucial feature is the factorial N(Δ)! per square, not N! globally.
-    This is what makes the cluster expansion converge.
-
-    The bound C^L where L = total number of lines in G is uniform over all graphs
-    with the same number of vertices and legs. -/
-theorem localized_graph_bound (mass : ℝ) (hmass : 0 < mass) :
-    [FeynmanGraphEstimateModel mass hmass] →
-    ∃ C : ℝ, 0 < C ∧ ∀ (r : ℕ) (G : FeynmanGraph r),
-      |graphIntegral G mass| ≤ C ^ G.lines.card := by
-  intro hw
-  exact FeynmanGraphEstimateModel.localized_graph_bound
-    (mass := mass) (hmass := hmass)
 
 end

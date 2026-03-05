@@ -104,23 +104,6 @@ theorem schwinger_monotone_in_volume (params : Phi4Params)
       (![f, g] : Fin 2 → TestFun2D) hfvec hsuppvec
   simpa [schwingerN_two_eq_schwingerTwo] using hmonoN
 
-/-- Monotonicity of finite-volume `k`-point Schwinger moments along the
-    exhausting rectangles, under a `SchwingerNMonotoneModel` interface. -/
-theorem schwingerN_monotone_in_volume_of_model (params : Phi4Params)
-    (k : ℕ)
-    [SchwingerNMonotoneModel params k]
-    (n₁ n₂ : ℕ) (hn₁ : 0 < n₁) (hn₂ : 0 < n₂) (h : n₁ ≤ n₂)
-    (f : Fin k → TestFun2D) (hf : ∀ i, ∀ x, 0 ≤ f i x)
-    (hfsupp : ∀ i, ∀ x ∉ (exhaustingRectangles n₁ hn₁).toSet, f i x = 0) :
-    schwingerN params (exhaustingRectangles n₁ hn₁) k f ≤
-      schwingerN params (exhaustingRectangles n₂ hn₂) k f := by
-  exact SchwingerNMonotoneModel.schwingerN_monotone
-    (params := params)
-    (Λ₁ := exhaustingRectangles n₁ hn₁)
-    (Λ₂ := exhaustingRectangles n₂ hn₂)
-    (exhaustingRectangles_mono_toSet n₁ n₂ hn₁ hn₂ h)
-    f hf hfsupp
-
 private lemma support_zero_outside_of_subset
     (f : TestFun2D) {A B : Set Spacetime2D}
     (hAB : A ⊆ B)
@@ -160,7 +143,7 @@ theorem schwingerN_uniformly_bounded_on_exhaustion
       ∀ i, ∀ x ∉ (exhaustingRectangles (n0 + 1) (Nat.succ_pos n0)).toSet, f i x = 0) :
     ∃ C : ℝ, ∀ n : ℕ,
       |schwingerN params (exhaustingRectangles (n + n0 + 1) (Nat.succ_pos _)) k f| ≤ C := by
-  rcases schwinger_uniform_bound params k f with ⟨C, hC⟩
+  rcases MultipleReflectionModel.schwinger_uniform_bound (params := params) k f with ⟨C, hC⟩
   refine ⟨C, ?_⟩
   intro n
   let Λn : Rectangle := exhaustingRectangles (n + n0 + 1) (Nat.succ_pos _)
@@ -210,11 +193,14 @@ theorem schwingerN_tendsto_iSup_of_monotone_bounded
           ∀ x ∉ (exhaustingRectangles (n + n0 + 1) (Nat.succ_pos _)).toSet, f i x = 0 := by
       intro i x hx
       exact support_zero_outside_of_subset (f i) hsub0n (hfsupp0 i) x hx
-    exact schwingerN_monotone_in_volume_of_model
+    exact SchwingerNMonotoneModel.schwingerN_monotone
       (params := params) (k := k)
-      (n + n0 + 1) (m + n0 + 1)
-      (Nat.succ_pos (n + n0)) (Nat.succ_pos (m + n0))
-      hle f hf hfsuppn
+      (Λ₁ := exhaustingRectangles (n + n0 + 1) (Nat.succ_pos (n + n0)))
+      (Λ₂ := exhaustingRectangles (m + n0 + 1) (Nat.succ_pos (m + n0)))
+      (exhaustingRectangles_mono_toSet
+        (n + n0 + 1) (m + n0 + 1)
+        (Nat.succ_pos (n + n0)) (Nat.succ_pos (m + n0)) hle)
+      f hf hfsuppn
   exact tendsto_iSup_of_monotone_abs_bounded
     (fun n : ℕ => schwingerN params (exhaustingRectangles (n + n0 + 1) (Nat.succ_pos _)) k f)
     hmono hbound
@@ -309,8 +295,13 @@ theorem schwingerN_tendsto_if_exhaustion_of_models
           ∀ i, ∀ x ∉ (exhaustingRectangles n hn).toSet, f i x = 0 := by
         intro i x hx
         exact support_zero_outside_of_subset (f i) hsub (hfsupp i) x hx
-      have hmono_nm := schwingerN_monotone_in_volume_of_model
-        (params := params) (k := k) n m hn hm hnm f hf hfsuppn
+      have hmono_nm :=
+        SchwingerNMonotoneModel.schwingerN_monotone
+          (params := params) (k := k)
+          (Λ₁ := exhaustingRectangles n hn)
+          (Λ₂ := exhaustingRectangles m hm)
+          (exhaustingRectangles_mono_toSet n m hn hm hnm)
+          f hf hfsuppn
       simpa [a, hn, hm] using hmono_nm
     · have hn0 : n = 0 := Nat.eq_zero_of_not_pos hn
       by_cases hm : 0 < m

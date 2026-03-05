@@ -242,7 +242,9 @@ private theorem finiteVolume_product_integrable
   have hprodL2 : MemLp (fun ω : FieldConfig2D => ∏ i, ω (f i)) (2 : ℝ≥0∞) μ := by
     simpa [μ] using freeField_product_memLp params.mass params.mass_pos n f (2 : ℝ≥0)
   have hwL2 : MemLp w (2 : ℝ≥0∞) μ := by
-    simpa [w, μ] using (exp_interaction_Lp params Λ (p := (2 : ℝ≥0∞)) (by norm_num))
+    simpa [w, μ] using
+      (InteractionWeightModel.exp_interaction_Lp
+        (params := params) (Λ := Λ) (p := (2 : ℝ≥0∞)) (by norm_num))
 
   have hmulInt : Integrable (fun ω : FieldConfig2D => w ω * ∏ i, ω (f i)) μ := by
     have hmulInt' : Integrable ((fun ω : FieldConfig2D => ∏ i, ω (f i)) * w) μ :=
@@ -306,7 +308,9 @@ private theorem finiteVolume_pairing_exp_integrable
               simp [X, pow_two]
     exact (memLp_two_iff_integrable_sq hXInt.aestronglyMeasurable).2 hX2Int
   have hwL2 : MemLp w (2 : ℝ≥0∞) μ := by
-    simpa [w, μ] using (exp_interaction_Lp params Λ (p := (2 : ℝ≥0∞)) (by norm_num))
+    simpa [w, μ] using
+      (InteractionWeightModel.exp_interaction_Lp
+        (params := params) (Λ := Λ) (p := (2 : ℝ≥0∞)) (by norm_num))
 
   have hmulInt : Integrable (fun ω : FieldConfig2D => X ω * w ω) μ :=
     hXL2.integrable_mul hwL2
@@ -1139,17 +1143,5 @@ class FiniteVolumeComparisonModel (params : Phi4Params) where
       (_hf : ∀ x, 0 ≤ f x) (_hg : ∀ x, 0 ≤ g x),
       schwingerTwo params Λ f g ≤
         ∫ ω, ω f * ω g ∂(freeFieldMeasure params.mass params.mass_pos)
-
-/-- The 2-point function is bounded by the free field 2-point function
-    (for the φ⁴ interaction with λ > 0). This is a consequence of the
-    Gaussian-domination / comparison inequalities for even φ⁴ models
-    (e.g. GJ 21.5, Proposition 21.5.1 and related bounds). -/
-theorem schwingerTwo_le_free (params : Phi4Params) (Λ : Rectangle)
-    [FiniteVolumeComparisonModel params]
-    (f g : TestFun2D) (hf : ∀ x, 0 ≤ f x) (hg : ∀ x, 0 ≤ g x) :
-    schwingerTwo params Λ f g ≤
-      ∫ ω, ω f * ω g ∂(freeFieldMeasure params.mass params.mass_pos) := by
-  exact FiniteVolumeComparisonModel.schwingerTwo_le_free
-    (params := params) Λ f g hf hg
 
 end
