@@ -1009,3 +1009,38 @@ primary local Glimm-Jaffe work queue.
   - `bash scripts/scratch_guard.sh` passes.
   - `scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv` passes.
   - `bash scripts/quick_gate.sh` passes.
+
+### Constructor-surface prune + guard tightening (2026-03-05)
+
+- Removed additional constructor/wrapper declarations with no standalone caller value:
+  - `finiteVolumeMeasure_isProbability_of_nonempty_interactionWeightModel`
+    (`Phi4/FiniteVolumeMeasure.lean`).
+  - `os4WeakCouplingThreshold_pos`
+    (`Phi4/OSAxioms.lean`).
+  - `latticeSchwingerNMonotoneModel_two_nonempty_of_latticeTwo`
+    (`Phi4/CorrelationInequalities.lean`) and inlined its construction path into
+    `schwingerNMonotoneModel_two_nonempty_of_lattice`.
+  - `schwingerUniformBoundModel_nonempty_of_data`,
+    `schwingerLimitModel_nonempty_of_data`,
+    `schwingerLimitModel_nonempty_of_limit_data`
+    (`Phi4/InfiniteVolumeLimit/Part1.lean`) and inlined model construction in
+    `gap_infiniteVolumeSchwingerModel_nonempty`.
+  - `reconstructionLinearGrowthModel_nonempty_of_data`
+    (`Phi4/Reconstruction/Part1Core.lean`) and inlined construction in
+    `Phi4/Reconstruction/Part1Tail.lean`.
+- Regenerated frontier report:
+  - `docs/frontier_obligations/frontier.tsv` now reports
+    `theorem .*_nonempty_of_ count = 12` (down from `17`).
+- Tightened guard baselines in `scripts/route_bloat_guard.sh`:
+  - `_nonempty_of_` max `17 -> 12`,
+  - `FiniteVolumeMeasure` theorem max `29 -> 28`,
+  - `FiniteVolumeMeasure isProbability_of` max `1 -> 0`,
+  - `InfiniteVolumeLimit.Part1` theorem max `23 -> 19`,
+  - `CorrelationInequalities` theorem max `35 -> 34`,
+  - `Reconstruction.Part3` theorem max `5 -> 3`,
+  - `Reconstruction.Part3 phi4_wightman_exists*` max `4 -> 3`.
+- Verification:
+  - `lake build Phi4.FiniteVolumeMeasure Phi4.CorrelationInequalities Phi4.InfiniteVolumeLimit.Part1 Phi4.InfiniteVolumeLimit.Part2 Phi4.InfiniteVolumeLimit.Part3 Phi4.OSAxioms Phi4.Reconstruction.Part1Core Phi4.Reconstruction.Part1Tail Phi4.Reconstruction.Part3` passes.
+  - `bash scripts/route_bloat_guard.sh` passes with tightened maxima.
+  - `scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv` passes.
+  - `bash scripts/quick_gate.sh` passes.

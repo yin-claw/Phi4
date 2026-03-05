@@ -572,22 +572,6 @@ theorem phi4_productTensor_approx_family_of_dense_range
 
 /-! ## Linear growth condition (E0') -/
 
-/-- Construct `ReconstructionLinearGrowthModel` from explicit linear-growth data. -/
-theorem reconstructionLinearGrowthModel_nonempty_of_data (params : Phi4Params)
-    [SchwingerFunctionModel params]
-    (hlinear :
-      ∃ OS : OsterwalderSchraderAxioms 1,
-        OS.S = phi4SchwingerFunctions params ∧
-        Nonempty (OSLinearGrowthCondition 1 OS)) :
-    Nonempty (ReconstructionLinearGrowthModel params) := by
-  rcases hlinear with ⟨OS, hOS, hlg_nonempty⟩
-  rcases hlg_nonempty with ⟨hlg⟩
-  exact ⟨{
-    os_package := OS
-    os_package_eq := hOS
-    linear_growth := hlg
-  }⟩
-
 /-- **Linear growth condition E0'** for the φ⁴₂ Schwinger functions, with
     explicit zeroth-mode normalization of `infiniteVolumeSchwinger`.
     This is the assumption-minimal frontier form: no interaction-weight

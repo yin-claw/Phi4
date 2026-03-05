@@ -123,10 +123,14 @@ theorem
   have hzero : ∀ f : Fin 0 → TestFun2D, infiniteVolumeSchwinger params 0 f = 1 := by
     intro f
     exact infiniteVolumeSchwinger_zero (params := params) f
-  exact reconstructionLinearGrowthModel_nonempty_of_data params
-    (hlinear :=
-      gap_phi4_linear_growth params hsmall alpha beta gamma hbeta
-        hmixed hcompat hzero hreduce hdense)
+  rcases gap_phi4_linear_growth params hsmall alpha beta gamma hbeta
+      hmixed hcompat hzero hreduce hdense with ⟨OS, hOS, hlg_nonempty⟩
+  rcases hlg_nonempty with ⟨hlg⟩
+  exact ⟨{
+    os_package := OS
+    os_package_eq := hOS
+    linear_growth := hlg
+  }⟩
 
 /-- Public linear-growth endpoint from `ReconstructionLinearGrowthModel`. -/
 theorem phi4_linear_growth (params : Phi4Params)

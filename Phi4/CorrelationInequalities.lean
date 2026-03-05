@@ -515,32 +515,25 @@ instance (priority := 85) schwingerNMonotoneFamilyModel_of_latticeFamily
     exact schwingerN_monotone_from_lattice
       (params := params) (k := k) Λ₁ Λ₂ h f hf hfΛ
 
-/-- Existing lattice two-point monotonicity data yields a generic lattice
-    monotonicity model at arity `k = 2`. -/
-theorem latticeSchwingerNMonotoneModel_two_nonempty_of_latticeTwo
-    (params : Phi4Params)
-    [LatticeSchwingerTwoMonotoneModel params] :
-    Nonempty (LatticeSchwingerNMonotoneModel params 2) := by
-  refine latticeSchwingerNMonotoneModel_nonempty_of_data params 2
-    (fun Λ L f => LatticeSchwingerTwoMonotoneModel.latticeTwo (params := params) Λ L (f 0) (f 1))
-    ?_
-  intro Λ₁ Λ₂ h f hf hfΛ ε hε
-  rcases LatticeSchwingerTwoMonotoneModel.approx_monotone_pair
-      (params := params) Λ₁ Λ₂ h
-      (f 0) (f 1) (hf 0) (hf 1) (hfΛ 0) (hfΛ 1) ε hε with
-      ⟨L₁, L₂, hmon, hclose₁, hclose₂⟩
-  refine ⟨L₁, L₂, hmon, ?_, ?_⟩
-  · simpa [schwingerN_two_eq_schwingerTwo] using hclose₁
-  · simpa [schwingerN_two_eq_schwingerTwo] using hclose₂
-
 /-- Lattice two-point monotonicity yields a `k = 2` Schwinger-moment
     monotonicity interface instance. -/
 theorem schwingerNMonotoneModel_two_nonempty_of_lattice
     (params : Phi4Params)
     [LatticeSchwingerTwoMonotoneModel params] :
     Nonempty (SchwingerNMonotoneModel params 2) := by
-  rcases latticeSchwingerNMonotoneModel_two_nonempty_of_latticeTwo
-      (params := params) with ⟨hmonoN⟩
+  have hmonoN_nonempty : Nonempty (LatticeSchwingerNMonotoneModel params 2) := by
+    refine latticeSchwingerNMonotoneModel_nonempty_of_data params 2
+      (fun Λ L f => LatticeSchwingerTwoMonotoneModel.latticeTwo (params := params) Λ L (f 0) (f 1))
+      ?_
+    intro Λ₁ Λ₂ h f hf hfΛ ε hε
+    rcases LatticeSchwingerTwoMonotoneModel.approx_monotone_pair
+        (params := params) Λ₁ Λ₂ h
+        (f 0) (f 1) (hf 0) (hf 1) (hfΛ 0) (hfΛ 1) ε hε with
+        ⟨L₁, L₂, hmon, hclose₁, hclose₂⟩
+    refine ⟨L₁, L₂, hmon, ?_, ?_⟩
+    · simpa [schwingerN_two_eq_schwingerTwo] using hclose₁
+    · simpa [schwingerN_two_eq_schwingerTwo] using hclose₂
+  rcases hmonoN_nonempty with ⟨hmonoN⟩
   letI : LatticeSchwingerNMonotoneModel params 2 := hmonoN
   exact ⟨inferInstance⟩
 

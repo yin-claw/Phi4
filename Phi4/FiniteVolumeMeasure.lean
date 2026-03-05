@@ -96,17 +96,6 @@ theorem finiteVolumeMeasure_isProbability (params : Phi4Params)
             simp
           exact ENNReal.inv_mul_cancel hne0 hneTop
 
-/-- `finiteVolumeMeasure_isProbability` from an explicit witness of
-    `InteractionWeightModel`, avoiding direct typeclass assumptions
-    at theorem-call sites. -/
-theorem finiteVolumeMeasure_isProbability_of_nonempty_interactionWeightModel
-    (params : Phi4Params) (Λ : Rectangle)
-    (hW : Nonempty (InteractionWeightModel params)) :
-    IsProbabilityMeasure (finiteVolumeMeasure params Λ) := by
-  rcases hW with ⟨hWinst⟩
-  letI : InteractionWeightModel params := hWinst
-  exact finiteVolumeMeasure_isProbability params Λ
-
 /-! ## Schwinger functions (correlation functions) -/
 
 /-- The 2-point Schwinger function in finite volume:

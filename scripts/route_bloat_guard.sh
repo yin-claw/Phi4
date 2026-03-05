@@ -4,9 +4,9 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-# Baselines captured after bloat-reduction refactor (2026-03-04):
+# Baselines captured after bloat-reduction refactor (2026-03-05):
 # - class .*Model count: 58
-# - theorem .*_nonempty_of_ count: 17
+# - theorem .*_nonempty_of_ count: 12
 # - interactionWeightModel_nonempty_of_* count: 6
 # - interactionIntegrabilityModel_nonempty_of_* count: 1
 # - gap_phi4_linear_growth variant count in Reconstruction/Part1Core.lean: 2
@@ -27,17 +27,17 @@ cd "$ROOT_DIR"
 # - Reconstruction/Part2 top-level theorem count: 1
 # - Reconstruction/Part2 *_explicit* theorem count: 0
 # - ModelBundle top-level theorem count: 0
-# - FiniteVolumeMeasure top-level theorem count: 29
-# - FiniteVolumeMeasure finiteVolumeMeasure_isProbability_of_* route count: 1
+# - FiniteVolumeMeasure top-level theorem count: 28
+# - FiniteVolumeMeasure finiteVolumeMeasure_isProbability_of_* route count: 0
 # - FiniteVolumeMeasure finiteVolumeMeasure_isProbability_of_sq_integrable_data_and_* route count: 0
-# - Reconstruction/Part3 top-level theorem count: 5
-# - Reconstruction/Part3 phi4_wightman_exists* theorem count: 4
-# - InfiniteVolumeLimit/Part1 top-level theorem count: 23
+# - Reconstruction/Part3 top-level theorem count: 3
+# - Reconstruction/Part3 phi4_wightman_exists* theorem count: 3
+# - InfiniteVolumeLimit/Part1 top-level theorem count: 19
 # - InfiniteVolumeLimit/Part1 schwingerTwo_* theorem count: 1
 # - InfiniteVolumeLimit/Part1 infinite_volume_schwinger_exists_*_of_* theorem count: 4
 # - InfiniteVolumeLimit/Part2 top-level theorem count: 11
 # - InfiniteVolumeLimit/Part3 top-level theorem count: 16
-# - CorrelationInequalities top-level theorem count: 35
+# - CorrelationInequalities top-level theorem count: 34
 # - Interaction/Part3 abs-moment forwarding wrapper count: 0
 # - OSAxioms removed no-caller `_of_data` wrappers kept at exact zero:
 #   - osaCoreModel_nonempty_of_data
@@ -80,7 +80,7 @@ cd "$ROOT_DIR"
 #   - uniformGeneratingFunctionalBoundModel_nonempty_of_data
 #   - nonlocalPhi4BoundModel_nonempty_of_data
 MAX_MODEL_CLASSES=58
-MAX_NONEMPTY_CONSTRUCTORS=17
+MAX_NONEMPTY_CONSTRUCTORS=12
 MAX_WEIGHT_ROUTES=6
 MAX_INTEGRABILITY_ROUTES=1
 MAX_LINEAR_GROWTH_ROUTES=2
@@ -100,17 +100,17 @@ MAX_INTERACTION_PART3_DOUBLEEXP_MOMENTBOUNDS_ROUTE=0
 MAX_RECON_PART2_THEOREMS=1
 MAX_RECON_PART2_EXPLICIT_ROUTES=0
 MAX_MODELBUNDLE_THEOREMS=0
-MAX_FINITE_VOLUME_THEOREMS=29
-MAX_FVM_ISPROB_ROUTES=1
+MAX_FINITE_VOLUME_THEOREMS=28
+MAX_FVM_ISPROB_ROUTES=0
 MAX_FVM_SQDATA_ROUTES=0
-MAX_RECON_PART3_THEOREMS=5
-MAX_RECON_PART3_WIGHTMAN_ROUTES=4
-MAX_IVL_PART1_THEOREMS=23
+MAX_RECON_PART3_THEOREMS=3
+MAX_RECON_PART3_WIGHTMAN_ROUTES=3
+MAX_IVL_PART1_THEOREMS=19
 MAX_IVL_PART1_SCHWINGERTWO_ROUTES=1
 MAX_IVL_PART1_EXISTS_ROUTES=4
 MAX_IVL_PART2_THEOREMS=11
 MAX_IVL_PART3_THEOREMS=16
-MAX_CORRELATION_THEOREMS=35
+MAX_CORRELATION_THEOREMS=34
 MAX_INTERACTION_PART2_EVENTUAL_LOWER_WRAPPER=0
 MAX_INTERACTION_PART2_GLOBAL_NONNEG_WRAPPER=0
 MAX_IVL_PART1_LATTICE_MONO_TWO_WRAPPER=0

@@ -430,45 +430,6 @@ class SchwingerLimitModel (params : Phi4Params) where
         Filter.atTop
         (nhds (infiniteVolumeSchwinger k f))
 
-/-- Construct `SchwingerUniformBoundModel` from explicit uniform-bound data. -/
-theorem schwingerUniformBoundModel_nonempty_of_data (params : Phi4Params)
-    (hbound : ∀ (k : ℕ) (f : Fin k → TestFun2D),
-      ∃ C : ℝ, ∀ (n : ℕ) (hn : 0 < n),
-        |schwingerN params (exhaustingRectangles n hn) k f| ≤ C) :
-    Nonempty (SchwingerUniformBoundModel params) := by
-  exact ⟨{ schwinger_uniformly_bounded := hbound }⟩
-
-/-- Construct `SchwingerLimitModel` from explicit limiting moments and
-    convergence data along the standard exhaustion sequence. -/
-theorem schwingerLimitModel_nonempty_of_data (params : Phi4Params)
-    (S : ∀ (k : ℕ), (Fin k → TestFun2D) → ℝ)
-    (hlim : ∀ (k : ℕ) (f : Fin k → TestFun2D),
-      Filter.Tendsto
-        (fun n : ℕ =>
-          if h : 0 < n then schwingerN params (exhaustingRectangles n h) k f else 0)
-        Filter.atTop
-        (nhds (S k f))) :
-    Nonempty (SchwingerLimitModel params) := by
-  exact ⟨{
-    infiniteVolumeSchwinger := S
-    infiniteVolumeSchwinger_tendsto := hlim
-  }⟩
-
-/-- Construct `SchwingerLimitModel` from existence-form limit data by choosing
-    a limiting moment for each `(k,f)`. -/
-theorem schwingerLimitModel_nonempty_of_limit_data (params : Phi4Params)
-    (hlim : ∀ (k : ℕ) (f : Fin k → TestFun2D),
-      ∃ S : ℝ, Filter.Tendsto
-        (fun n : ℕ =>
-          if h : 0 < n then schwingerN params (exhaustingRectangles n h) k f else 0)
-        Filter.atTop (nhds S)) :
-    Nonempty (SchwingerLimitModel params) := by
-  classical
-  refine schwingerLimitModel_nonempty_of_data params
-    (fun k f => (hlim k f).choose) ?_
-  intro k f
-  exact (hlim k f).choose_spec
-
 /-- Any full infinite-volume Schwinger model provides the uniform-bound
     subinterface. -/
 instance (priority := 100) schwingerUniformBoundModel_of_infiniteVolumeSchwinger
@@ -584,8 +545,16 @@ theorem gap_infiniteVolumeSchwingerModel_nonempty (params : Phi4Params)
           if h : 0 < n then schwingerN params (exhaustingRectangles n h) k f else 0)
         Filter.atTop (nhds S)) :
     Nonempty (InfiniteVolumeSchwingerModel params) := by
-  rcases schwingerUniformBoundModel_nonempty_of_data params hbound with ⟨hboundModel⟩
-  rcases schwingerLimitModel_nonempty_of_limit_data params hlim with ⟨hlimModel⟩
+  classical
+  let hboundModel : SchwingerUniformBoundModel params := {
+    schwinger_uniformly_bounded := hbound
+  }
+  let hlimModel : SchwingerLimitModel params := {
+    infiniteVolumeSchwinger := fun k f => (hlim k f).choose
+    infiniteVolumeSchwinger_tendsto := by
+      intro k f
+      exact (hlim k f).choose_spec
+  }
   letI : SchwingerUniformBoundModel params := hboundModel
   letI : SchwingerLimitModel params := hlimModel
   exact ⟨inferInstance⟩

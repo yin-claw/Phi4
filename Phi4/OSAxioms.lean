@@ -301,14 +301,6 @@ def os4WeakCouplingThreshold (params : Phi4Params)
     [OSE4ClusterModel params] : ℝ :=
   OSE4ClusterModel.weak_coupling_threshold (params := params)
 
-/-- Positivity of the canonical weak-coupling threshold. -/
-theorem os4WeakCouplingThreshold_pos (params : Phi4Params)
-    [SchwingerFunctionModel params]
-    [OSE4ClusterModel params] :
-    0 < os4WeakCouplingThreshold params := by
-  simpa [os4WeakCouplingThreshold] using
-    OSE4ClusterModel.weak_coupling_threshold_pos (params := params)
-
 /-- E4 cluster property extracted from `OSE4ClusterModel` under weak coupling. -/
 theorem phi4_e4_cluster_of_weak_coupling (params : Phi4Params)
     [SchwingerFunctionModel params]
