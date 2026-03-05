@@ -416,69 +416,6 @@ theorem standardSeq_succ_uniform_integral_bound_of_partition_bound
   · have hq : 0 < p.toReal := ENNReal.toReal_pos hp0 hpTop
     simpa using hpartition p.toReal hq
 
-/-- Construct `InteractionWeightModel` from:
-    1) per-volume polynomial-decay squared-moment bounds for shifted cutoff
-       deviations (`C(Λ) * (n+1)^(-β)` with `β > 1`), and
-    2) per-volume uniform shifted-cutoff partition-function bounds
-       `∫ exp(-q * interactionCutoff(κ_{n+1})) ≤ D(Λ, q)`.
-
-    This is the assumption-explicit hard-core WP1 assembly route:
-    quantitative UV-difference control + uniform cutoff partition bounds imply
-    Boltzmann-weight `Lᵖ` integrability of the limiting interaction. -/
-theorem interactionWeightModel_nonempty_of_sq_moment_polynomial_bound_per_volume_and_uniform_partition_bound
-    (params : Phi4Params)
-    (β : ℝ) (hβ : 1 < β)
-    (C : Rectangle → ℝ)
-    (hC_nonneg : ∀ Λ : Rectangle, 0 ≤ C Λ)
-    (hInt :
-      ∀ (Λ : Rectangle) (n : ℕ),
-        Integrable
-          (fun ω : FieldConfig2D =>
-            (interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω - interaction params Λ ω) ^ 2)
-          (freeFieldMeasure params.mass params.mass_pos))
-    (hM :
-      ∀ (Λ : Rectangle) (n : ℕ),
-        ∫ ω : FieldConfig2D,
-          (interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω - interaction params Λ ω) ^ 2
-          ∂(freeFieldMeasure params.mass params.mass_pos)
-        ≤ C Λ * (↑(n + 1) : ℝ) ^ (-β))
-    (hcutoff_meas :
-      ∀ (Λ : Rectangle) (n : ℕ),
-        AEStronglyMeasurable
-          (fun ω : FieldConfig2D => interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω)
-          (freeFieldMeasure params.mass params.mass_pos))
-    (hpartition :
-      ∀ (Λ : Rectangle) (q : ℝ), 0 < q →
-        ∃ D : ℝ,
-          (∀ n : ℕ,
-            Integrable
-              (fun ω : FieldConfig2D =>
-                Real.exp (-(q * interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω)))
-              (freeFieldMeasure params.mass params.mass_pos)) ∧
-          (∀ n : ℕ,
-            ∫ ω : FieldConfig2D,
-              Real.exp (-(q * interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω))
-              ∂(freeFieldMeasure params.mass params.mass_pos) ≤ D)) :
-    Nonempty (InteractionWeightModel params) := by
-  have htend :
-      ∀ (Λ : Rectangle),
-        ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
-          Filter.Tendsto
-            (fun n : ℕ => interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω)
-            Filter.atTop
-            (nhds (interaction params Λ ω)) := by
-    intro Λ
-    exact
-      interactionCutoff_standardSeq_succ_tendsto_ae_of_sq_moment_polynomial_bound_to_interaction
-        (params := params) (Λ := Λ) (C := C Λ) (β := β)
-        (hC := hC_nonneg Λ) hβ (hInt Λ) (hM Λ)
-  refine interactionWeightModel_nonempty_of_standardSeq_succ_tendsto_ae_and_uniform_integral_bound
-    (params := params) htend hcutoff_meas ?_
-  intro Λ p hpTop
-  exact standardSeq_succ_uniform_integral_bound_of_partition_bound
-    (params := params) (Λ := Λ) (hpartition := hpartition Λ) hpTop
-
-
 /-- Geometric-series closure:
     if `A, B ≥ 0` and `s, t ≥ 0`, then
     `A*s^n + B*t^n ≤ (A+B) * (max s t)^n` for every `n`. -/
