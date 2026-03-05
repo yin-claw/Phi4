@@ -65,8 +65,8 @@ These are the key endpoint theorems and their remaining assumptions:
    - Derived consequence already formalized:
      - `connectedTwoPoint_decay_eventually_small` gives `ε`-`R` clustering for
        fixed test-function pairs from the exponential-decay interface.
-   - Trusted interface alternative:
-     - `phi4_wightman_exists_of_interfaces` requires
+   - Trusted interface endpoint:
+     - `phi4_wightman_exists` requires
        `ReconstructionLinearGrowthModel params` and
        `WightmanReconstructionModel params` explicitly.
    - Downstream corollaries:
@@ -87,8 +87,8 @@ These are the key endpoint theorems and their remaining assumptions:
 4. `phi4_satisfies_OS` in `Phi4/OSAxioms.lean` vs trusted interface path
    - Frontier theorem `phi4_satisfies_OS` still traverses theorem-level gaps
      (`gap_osDistributionE2_nonempty`, `gap_osE4Cluster_nonempty`).
-   - Trusted interface alternative:
-     - `phi4_satisfies_OS_of_interfaces` with explicit weak-coupling smallness.
+   - Trusted interface theorem:
+     - `phi4_satisfies_OS` with explicit weak-coupling smallness.
 
 ## 3. Interface Inventory (Current Assumption Surface)
 

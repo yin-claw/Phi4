@@ -11,25 +11,6 @@ open scoped ENNReal NNReal
 
 /-! ## Wightman reconstruction -/
 
-/-- Class-free reconstruction step: linear growth plus an OS-to-Wightman
-    reconstruction rule yields Wightman existence for a Schwinger family `S`. -/
-theorem wightman_exists_of_linear_growth_and_reconstruction
-    (S : SchwingerFunctions 1)
-    (hlinear : ∃ OS : OsterwalderSchraderAxioms 1,
-      OS.S = S ∧ Nonempty (OSLinearGrowthCondition 1 OS))
-    (hreconstruct : ∀ (OS : OsterwalderSchraderAxioms 1),
-      OSLinearGrowthCondition 1 OS →
-        ∃ (Wfn : WightmanFunctions 1),
-          IsWickRotationPair OS.S Wfn.W) :
-    ∃ (Wfn : WightmanFunctions 1),
-      ∃ (OS : OsterwalderSchraderAxioms 1),
-        OS.S = S ∧ IsWickRotationPair OS.S Wfn.W := by
-  rcases hlinear with ⟨OS, hOS_lg⟩
-  rcases hOS_lg with ⟨hS, hlg_nonempty⟩
-  rcases hlg_nonempty with ⟨hlg⟩
-  rcases hreconstruct OS hlg with ⟨Wfn, hWR⟩
-  exact ⟨Wfn, OS, hS, hWR⟩
-
 /-- Construct Wightman existence from explicit linear-growth and reconstruction
     rule data at fixed `params`. -/
 theorem phi4_wightman_exists_of_explicit_data (params : Phi4Params) :
@@ -45,9 +26,12 @@ theorem phi4_wightman_exists_of_explicit_data (params : Phi4Params) :
       ∃ (OS : OsterwalderSchraderAxioms 1),
         OS.S = phi4SchwingerFunctions params ∧
         IsWickRotationPair OS.S Wfn.W := by
-  intro hos hlinear hreconstruct
-  exact wightman_exists_of_linear_growth_and_reconstruction
-    (S := phi4SchwingerFunctions params) hlinear hreconstruct
+  intro _ hlinear hreconstruct
+  rcases hlinear with ⟨OS, hOS_lg⟩
+  rcases hOS_lg with ⟨hS, hlg_nonempty⟩
+  rcases hlg_nonempty with ⟨hlg⟩
+  rcases hreconstruct OS hlg with ⟨Wfn, hWR⟩
+  exact ⟨Wfn, OS, hS, hWR⟩
 
 /-- Direct weak-coupling endpoint from:
     1) interface-level OS package data under weak coupling,
@@ -160,22 +144,6 @@ theorem
     (hlinear := ReconstructionLinearGrowthModel.phi4_linear_growth (params := params))
     (hreconstruct := WightmanReconstructionModel.wightman_reconstruction (params := params))
 
-/-- Same endpoint as
-    `phi4_wightman_exists_of_interfaces_of_sq_integrable_data_and_linear_threshold_geometric_exp_moment_and_double_exp_moment_geometric`,
-    with weaker core assumptions: no separate `q`-level integrability
-    hypothesis is required. -/
-theorem phi4_wightman_exists_of_interfaces (params : Phi4Params)
-    [SchwingerFunctionModel params]
-    [ReconstructionLinearGrowthModel params]
-    [WightmanReconstructionModel params] :
-    ∃ (Wfn : WightmanFunctions 1),
-      ∃ (OS : OsterwalderSchraderAxioms 1),
-        OS.S = phi4SchwingerFunctions params ∧
-        IsWickRotationPair OS.S Wfn.W := by
-  exact phi4_wightman_exists_of_explicit_data params
-    (hlinear := ReconstructionLinearGrowthModel.phi4_linear_growth (params := params))
-    (hreconstruct := WightmanReconstructionModel.wightman_reconstruction (params := params))
-
 /-- **Main Theorem**: The φ⁴₂ theory defines a Wightman quantum field theory.
 
     By the OS reconstruction theorem (from OSreconstruction),
@@ -195,6 +163,8 @@ theorem phi4_wightman_exists (params : Phi4Params)
       ∃ (OS : OsterwalderSchraderAxioms 1),
         OS.S = phi4SchwingerFunctions params ∧
         IsWickRotationPair OS.S Wfn.W := by
-  exact phi4_wightman_exists_of_interfaces params
+  exact phi4_wightman_exists_of_explicit_data params
+    (hlinear := ReconstructionLinearGrowthModel.phi4_linear_growth (params := params))
+    (hreconstruct := WightmanReconstructionModel.wightman_reconstruction (params := params))
 
 end

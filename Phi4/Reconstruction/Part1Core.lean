@@ -627,7 +627,7 @@ theorem gap_phi4_linear_growth_of_zero_mode_normalization (params : Phi4Params)
     ∃ OS : OsterwalderSchraderAxioms 1,
       OS.S = phi4SchwingerFunctions params ∧
       Nonempty (OSLinearGrowthCondition 1 OS) := by
-  rcases phi4_satisfies_OS_of_interfaces params hsmall with ⟨OS, hS⟩
+  rcases phi4_satisfies_OS params hsmall with ⟨OS, hS⟩
   have hnormalized : ∀ g : SchwartzNPoint 1 0, phi4SchwingerFunctions params 0 g = g 0 :=
     phi4_normalized_order0_of_linear_and_compat_of_zero params hcompat hzero
   exact phi4_linear_growth_of_mixed_bound_productTensor_approx_and_given_normalized_order0

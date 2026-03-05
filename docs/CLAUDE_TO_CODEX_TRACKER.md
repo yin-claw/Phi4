@@ -944,3 +944,48 @@ primary local Glimm-Jaffe work queue.
   - `scripts/nonempty_route_inventory.sh --emit docs/route_inventory/nonempty_inventory.tsv` passes.
   - `bash scripts/route_bloat_guard.sh` passes.
   - `bash scripts/quick_gate.sh` passes.
+
+### Reconstruction/Part3 wrapper-chain collapse (2026-03-04, same cycle)
+
+- Pruned redundant wrapper chain in `Phi4/Reconstruction/Part3.lean`:
+  - removed `wightman_exists_of_linear_growth_and_reconstruction`,
+  - removed `phi4_wightman_exists_of_interfaces`.
+- Rewired remaining canonical endpoints:
+  - `phi4_wightman_exists_of_explicit_data` now performs the reconstruction
+    extraction directly (no helper-wrapper indirection),
+  - `phi4_wightman_exists` now calls
+    `phi4_wightman_exists_of_explicit_data` directly.
+- Resulting `Reconstruction.Part3` theorem surface reduced from 5 to 3
+  declarations while preserving endpoint behavior.
+- Doc sync for stale references:
+  - updated `Phi4/AUDIT.md` and `Phi4/GAPS.md` to remove
+    `phi4_wightman_exists_of_interfaces` mentions.
+- Verification:
+  - `lake build Phi4.Reconstruction.Part3 Phi4.OSAxioms Phi4.Reconstruction.Part1Core Phi4.Reconstruction.Part1Tail` passes.
+  - `scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv` passes.
+  - `scripts/nonempty_route_inventory.sh --emit docs/route_inventory/nonempty_inventory.tsv` passes.
+  - `bash scripts/route_bloat_guard.sh` passes (notably: `Reconstruction.Part3 theorem count = 3`, `phi4_wightman_exists* routes = 3`).
+  - `bash scripts/quick_gate.sh` passes.
+
+### OSAxioms interface-alias collapse (2026-03-04, same cycle)
+
+- Removed public wrapper alias `phi4_satisfies_OS_of_interfaces` by turning the
+  interface-construction body into an internal theorem
+  `phi4_satisfies_OS_from_interfaces` in `Phi4/OSAxioms.lean`.
+- Rewired callers to canonical endpoint surface:
+  - `phi4_satisfies_OS` now delegates to
+    `phi4_satisfies_OS_from_interfaces`.
+  - `phi4_satisfies_OS_of_explicit_data` now delegates to
+    `phi4_satisfies_OS_from_interfaces`.
+  - `gap_phi4_linear_growth_of_zero_mode_normalization`
+    (`Phi4/Reconstruction/Part1Core.lean`) now calls canonical
+    `phi4_satisfies_OS` instead of the removed alias.
+- Doc sync:
+  - updated `Phi4/GAPS.md` references from
+    `phi4_satisfies_OS_of_interfaces` to `phi4_satisfies_OS`.
+- Verification:
+  - `lake build Phi4.OSAxioms Phi4.Reconstruction.Part1Core Phi4.Reconstruction.Part1Tail Phi4.Reconstruction.Part3` passes.
+  - `scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv` passes.
+  - `scripts/nonempty_route_inventory.sh --emit docs/route_inventory/nonempty_inventory.tsv` passes.
+  - `bash scripts/route_bloat_guard.sh` passes.
+  - `bash scripts/quick_gate.sh` passes.

@@ -985,9 +985,9 @@ local `sorry`.
 3. The monotonicity order used in FKG interfaces is still abstract and not yet identified with a fully internalized lattice/field order construction; this remains a closure task.
 4. Upstream OS reconstruction bridge theorem `os_to_wightman` (OSReconstruction) currently depends on `sorryAx`; by project policy it cannot be used to discharge `phi4_wightman_reconstruction_step` yet. This dependency is now isolated in `Phi4/ReconstructionUpstream.lean` rather than core `Phi4/Reconstruction.lean`.
 5. New constructive infrastructure was added in `InfiniteVolumeLimit.lean` for exhausting-sequence convergence in the two-point channel (including lattice and `k = 2` `schwingerN` variants, plus interface-style `if h : 0 < n then ... else 0` endpoints), removing a previously external boundedness hypothesis in that local convergence path.
-6. `Reconstruction/Part3.lean` exposes a trusted interface-level endpoint
-   `phi4_wightman_exists_of_interfaces`; `phi4_wightman_exists` is retained as
-   the canonical top-level theorem alias.
+6. `Reconstruction/Part3.lean` now keeps the interface endpoint surface to
+   `phi4_wightman_exists_of_explicit_data` and the canonical top-level theorem
+   `phi4_wightman_exists` (intermediate wrapper aliases removed).
 7. Thin interface-only forwarding corollaries in `Reconstruction/Part3.lean`
    (`*_of_interfaces`) were removed as no-caller wrappers; canonical corollaries
    are `phi4_selfadjoint_fields`, `phi4_locality`,
