@@ -187,11 +187,6 @@ class FreeCovarianceKernelModel (mass : ℝ) (hmass : 0 < mass) where
       GaussianField.covariance (freeCovarianceCLM mass hmass) f g =
         ∫ x, ∫ y, f x * freeCovKernel mass x y * g y
 
-/-- The covariance kernel is symmetric. -/
-theorem freeCovKernel_symm (mass : ℝ) (x y : Spacetime2D) :
-    freeCovKernel mass x y = freeCovKernel mass y x := by
-  simp only [freeCovKernel, norm_sub_rev]
-
 /-- Rewrite the free covariance kernel using the 2D Schwinger integral identity. -/
 theorem freeCovKernel_eq_besselK0
     (mass : ℝ) (hmass : 0 < mass) (x y : Spacetime2D)

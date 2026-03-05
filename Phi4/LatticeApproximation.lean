@@ -160,18 +160,6 @@ def cell (L : RectLattice Λ) (i : Fin L.Nt) (j : Fin L.Nx) : Rectangle where
       mul_lt_mul_of_pos_right hj L.spaceStep_pos
     linarith
 
-/-- Cell width equals the time mesh spacing. -/
-theorem cell_width_eq_timeStep (L : RectLattice Λ) (i : Fin L.Nt) (j : Fin L.Nx) :
-    (L.cell i j).width = L.timeStep := by
-  simp [Rectangle.width, cell]
-  ring
-
-/-- Cell height equals the space mesh spacing. -/
-theorem cell_height_eq_spaceStep (L : RectLattice Λ) (i : Fin L.Nt) (j : Fin L.Nx) :
-    (L.cell i j).height = L.spaceStep := by
-  simp [Rectangle.height, cell]
-  ring
-
 /-- Anchor point of cell `(i,j)`, chosen as its lower-left corner node. -/
 def cellAnchor (L : RectLattice Λ) (i : Fin L.Nt) (j : Fin L.Nx) : Spacetime2D :=
   L.node ⟨i.1, Nat.lt_succ_of_lt i.2⟩ ⟨j.1, Nat.lt_succ_of_lt j.2⟩

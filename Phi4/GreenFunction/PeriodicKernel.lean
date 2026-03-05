@@ -78,14 +78,6 @@ theorem shiftPoint_add_indices (L₁ L₂ : ℝ)
     shiftPoint L₁ L₂ (-m) (-n) (shiftPoint L₁ L₂ m n x) = x := by
   simpa [add_comm] using (shiftPoint_add_indices L₁ L₂ (-m) m (-n) n x).symm
 
-/-- Free covariance is invariant under simultaneous periodic lattice translation
-    of both arguments. -/
-theorem freeCovKernel_shift_both (mass L₁ L₂ : ℝ)
-    (m n : ℤ) (x y : Spacetime2D) :
-    freeCovKernel mass (shiftPoint L₁ L₂ m n x) (shiftPoint L₁ L₂ m n y) =
-      freeCovKernel mass x y := by
-  simp [freeCovKernel]
-
 /-- Finite index set `{-N, ..., N}` used in truncated periodic image sums. -/
 def periodicIndexFinset (N : ℕ) : Finset ℤ :=
   Finset.Icc (-(N : ℤ)) (N : ℤ)
@@ -93,13 +85,6 @@ def periodicIndexFinset (N : ℕ) : Finset ℤ :=
 @[simp] theorem periodicIndexFinset_zero : periodicIndexFinset 0 = ({0} : Finset ℤ) := by
   ext z
   simp [periodicIndexFinset]
-
-/-- The index set `{-N,...,N}` is stable under negation. -/
-theorem periodicIndexFinset_neg_mem (N : ℕ) {m : ℤ}
-    (hm : m ∈ periodicIndexFinset N) :
-    -m ∈ periodicIndexFinset N := by
-  simp [periodicIndexFinset] at hm ⊢
-  omega
 
 /-- One periodic image term in the method-of-images construction. -/
 def periodicKernelTerm (mass L₁ L₂ : ℝ) (m n : ℤ)
