@@ -1103,3 +1103,29 @@ primary local Glimm-Jaffe work queue.
   - `bash scripts/route_bloat_guard.sh` passes with tightened maxima.
   - `scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv` passes.
   - `bash scripts/quick_gate.sh` passes.
+
+### Lattice `k=2` route collapse to instance (2026-03-05, follow-up 3)
+
+- Removed one remaining `_nonempty_of_` route:
+  - deleted `schwingerNMonotoneModel_two_nonempty_of_lattice`
+    (`Phi4/CorrelationInequalities.lean`).
+- Replaced with direct instance construction:
+  - added `schwingerNMonotoneModel_two_of_lattice` instance in
+    `Phi4/CorrelationInequalities.lean`.
+- Updated call sites to typeclass resolution:
+  - `Phi4/InfiniteVolumeLimit/Part1.lean`,
+  - `test/task3_lattice_audit.lean` (three sites).
+- Regenerated inventories/reports:
+  - `docs/frontier_obligations/frontier.tsv`: `_nonempty_of_ count = 5`.
+  - `docs/route_inventory/nonempty_inventory.tsv`: total routes `5`,
+    zero-caller `0`, plumbing `0`.
+- Tightened guard baselines in `scripts/route_bloat_guard.sh`:
+  - `_nonempty_of_` max `6 -> 5`,
+  - `CorrelationInequalities` theorem max `32 -> 31`.
+- Verification:
+  - `lake build Phi4.CorrelationInequalities Phi4.InfiniteVolumeLimit.Part1` passes.
+  - `lake env lean test/task3_lattice_audit.lean` passes.
+  - `bash scripts/route_bloat_guard.sh` passes with tightened maxima.
+  - `scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv` passes.
+  - `scripts/nonempty_route_inventory.sh --emit docs/route_inventory/nonempty_inventory.tsv` passes.
+  - `bash scripts/quick_gate.sh` passes.

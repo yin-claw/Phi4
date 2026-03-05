@@ -6,7 +6,7 @@ cd "$ROOT_DIR"
 
 # Baselines captured after bloat-reduction refactor (2026-03-05, latest):
 # - class .*Model count: 58
-# - theorem .*_nonempty_of_ count: 6
+# - theorem .*_nonempty_of_ count: 5
 # - interactionWeightModel_nonempty_of_* count: 4
 # - interactionIntegrabilityModel_nonempty_of_* count: 0
 # - gap_phi4_linear_growth variant count in Reconstruction/Part1Core.lean: 2
@@ -37,7 +37,7 @@ cd "$ROOT_DIR"
 # - InfiniteVolumeLimit/Part1 infinite_volume_schwinger_exists_*_of_* theorem count: 4
 # - InfiniteVolumeLimit/Part2 top-level theorem count: 11
 # - InfiniteVolumeLimit/Part3 top-level theorem count: 16
-# - CorrelationInequalities top-level theorem count: 32
+# - CorrelationInequalities top-level theorem count: 31
 # - Interaction/Part3 abs-moment forwarding wrapper count: 0
 # - OSAxioms removed no-caller `_of_data` wrappers kept at exact zero:
 #   - osaCoreModel_nonempty_of_data
@@ -80,7 +80,7 @@ cd "$ROOT_DIR"
 #   - uniformGeneratingFunctionalBoundModel_nonempty_of_data
 #   - nonlocalPhi4BoundModel_nonempty_of_data
 MAX_MODEL_CLASSES=58
-MAX_NONEMPTY_CONSTRUCTORS=6
+MAX_NONEMPTY_CONSTRUCTORS=5
 MAX_WEIGHT_ROUTES=4
 MAX_INTEGRABILITY_ROUTES=0
 MAX_LINEAR_GROWTH_ROUTES=2
@@ -110,7 +110,7 @@ MAX_IVL_PART1_SCHWINGERTWO_ROUTES=1
 MAX_IVL_PART1_EXISTS_ROUTES=4
 MAX_IVL_PART2_THEOREMS=11
 MAX_IVL_PART3_THEOREMS=16
-MAX_CORRELATION_THEOREMS=32
+MAX_CORRELATION_THEOREMS=31
 MAX_INTERACTION_PART2_EVENTUAL_LOWER_WRAPPER=0
 MAX_INTERACTION_PART2_GLOBAL_NONNEG_WRAPPER=0
 MAX_IVL_PART1_LATTICE_MONO_TWO_WRAPPER=0

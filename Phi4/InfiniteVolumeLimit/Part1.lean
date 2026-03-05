@@ -353,8 +353,7 @@ theorem schwingerTwo_tendsto_if_exhaustion_of_lattice_models
       Filter.atTop
       (nhds (⨆ n : ℕ,
         schwingerTwo params (exhaustingRectangles (n + 1) (Nat.succ_pos n)) f g)) := by
-  rcases schwingerNMonotoneModel_two_nonempty_of_lattice (params := params) with ⟨hmono⟩
-  letI : SchwingerNMonotoneModel params 2 := hmono
+  letI : SchwingerNMonotoneModel params 2 := inferInstance
   have hfvec : ∀ i, ∀ x, 0 ≤ (![f, g] : Fin 2 → TestFun2D) i x := by
     intro i x
     fin_cases i
