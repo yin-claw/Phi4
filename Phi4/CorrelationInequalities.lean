@@ -487,44 +487,6 @@ def truncatedFourPoint14 (params : Phi4Params) (Λ : Rectangle)
   schwingerN params Λ 4 ![f₁, f₂, f₃, f₄] -
     schwingerTwo params Λ f₁ f₄ * schwingerTwo params Λ f₂ f₃
 
-/-- Nonnegativity of the `(12)(34)` pairing-subtracted 4-point expression:
-    `S₄ - S₂(12)S₂(34) ≥ 0`. -/
-theorem pairing_subtracted_four_point_nonneg (params : Phi4Params) (Λ : Rectangle)
-    [CorrelationGKSSecondModel params]
-    (f₁ f₂ f₃ f₄ : TestFun2D)
-    (hf₁ : ∀ x, 0 ≤ f₁ x) (hf₂ : ∀ x, 0 ≤ f₂ x)
-    (hf₃ : ∀ x, 0 ≤ f₃ x) (hf₄ : ∀ x, 0 ≤ f₄ x) :
-    0 ≤ truncatedFourPoint12 params Λ f₁ f₂ f₃ f₄ := by
-  have h := CorrelationGKSSecondModel.griffiths_second (params := params) Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
-  unfold truncatedFourPoint12
-  linarith
-
-/-- Nonnegativity of the `(13)(24)` pairing-subtracted expression:
-    `S₄ - S₂(13)S₂(24) ≥ 0`. -/
-theorem pairing_subtracted_four_point_nonneg_13_24
-    (params : Phi4Params) (Λ : Rectangle)
-    [CorrelationGKSSecondModel params]
-    (f₁ f₂ f₃ f₄ : TestFun2D)
-    (hf₁ : ∀ x, 0 ≤ f₁ x) (hf₂ : ∀ x, 0 ≤ f₂ x)
-    (hf₃ : ∀ x, 0 ≤ f₃ x) (hf₄ : ∀ x, 0 ≤ f₄ x) :
-    0 ≤ truncatedFourPoint13 params Λ f₁ f₂ f₃ f₄ := by
-  have h := griffiths_second_13_24 params Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
-  unfold truncatedFourPoint13
-  linarith
-
-/-- Nonnegativity of the `(14)(23)` pairing-subtracted expression:
-    `S₄ - S₂(14)S₂(23) ≥ 0`. -/
-theorem pairing_subtracted_four_point_nonneg_14_23
-    (params : Phi4Params) (Λ : Rectangle)
-    [CorrelationGKSSecondModel params]
-    (f₁ f₂ f₃ f₄ : TestFun2D)
-    (hf₁ : ∀ x, 0 ≤ f₁ x) (hf₂ : ∀ x, 0 ≤ f₂ x)
-    (hf₃ : ∀ x, 0 ≤ f₃ x) (hf₄ : ∀ x, 0 ≤ f₄ x) :
-    0 ≤ truncatedFourPoint14 params Λ f₁ f₂ f₃ f₄ := by
-  have h := griffiths_second_14_23 params Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
-  unfold truncatedFourPoint14
-  linarith
-
 /-- FKG implies nonnegativity of the connected finite-volume two-point function
     for nonnegative test functions. -/
 theorem connectedSchwingerTwo_nonneg
@@ -554,51 +516,6 @@ theorem connectedSchwingerTwo_nonneg
     simpa [schwingerN, schwingerTwo] using hfkg
   unfold connectedSchwingerTwo
   exact sub_nonneg.mpr hfkg'
-
-/-- Upper bound on the `(12)(34)` pairing-subtracted expression from Lebowitz:
-    `S₄ - S₂(12)S₂(34) ≤ S₂(13)S₂(24) + S₂(14)S₂(23)`. -/
-theorem pairing_subtracted_four_point_upper_bound
-    (params : Phi4Params) (Λ : Rectangle)
-    [CorrelationLebowitzModel params]
-    (f₁ f₂ f₃ f₄ : TestFun2D)
-    (hf₁ : ∀ x, 0 ≤ f₁ x) (hf₂ : ∀ x, 0 ≤ f₂ x)
-    (hf₃ : ∀ x, 0 ≤ f₃ x) (hf₄ : ∀ x, 0 ≤ f₄ x) :
-    truncatedFourPoint12 params Λ f₁ f₂ f₃ f₄ ≤
-      schwingerTwo params Λ f₁ f₃ * schwingerTwo params Λ f₂ f₄ +
-      schwingerTwo params Λ f₁ f₄ * schwingerTwo params Λ f₂ f₃ := by
-  have h := CorrelationLebowitzModel.lebowitz_inequality (params := params) Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
-  unfold truncatedFourPoint12
-  linarith
-
-/-- Upper bound on the `(13)(24)` pairing-subtracted expression from Lebowitz:
-    `S₄ - S₂(13)S₂(24) ≤ S₂(12)S₂(34) + S₂(14)S₂(23)`. -/
-theorem pairing_subtracted_four_point_upper_bound_13_24
-    (params : Phi4Params) (Λ : Rectangle)
-    [CorrelationLebowitzModel params]
-    (f₁ f₂ f₃ f₄ : TestFun2D)
-    (hf₁ : ∀ x, 0 ≤ f₁ x) (hf₂ : ∀ x, 0 ≤ f₂ x)
-    (hf₃ : ∀ x, 0 ≤ f₃ x) (hf₄ : ∀ x, 0 ≤ f₄ x) :
-    truncatedFourPoint13 params Λ f₁ f₂ f₃ f₄ ≤
-      schwingerTwo params Λ f₁ f₂ * schwingerTwo params Λ f₃ f₄ +
-      schwingerTwo params Λ f₁ f₄ * schwingerTwo params Λ f₂ f₃ := by
-  have h := CorrelationLebowitzModel.lebowitz_inequality (params := params) Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
-  unfold truncatedFourPoint13
-  linarith
-
-/-- Upper bound on the `(14)(23)` pairing-subtracted expression from Lebowitz:
-    `S₄ - S₂(14)S₂(23) ≤ S₂(12)S₂(34) + S₂(13)S₂(24)`. -/
-theorem pairing_subtracted_four_point_upper_bound_14_23
-    (params : Phi4Params) (Λ : Rectangle)
-    [CorrelationLebowitzModel params]
-    (f₁ f₂ f₃ f₄ : TestFun2D)
-    (hf₁ : ∀ x, 0 ≤ f₁ x) (hf₂ : ∀ x, 0 ≤ f₂ x)
-    (hf₃ : ∀ x, 0 ≤ f₃ x) (hf₄ : ∀ x, 0 ≤ f₄ x) :
-    truncatedFourPoint14 params Λ f₁ f₂ f₃ f₄ ≤
-      schwingerTwo params Λ f₁ f₂ * schwingerTwo params Λ f₃ f₄ +
-      schwingerTwo params Λ f₁ f₃ * schwingerTwo params Λ f₂ f₄ := by
-  have h := CorrelationLebowitzModel.lebowitz_inequality (params := params) Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
-  unfold truncatedFourPoint14
-  linarith
 
 /-! ## Fully connected 4-point bounds -/
 
@@ -681,41 +598,5 @@ theorem cumulantFourPoint_lower_bounds_all_channels
   · constructor
     · linarith
     · linarith
-
-/-- Alternative absolute-value bound using the `(13)(24)` GKS-II lower channel. -/
-theorem cumulantFourPoint_abs_bound_alt13
-    (params : Phi4Params) (Λ : Rectangle)
-    [CorrelationGKSSecondModel params]
-    [CorrelationLebowitzModel params]
-    (f₁ f₂ f₃ f₄ : TestFun2D)
-    (hf₁ : ∀ x, 0 ≤ f₁ x) (hf₂ : ∀ x, 0 ≤ f₂ x)
-    (hf₃ : ∀ x, 0 ≤ f₃ x) (hf₄ : ∀ x, 0 ≤ f₄ x) :
-    |cumulantFourPoint params Λ f₁ f₂ f₃ f₄| ≤
-      schwingerTwo params Λ f₁ f₂ * schwingerTwo params Λ f₃ f₄ +
-      schwingerTwo params Λ f₁ f₄ * schwingerTwo params Λ f₂ f₃ := by
-  have hnonpos := cumulantFourPoint_nonpos params Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
-  have hLowerAll := cumulantFourPoint_lower_bounds_all_channels
-    params Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
-  rcases hLowerAll with ⟨_, h13, _⟩
-  rw [abs_of_nonpos hnonpos]
-  linarith
-
-/-- Alternative absolute-value bound using the `(14)(23)` GKS-II lower channel. -/
-theorem cumulantFourPoint_abs_bound_alt14
-    (params : Phi4Params) (Λ : Rectangle)
-    [CorrelationGKSSecondModel params]
-    [CorrelationLebowitzModel params]
-    (f₁ f₂ f₃ f₄ : TestFun2D)
-    (hf₁ : ∀ x, 0 ≤ f₁ x) (hf₂ : ∀ x, 0 ≤ f₂ x)
-    (hf₃ : ∀ x, 0 ≤ f₃ x) (hf₄ : ∀ x, 0 ≤ f₄ x) :
-    |cumulantFourPoint params Λ f₁ f₂ f₃ f₄| ≤
-      schwingerTwo params Λ f₁ f₂ * schwingerTwo params Λ f₃ f₄ +
-      schwingerTwo params Λ f₁ f₃ * schwingerTwo params Λ f₂ f₄ := by
-  have hnonpos := cumulantFourPoint_nonpos params Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
-  have hLowerAll := cumulantFourPoint_lower_bounds_all_channels
-    params Λ f₁ f₂ f₃ f₄ hf₁ hf₂ hf₃ hf₄
-  rcases hLowerAll with ⟨_, _, h14⟩
-  rw [abs_of_nonpos hnonpos]
-  linarith
 
 end
