@@ -195,33 +195,6 @@ class InteractionWeightModel (params : Phi4Params) where
       MemLp (fun ω => Real.exp (-(interaction params Λ ω)))
         p (freeFieldMeasure params.mass params.mass_pos)
 
-/-- Build cutoff `L²` control from a square-integrability hypothesis. -/
-theorem interactionCutoff_memLp_two_of_sq_integrable
-    (params : Phi4Params) (Λ : Rectangle) (κ : UVCutoff)
-    (hmeas :
-      AEStronglyMeasurable (interactionCutoff params Λ κ)
-        (freeFieldMeasure params.mass params.mass_pos))
-    (hsq :
-      Integrable (fun ω => (interactionCutoff params Λ κ ω) ^ 2)
-        (freeFieldMeasure params.mass params.mass_pos)) :
-    MemLp (interactionCutoff params Λ κ) 2
-      (freeFieldMeasure params.mass params.mass_pos) := by
-  exact (memLp_two_iff_integrable_sq hmeas).2 hsq
-
-/-- Build limiting-interaction `L²` control from a square-integrability
-    hypothesis. -/
-theorem interaction_memLp_two_of_sq_integrable
-    (params : Phi4Params) (Λ : Rectangle)
-    (hmeas :
-      AEStronglyMeasurable (interaction params Λ)
-        (freeFieldMeasure params.mass params.mass_pos))
-    (hsq :
-      Integrable (fun ω => (interaction params Λ ω) ^ 2)
-        (freeFieldMeasure params.mass params.mass_pos)) :
-    MemLp (interaction params Λ) 2
-      (freeFieldMeasure params.mass params.mass_pos) := by
-  exact (memLp_two_iff_integrable_sq hmeas).2 hsq
-
 /-- Construct `InteractionUVModel` from:
     1) cutoff-square integrability + measurability,
     2) UV `L²` convergence data,
@@ -265,16 +238,12 @@ theorem interactionUVModel_nonempty_of_sq_integrable_data
   exact ⟨{
     interactionCutoff_in_L2 := by
       intro Λ κ
-      exact interactionCutoff_memLp_two_of_sq_integrable
-        (params := params) (Λ := Λ) (κ := κ)
-        (hcutoff_meas Λ κ) (hcutoff_sq Λ κ)
+      exact (memLp_two_iff_integrable_sq (hcutoff_meas Λ κ)).2 (hcutoff_sq Λ κ)
     interactionCutoff_converges_L2 := hcutoff_conv
     interactionCutoff_tendsto_ae := hcutoff_ae
     interaction_in_L2 := by
       intro Λ
-      exact interaction_memLp_two_of_sq_integrable
-        (params := params) (Λ := Λ)
-        (hinteraction_meas Λ) (hinteraction_sq Λ)
+      exact (memLp_two_iff_integrable_sq (hinteraction_meas Λ)).2 (hinteraction_sq Λ)
   }⟩
 
 /-- Any full interaction-integrability model provides the weight-integrability
