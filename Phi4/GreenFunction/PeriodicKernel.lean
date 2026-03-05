@@ -159,25 +159,6 @@ theorem periodicKernelTerm_symm (mass L₁ L₂ : ℝ)
     _ = freeCovKernel mass y (shiftPoint L₁ L₂ (-m) (-n) x) := by
           exact freeCovKernel_symm mass _ _
 
-/-- One image term is invariant under simultaneous lattice translation of both
-    spacetime arguments. -/
-theorem periodicKernelTerm_shift_both (mass L₁ L₂ : ℝ)
-    (m n a b : ℤ) (x y : Spacetime2D) :
-    periodicKernelTerm mass L₁ L₂ m n
-      (shiftPoint L₁ L₂ a b x) (shiftPoint L₁ L₂ a b y)
-      = periodicKernelTerm mass L₁ L₂ m n x y := by
-  unfold periodicKernelTerm
-  calc
-    freeCovKernel mass (shiftPoint L₁ L₂ a b x)
-      (shiftPoint L₁ L₂ m n (shiftPoint L₁ L₂ a b y))
-        = freeCovKernel mass (shiftPoint L₁ L₂ a b x)
-            (shiftPoint L₁ L₂ a b (shiftPoint L₁ L₂ m n y)) := by
-              rw [shiftPoint_comm_indices]
-    _ = freeCovKernel mass x (shiftPoint L₁ L₂ m n y) := by
-          simpa using
-            (freeCovKernel_shift_both mass L₁ L₂ a b x
-              (shiftPoint L₁ L₂ m n y))
-
 /-- Truncated periodic image kernel:
     sum over lattice shifts `(m,n) ∈ {-N,...,N}²`. -/
 def periodicKernelTrunc (mass L₁ L₂ : ℝ) (N : ℕ)

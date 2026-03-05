@@ -167,13 +167,6 @@ end Factorial
 
 section GraphSpecialized
 
-/-- Graph-specialized factorial occupancy bound at vertices. -/
-theorem graph_vertex_factorial_prod_le_total_factorial {r : ℕ} (G : FeynmanGraph r) :
-    (∏ v : Fin r, Nat.factorial (G.legs v)) ≤
-      Nat.factorial (∑ v : Fin r, G.legs v) := by
-  simpa using
-    factorial_prod_le_factorial_sum (s := (Finset.univ : Finset (Fin r))) G.legs
-
 /-- Graph-specialized factorization of weighted vertex occupancy products. -/
 theorem graph_vertex_factorial_weighted_prod_eq
     {r : ℕ} (G : FeynmanGraph r) (A : ℝ) :

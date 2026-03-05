@@ -277,14 +277,6 @@ def discretizeByCellAverage (L : RectLattice Λ) (f : TestFun2D) :
     Fin L.Nt → Fin L.Nx → ℝ :=
   fun i j => L.cellAverage f i j
 
-/-- Positivity of cell integrals for nonnegative test functions. -/
-theorem cellIntegral_nonneg (L : RectLattice Λ) (f : TestFun2D)
-    (i : Fin L.Nt) (j : Fin L.Nx)
-    (hf : ∀ x, 0 ≤ f x) :
-    0 ≤ L.cellIntegral f i j := by
-  unfold cellIntegral
-  exact integral_nonneg_of_ae (Filter.Eventually.of_forall hf)
-
 /-- Additivity of cell averages. -/
 theorem cellAverage_add
     (L : RectLattice Λ) (f g : TestFun2D) (i : Fin L.Nt) (j : Fin L.Nx) :
@@ -337,13 +329,6 @@ theorem cellIntegral_eq_area_mul_cellAverage
   unfold cellAverage
   field_simp [ne_of_gt (L.cell_area_pos i j)]
 
-/-- Nonnegativity of cell-anchor discretization. -/
-theorem discretizeByCellAnchor_nonneg
-    (L : RectLattice Λ) (f : TestFun2D) (hf : ∀ x, 0 ≤ f x)
-    (i : Fin L.Nt) (j : Fin L.Nx) :
-    0 ≤ L.discretizeByCellAnchor f i j := by
-  exact hf _
-
 /-- Monotonicity of cell-average discretization under pointwise comparison. -/
 theorem discretizeByCellAverage_mono
     (L : RectLattice Λ)
@@ -362,14 +347,6 @@ def riemannSumCellAnchor (L : RectLattice Λ) (f : TestFun2D) : ℝ :=
 def riemannSumCellAverage (L : RectLattice Λ) (f : TestFun2D) : ℝ :=
   ∑ i : Fin L.Nt, ∑ j : Fin L.Nx,
     (L.cell i j).area * L.discretizeByCellAverage f i j
-
-/-- Cell-average Riemann sum equals the sum of exact cell integrals. -/
-theorem riemannSumCellAverage_eq_sum_cellIntegrals
-    (L : RectLattice Λ) (f : TestFun2D) :
-    L.riemannSumCellAverage f =
-      ∑ i : Fin L.Nt, ∑ j : Fin L.Nx, L.cellIntegral f i j := by
-  unfold riemannSumCellAverage discretizeByCellAverage
-  simp [cellIntegral_eq_area_mul_cellAverage]
 
 /-- Additivity of cell-average Riemann sums. -/
 theorem riemannSumCellAverage_add

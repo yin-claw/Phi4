@@ -207,16 +207,6 @@ theorem dirichlet_monotone (Λ₁ Λ₂ : Rectangle) (mass : ℝ) (hmass : 0 < m
   simpa [dirichletCov] using
     (BoundaryComparisonModel.dirichlet_monotone (mass := mass) (hmass := hmass) Λ₁ Λ₂ h f hf)
 
-/-- Combined comparison `C_Λ^D ≤ C_Λ^N` as quadratic forms for test functions
-    supported in `Λ`. -/
-theorem dirichlet_le_neumann (Λ : Rectangle) (mass : ℝ) (hmass : 0 < mass)
-    [BoundaryKernelModel mass hmass] [BoundaryComparisonModel mass hmass]
-    (f : TestFun2D) (hf : ∀ x ∉ Λ.toSet, f x = 0) :
-    ∫ x, ∫ y, f x * dirichletCov Λ mass hmass x y * f y ≤
-      ∫ x, ∫ y, f x * neumannCov Λ mass hmass x y * f y := by
-  exact le_trans (dirichlet_le_free Λ mass hmass f hf)
-    (free_le_neumann Λ mass hmass f hf)
-
 /-! ## Change of boundary conditions
 
 The difference δC = C - C_D between free and Dirichlet covariances is controlled.
