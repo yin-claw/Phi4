@@ -317,7 +317,7 @@ the local Glimm-Jaffe objective.
   limiting-interaction AE nonnegativity from these shifted-cutoff moment-decay
   hypotheses:
   `cutoff_seq_eventually_nonneg_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`,
-  `interaction_ae_nonneg_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`,
+  `interaction_ae_nonneg_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound_of_standardSeq_tendsto_ae`,
   and correspondingly routes
   `exp_interaction_Lp_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`
   through the nonnegativity-transfer chain.

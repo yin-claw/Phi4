@@ -1184,3 +1184,24 @@ primary local Glimm-Jaffe work queue.
   - `bash scripts/route_bloat_guard.sh` passes.
   - `scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv` passes.
   - `scripts/nonempty_route_inventory.sh --emit docs/route_inventory/nonempty_inventory.tsv` passes.
+
+### Interaction nonnegativity-wrapper collapse (2026-03-05, follow-up 6)
+
+- Removed two single-use nonnegativity wrappers in `Phi4/Interaction/Part2.lean`:
+  - `interaction_ae_nonneg_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`,
+  - `interaction_ae_nonneg_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`.
+- Inlined the constructive square-data `InteractionUVModel` instantiation and
+  direct explicit nonnegativity call into:
+  - `exp_interaction_Lp_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`.
+- Surface reduction:
+  - `Interaction/Part2` top-level theorem count reduced `8 -> 6`.
+- Guard tightening:
+  - `scripts/route_bloat_guard.sh`: `MAX_INTERACTION_PART2_THEOREMS` set `8 -> 6`.
+- Doc sync:
+  - `TODO.md` updated to refer to the explicit retained theorem
+    `interaction_ae_nonneg_of_uv_cutoff_seq_shifted_exponential_moment_geometric_bound_of_standardSeq_tendsto_ae`.
+- Verification:
+  - `lake build Phi4.Interaction.Part2 Phi4.Interaction.Part3` passes.
+  - `bash scripts/route_bloat_guard.sh` passes.
+  - `scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv` passes.
+  - `scripts/nonempty_route_inventory.sh --emit docs/route_inventory/nonempty_inventory.tsv` passes.
