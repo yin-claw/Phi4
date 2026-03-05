@@ -556,20 +556,6 @@ theorem phi4_productTensor_approx_of_dense_range
     Filter.tendsto_comap
   exact hpt.comp hu
 
-/-- Family-form product-tensor approximation from dense image assumptions
-    at each positive order. -/
-theorem phi4_productTensor_approx_family_of_dense_range
-    (hdense :
-      ∀ (n : ℕ) (_hn : 0 < n),
-        DenseRange (fun f : Fin n → TestFun2D =>
-          schwartzProductTensorFromTestFamily f)) :
-    ∀ (n : ℕ) (_hn : 0 < n) (g : SchwartzNPoint 1 n),
-      ∃ u : ℕ → Fin n → TestFun2D,
-        Filter.Tendsto (fun k => schwartzProductTensorFromTestFamily (u k))
-          Filter.atTop (nhds g) := by
-  intro n hn g
-  exact phi4_productTensor_approx_of_dense_range hn g (hdense n hn)
-
 /-! ## Linear growth condition (E0') -/
 
 /-- **Linear growth condition E0'** for the φ⁴₂ Schwinger functions, with
@@ -616,5 +602,5 @@ theorem gap_phi4_linear_growth (params : Phi4Params)
     phi4_normalized_order0_of_linear_and_compat_of_zero params hcompat hzero
   exact phi4_linear_growth_of_mixed_bound_productTensor_approx_and_given_normalized_order0
     params OS hS alpha beta gamma hbeta hmixed hreduce
-    (phi4_productTensor_approx_family_of_dense_range hdense) hnormalized
-
+    (fun n hn g => phi4_productTensor_approx_of_dense_range hn g (hdense n hn))
+    hnormalized
