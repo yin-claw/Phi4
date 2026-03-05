@@ -322,32 +322,6 @@ theorem interactionCutoff_standardSeq_tendsto_ae
     (params := params) (Λ := Λ)
     (InteractionUVModel.interactionCutoff_tendsto_ae (params := params) Λ)
 
-/-- Shifted canonical-sequence (`κ_{n+1}`) specialization of the explicit
-    real-parameterized a.e. UV convergence data. -/
-theorem interactionCutoff_standardSeq_succ_tendsto_ae_of_tendsto_ae
-    (params : Phi4Params) (Λ : Rectangle)
-    (htend :
-      ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
-        Filter.Tendsto
-          (fun (κ : ℝ) => if h : 0 < κ then interactionCutoff params Λ ⟨κ, h⟩ ω else 0)
-          Filter.atTop
-          (nhds (interaction params Λ ω))) :
-    ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
-      Filter.Tendsto
-        (fun n : ℕ => interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω)
-        Filter.atTop
-        (nhds (interaction params Λ ω)) := by
-  have hstd :
-      ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
-        Filter.Tendsto
-          (fun n : ℕ => interactionCutoff params Λ (standardUVCutoffSeq n) ω)
-          Filter.atTop
-          (nhds (interaction params Λ ω)) :=
-    interactionCutoff_standardSeq_tendsto_ae_of_tendsto_ae
-      (params := params) (Λ := Λ) htend
-  filter_upwards [hstd] with ω hω
-  exact hω.comp (Filter.tendsto_add_atTop_nat 1)
-
 /-- Shifted canonical-sequence (`κ_{n+1}`) measurability transfer:
     UV-cutoff measurability data yields measurability for each shifted
     canonical cutoff `interactionCutoff(κ_{n+1})`. -/

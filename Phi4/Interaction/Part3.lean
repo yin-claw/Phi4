@@ -149,8 +149,16 @@ theorem
   refine interactionWeightModel_nonempty_of_standardSeq_succ_tendsto_ae_and_geometric_exp_moment_bound
     (params := params) ?_ ?_ ?_
   · intro Λ
-    exact interactionCutoff_standardSeq_succ_tendsto_ae_of_tendsto_ae
-      (params := params) (Λ := Λ) (hcutoff_ae Λ)
+    have hstd :
+        ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
+          Filter.Tendsto
+            (fun n : ℕ => interactionCutoff params Λ (standardUVCutoffSeq n) ω)
+            Filter.atTop
+            (nhds (interaction params Λ ω)) :=
+      interactionCutoff_standardSeq_tendsto_ae_of_tendsto_ae
+        (params := params) (Λ := Λ) (hcutoff_ae Λ)
+    filter_upwards [hstd] with ω hω
+    exact hω.comp (Filter.tendsto_add_atTop_nat 1)
   · intro Λ n
     exact interactionCutoff_standardSeq_succ_aestronglyMeasurable
       (params := params) hcutoff_meas Λ n
