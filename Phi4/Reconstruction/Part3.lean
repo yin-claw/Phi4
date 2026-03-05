@@ -132,13 +132,34 @@ theorem
     hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
     hinteraction_meas hinteraction_sq hcore
     hsmall alpha beta gamma hbeta huniform hcompat hreduce hdense
-  rcases
-      reconstructionLinearGrowthModel_nonempty_of_sq_integrable_data_and_linear_threshold_geometric_exp_moment_and_double_exp_moment_geometric
-        (params := params)
-        hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
-        hinteraction_meas hinteraction_sq hcore
-        hsmall alpha beta gamma hbeta
-        huniform hcompat hreduce hdense with ⟨hlin⟩
+  have hlin_nonempty : Nonempty (ReconstructionLinearGrowthModel params) := by
+    rcases
+        interactionIntegrabilityModel_nonempty_of_sq_integrable_data_and_linear_threshold_geometric_exp_moment_and_double_exp_moment_geometric
+          (params := params)
+          hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
+          hinteraction_meas hinteraction_sq hcore with ⟨hIntModel⟩
+    letI : InteractionIntegrabilityModel params := hIntModel
+    have hmixed :
+        ∀ (n : ℕ) (_hn : 0 < n) (f : Fin n → TestFun2D), ∃ c : ℝ,
+          ‖phi4SchwingerFunctions params n (schwartzProductTensorFromTestFamily f)‖ ≤
+            ∑ i : Fin n, (Nat.factorial n : ℝ) *
+              (Real.exp (c * normFunctional (f i)) +
+                Real.exp (c * normFunctional (-(f i)))) := by
+      intro n hn f
+      exact phi4_productTensor_mixed_bound_of_uniform_generating_bound
+        params huniform hcompat n hn f
+    have hzero : ∀ f : Fin 0 → TestFun2D, infiniteVolumeSchwinger params 0 f = 1 := by
+      intro f
+      exact infiniteVolumeSchwinger_zero (params := params) f
+    rcases gap_phi4_linear_growth params hsmall alpha beta gamma hbeta
+        hmixed hcompat hzero hreduce hdense with ⟨OS, hOS, hlg_nonempty⟩
+    rcases hlg_nonempty with ⟨hlg⟩
+    exact ⟨{
+      os_package := OS
+      os_package_eq := hOS
+      linear_growth := hlg
+    }⟩
+  rcases hlin_nonempty with ⟨hlin⟩
   letI : ReconstructionLinearGrowthModel params := hlin
   exact phi4_wightman_exists_of_explicit_data params
     (hlinear := ReconstructionLinearGrowthModel.phi4_linear_growth (params := params))

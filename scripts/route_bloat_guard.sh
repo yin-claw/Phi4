@@ -6,7 +6,7 @@ cd "$ROOT_DIR"
 
 # Baselines captured after bloat-reduction refactor (2026-03-05, latest):
 # - class .*Model count: 58
-# - theorem .*_nonempty_of_ count: 7
+# - theorem .*_nonempty_of_ count: 6
 # - interactionWeightModel_nonempty_of_* count: 3
 # - interactionIntegrabilityModel_nonempty_of_* count: 2
 # - gap_phi4_linear_growth variant count in Reconstruction/Part1Core.lean: 2
@@ -80,7 +80,7 @@ cd "$ROOT_DIR"
 #   - uniformGeneratingFunctionalBoundModel_nonempty_of_data
 #   - nonlocalPhi4BoundModel_nonempty_of_data
 MAX_MODEL_CLASSES=58
-MAX_NONEMPTY_CONSTRUCTORS=7
+MAX_NONEMPTY_CONSTRUCTORS=6
 MAX_WEIGHT_ROUTES=3
 MAX_INTEGRABILITY_ROUTES=2
 MAX_LINEAR_GROWTH_ROUTES=2

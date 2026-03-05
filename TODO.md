@@ -1047,11 +1047,10 @@ New infrastructure now in place (WP1 hard-core reduction):
   and
   `phi4_wightman_exists_of_interfaces_of_sq_integrable_data_and_linear_lower_bound_off_bad_sets_and_sq_exp_moment_geometric_and_bad_measure_geometric_ennreal`
   (dense/interface reconstruction endpoints for the same route).
-- `reconstructionLinearGrowthModel_nonempty_of_sq_integrable_data_and_linear_threshold_geometric_exp_moment_and_double_exp_moment_geometric`
-  and
-  `phi4_wightman_exists_of_interfaces_of_sq_integrable_data_and_linear_threshold_geometric_exp_moment_and_double_exp_moment_geometric`
-  (reconstruction linear-growth/interface Wightman endpoints for the
-  doubled-parameter (`q`, `2q`) linear-threshold route).
+- `phi4_wightman_exists_of_interfaces_of_sq_integrable_data_and_linear_threshold_geometric_exp_moment_and_double_exp_moment_geometric`
+  (canonical interface Wightman endpoint for the doubled-parameter (`q`, `2q`)
+  linear-threshold route; the no-caller intermediate reconstruction-linear-growth
+  constructor route was pruned).
 - `reconstructionLinearGrowthModel_nonempty_of_sq_integrable_data_and_linear_threshold_geometric_exp_moment_and_double_exp_moment_geometric_of_moment_bounds`
   and
   `phi4_wightman_exists_of_interfaces_of_sq_integrable_data_and_linear_threshold_geometric_exp_moment_and_double_exp_moment_geometric_of_moment_bounds`

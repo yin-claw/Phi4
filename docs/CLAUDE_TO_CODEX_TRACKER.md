@@ -1163,3 +1163,24 @@ primary local Glimm-Jaffe work queue.
   - `scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv` passes.
   - `scripts/nonempty_route_inventory.sh --emit docs/route_inventory/nonempty_inventory.tsv` passes.
   - `bash scripts/quick_gate.sh` passes.
+
+### Reconstruction single-caller route collapse (2026-03-05, follow-up 5)
+
+- Removed no-caller intermediate reconstruction constructor:
+  - deleted
+    `reconstructionLinearGrowthModel_nonempty_of_sq_integrable_data_and_linear_threshold_geometric_exp_moment_and_double_exp_moment_geometric`
+    (`Phi4/Reconstruction/Part1Tail.lean`).
+- Inlined its constructive proof steps directly at the only downstream call site:
+  - `Phi4/Reconstruction/Part3.lean`
+    (`phi4_wightman_exists_of_interfaces_of_sq_integrable_data_and_linear_threshold_geometric_exp_moment_and_double_exp_moment_geometric`).
+- Regenerated inventories:
+  - `docs/frontier_obligations/frontier.tsv`: `_nonempty_of_ count = 6`.
+  - `docs/route_inventory/nonempty_inventory.tsv`: total routes `6`,
+    zero-caller `0`, plumbing `0`.
+- Tightened guard baseline:
+  - `scripts/route_bloat_guard.sh`: `_nonempty_of_` max `7 -> 6`.
+- Verification:
+  - `lake build Phi4.Reconstruction.Part1Tail Phi4.Reconstruction.Part3` passes.
+  - `bash scripts/route_bloat_guard.sh` passes.
+  - `scripts/frontier_report.sh --emit docs/frontier_obligations/frontier.tsv` passes.
+  - `scripts/nonempty_route_inventory.sh --emit docs/route_inventory/nonempty_inventory.tsv` passes.
