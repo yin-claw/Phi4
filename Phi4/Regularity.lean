@@ -116,35 +116,6 @@ def generatingFunctionalOnExhaustion (params : Phi4Params) (f : TestFun2D) (n : 
     generatingFunctionalOnExhaustion params f n =
       generatingFunctional params (exhaustingRectangles (n + 1) (Nat.succ_pos n)) f := rfl
 
-/-- Finite-volume diagonal moments from a finite-volume generating-functional
-    exponential bound at fixed constant `c`. -/
-theorem finiteVolume_diagonal_moment_bound_of_generating_bound
-    (params : Phi4Params) [InteractionWeightModel params]
-    (c : ℝ)
-    (hbound : ∀ (g : TestFun2D) (Λ : Rectangle),
-      |generatingFunctional params Λ g| ≤ Real.exp (c * normFunctional g))
-    (Λ : Rectangle) (f : TestFun2D) (n : ℕ) :
-    |schwingerN params Λ n (fun _ => f)| ≤
-      (Nat.factorial n : ℝ) *
-        (Real.exp (c * normFunctional f) + Real.exp (c * normFunctional (-f))) := by
-  have hmoment :=
-    schwingerN_const_abs_le_factorial_mul_generatingFunctional_pair
-      params Λ f n
-  have hgf_nonneg : 0 ≤ generatingFunctional params Λ f :=
-    generatingFunctional_nonneg params Λ f
-  have hgneg_nonneg : 0 ≤ generatingFunctional params Λ (-f) :=
-    generatingFunctional_nonneg params Λ (-f)
-  have hgf_le : generatingFunctional params Λ f ≤ Real.exp (c * normFunctional f) := by
-    simpa [abs_of_nonneg hgf_nonneg] using hbound f Λ
-  have hgneg_le : generatingFunctional params Λ (-f) ≤ Real.exp (c * normFunctional (-f)) := by
-    simpa [abs_of_nonneg hgneg_nonneg] using hbound (-f) Λ
-  have hsum_le :
-      generatingFunctional params Λ f + generatingFunctional params Λ (-f) ≤
-        Real.exp (c * normFunctional f) + Real.exp (c * normFunctional (-f)) :=
-    add_le_add hgf_le hgneg_le
-  have hfac_nonneg : 0 ≤ (Nat.factorial n : ℝ) := by positivity
-  exact hmoment.trans (mul_le_mul_of_nonneg_left hsum_le hfac_nonneg)
-
 /-- Uniform-in-volume finite-volume mixed `n`-point moments from a pointwise-in-`f`
     generating-functional exponential estimate. The resulting `c` depends on the
     finite family `f : Fin n → TestFun2D`, but is uniform in `Λ`. -/

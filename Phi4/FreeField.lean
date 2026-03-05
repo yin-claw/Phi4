@@ -134,27 +134,6 @@ theorem freeFieldMeasure_isProbability (mass : ℝ) (hmass : 0 < mass) :
     IsProbabilityMeasure (freeFieldMeasure mass hmass) :=
   GaussianField.measure_isProbability _
 
-/-- The free field is centered: E[ω(f)] = 0 for all test functions f.
-    Proof: `GaussianField.measure_centered`. -/
-theorem freeField_centered (mass : ℝ) (hmass : 0 < mass) (f : TestFun2D) :
-    ∫ ω, ω f ∂(freeFieldMeasure mass hmass) = 0 :=
-  GaussianField.measure_centered _ f
-
-/-- Two-point function: E[ω(f)ω(g)] = C(f,g).
-    This is the free propagator C(f,g) = ∫ f(x) (-Δ+m²)⁻¹(x,y) g(y) dx dy.
-    Proof: `GaussianField.cross_moment_eq_covariance`. -/
-theorem freeField_two_point (mass : ℝ) (hmass : 0 < mass) (f g : TestFun2D) :
-    ∫ ω, ω f * ω g ∂(freeFieldMeasure mass hmass) =
-      GaussianField.covariance (freeCovarianceCLM mass hmass) f g :=
-  GaussianField.cross_moment_eq_covariance _ f g
-
-/-- Pairing ω(f) is in Lᵖ for all finite p (Fernique-type bound).
-    Proof: `GaussianField.pairing_memLp`. -/
-theorem freeField_pairing_memLp (mass : ℝ) (hmass : 0 < mass)
-    (f : TestFun2D) (p : ℝ≥0) :
-    MemLp (fun ω : FieldConfig2D => ω f) p (freeFieldMeasure mass hmass) :=
-  GaussianField.pairing_memLp (freeCovarianceCLM mass hmass) f p
-
 /-- Exponential moments of linear pairings under the free field measure. -/
 theorem freeField_pairing_exp_integrable (mass : ℝ) (hmass : 0 < mass)
     (f : TestFun2D) (t : ℝ) :

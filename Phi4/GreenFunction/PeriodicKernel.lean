@@ -86,16 +86,6 @@ theorem freeCovKernel_shift_both (mass L₁ L₂ : ℝ)
       freeCovKernel mass x y := by
   simp [freeCovKernel]
 
-/-- Shift-transfer identity: moving the image shift from the second argument to
-    the first argument with opposite sign. -/
-theorem freeCovKernel_shift_transfer (mass L₁ L₂ : ℝ)
-    (m n : ℤ) (x y : Spacetime2D) :
-    freeCovKernel mass x (shiftPoint L₁ L₂ m n y) =
-      freeCovKernel mass (shiftPoint L₁ L₂ (-m) (-n) x) y := by
-  have h := freeCovKernel_shift_both mass L₁ L₂ m n
-    (shiftPoint L₁ L₂ (-m) (-n) x) y
-  simpa using h
-
 /-- Finite index set `{-N, ..., N}` used in truncated periodic image sums. -/
 def periodicIndexFinset (N : ℕ) : Finset ℤ :=
   Finset.Icc (-(N : ℤ)) (N : ℤ)
@@ -110,22 +100,6 @@ theorem periodicIndexFinset_neg_mem (N : ℕ) {m : ℤ}
     -m ∈ periodicIndexFinset N := by
   simp [periodicIndexFinset] at hm ⊢
   omega
-
-/-- Reindexing a sum over `{-N,...,N}` by negation. -/
-theorem sum_periodicIndexFinset_comp_neg
-    {α : Type*} [AddCommMonoid α] (N : ℕ) (f : ℤ → α) :
-    Finset.sum (periodicIndexFinset N) (fun m => f (-m))
-      = Finset.sum (periodicIndexFinset N) (fun m => f m) := by
-  classical
-  refine Finset.sum_bij (fun m hm => -m) ?hmem ?hinj ?hsurj ?heq
-  · intro m hm
-    exact periodicIndexFinset_neg_mem N hm
-  · intro m₁ hm₁ m₂ hm₂ h
-    exact neg_injective h
-  · intro m hm
-    refine ⟨-m, periodicIndexFinset_neg_mem N hm, by simp⟩
-  · intro m hm
-    simp
 
 /-- One periodic image term in the method-of-images construction. -/
 def periodicKernelTerm (mass L₁ L₂ : ℝ) (m n : ℤ)

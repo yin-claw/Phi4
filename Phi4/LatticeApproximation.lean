@@ -172,11 +172,6 @@ theorem cell_height_eq_spaceStep (L : RectLattice Λ) (i : Fin L.Nt) (j : Fin L.
   simp [Rectangle.height, cell]
   ring
 
-/-- Cell area equals one mesh area element `Δt * Δx`. -/
-theorem cell_area_eq_meshArea (L : RectLattice Λ) (i : Fin L.Nt) (j : Fin L.Nx) :
-    (L.cell i j).area = L.timeStep * L.spaceStep := by
-  simp [Rectangle.area, cell_width_eq_timeStep, cell_height_eq_spaceStep]
-
 /-- Anchor point of cell `(i,j)`, chosen as its lower-left corner node. -/
 def cellAnchor (L : RectLattice Λ) (i : Fin L.Nt) (j : Fin L.Nx) : Spacetime2D :=
   L.node ⟨i.1, Nat.lt_succ_of_lt i.2⟩ ⟨j.1, Nat.lt_succ_of_lt j.2⟩
