@@ -195,57 +195,6 @@ class InteractionWeightModel (params : Phi4Params) where
       MemLp (fun ω => Real.exp (-(interaction params Λ ω)))
         p (freeFieldMeasure params.mass params.mass_pos)
 
-/-- Construct `InteractionUVModel` from:
-    1) cutoff-square integrability + measurability,
-    2) UV `L²` convergence data,
-    3) cutoff a.e. UV convergence,
-    4) limiting-interaction square integrability + measurability. -/
-theorem interactionUVModel_nonempty_of_sq_integrable_data
-    (params : Phi4Params)
-    (hcutoff_meas :
-      ∀ (Λ : Rectangle) (κ : UVCutoff),
-        AEStronglyMeasurable (interactionCutoff params Λ κ)
-          (freeFieldMeasure params.mass params.mass_pos))
-    (hcutoff_sq :
-      ∀ (Λ : Rectangle) (κ : UVCutoff),
-        Integrable (fun ω => (interactionCutoff params Λ κ ω) ^ 2)
-          (freeFieldMeasure params.mass params.mass_pos))
-    (hcutoff_conv :
-      ∀ (Λ : Rectangle),
-        Filter.Tendsto
-          (fun (κ : ℝ) => if h : 0 < κ then
-            ∫ ω, (interactionCutoff params Λ ⟨κ, h⟩ ω - interaction params Λ ω) ^ 2
-              ∂(freeFieldMeasure params.mass params.mass_pos)
-            else 0)
-          Filter.atTop
-          (nhds 0))
-    (hcutoff_ae :
-      ∀ (Λ : Rectangle),
-        ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
-          Filter.Tendsto
-            (fun (κ : ℝ) => if h : 0 < κ then interactionCutoff params Λ ⟨κ, h⟩ ω else 0)
-            Filter.atTop
-            (nhds (interaction params Λ ω)))
-    (hinteraction_meas :
-      ∀ (Λ : Rectangle),
-        AEStronglyMeasurable (interaction params Λ)
-          (freeFieldMeasure params.mass params.mass_pos))
-    (hinteraction_sq :
-      ∀ (Λ : Rectangle),
-        Integrable (fun ω => (interaction params Λ ω) ^ 2)
-          (freeFieldMeasure params.mass params.mass_pos)) :
-    Nonempty (InteractionUVModel params) := by
-  exact ⟨{
-    interactionCutoff_in_L2 := by
-      intro Λ κ
-      exact (memLp_two_iff_integrable_sq (hcutoff_meas Λ κ)).2 (hcutoff_sq Λ κ)
-    interactionCutoff_converges_L2 := hcutoff_conv
-    interactionCutoff_tendsto_ae := hcutoff_ae
-    interaction_in_L2 := by
-      intro Λ
-      exact (memLp_two_iff_integrable_sq (hinteraction_meas Λ)).2 (hinteraction_sq Λ)
-  }⟩
-
 /-- Any full interaction-integrability model provides the weight-integrability
     subinterface. -/
 instance (priority := 100) interactionWeightModel_of_integrability

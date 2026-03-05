@@ -56,12 +56,17 @@ theorem interactionIntegrabilityModel_nonempty_from_sq_integrable_data_and_weigh
           (freeFieldMeasure params.mass params.mass_pos))
     (hW : Nonempty (InteractionWeightModel params)) :
     Nonempty (InteractionIntegrabilityModel params) := by
-  rcases interactionUVModel_nonempty_of_sq_integrable_data
-      (params := params)
-      hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
-      hinteraction_meas hinteraction_sq with ⟨huv⟩
   rcases hW with ⟨hweight⟩
-  letI : InteractionUVModel params := huv
+  letI : InteractionUVModel params := {
+    interactionCutoff_in_L2 := by
+      intro Λ κ
+      exact (memLp_two_iff_integrable_sq (hcutoff_meas Λ κ)).2 (hcutoff_sq Λ κ)
+    interactionCutoff_converges_L2 := hcutoff_conv
+    interactionCutoff_tendsto_ae := hcutoff_ae
+    interaction_in_L2 := by
+      intro Λ
+      exact (memLp_two_iff_integrable_sq (hinteraction_meas Λ)).2 (hinteraction_sq Λ)
+  }
   letI : InteractionWeightModel params := hweight
   exact ⟨inferInstance⟩
 
