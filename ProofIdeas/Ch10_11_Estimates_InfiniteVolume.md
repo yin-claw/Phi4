@@ -3,13 +3,15 @@
 ## Status Snapshot (2026-02-27)
 
 - `CorrelationInequalities.lean`, `MultipleReflections.lean`, and
-  `InfiniteVolumeLimit.lean` now have no theorem-level `sorry`.
-- Infinite-volume assumptions are split into focused subinterfaces:
-  `SchwingerUniformBoundModel`, `SchwingerLimitModel`,
-  `InfiniteVolumeMeasureModel`, and `InfiniteVolumeMomentModel`
-  (recombining to `InfiniteVolumeLimitModel`).
-- `k = 2` monotonicity/limit bridge lemmas are implemented and reusable; the
-  main remaining work is constructive grounding of the chapter interfaces.
+  `InfiniteVolumeLimit/Part1.lean` now expose their main missing mathematical
+  content through explicit theorem-level frontiers rather than the older
+  wrapper lattice.
+- The chessboard and volume-uniform-bound obligations are now surfaced as
+  `gap_hasChessboardEstimate` and `gap_hasSchwingerUniformBound`.
+- The infinite-volume convergence theorems in `Part1.lean` now take explicit
+  monotonicity and uniform-bound assumptions instead of `MultipleReflectionModel`.
+- Remaining live infinite-volume packaging interfaces are `SchwingerLimitModel`
+  and `InfiniteVolumeMeasureModel`.
 - Note: theorem names are the stable lookup key; line numbers can drift.
 
 ## 1. Correlation Inequalities (Section 10.2)
@@ -36,11 +38,11 @@ For P = λφ^4 + σφ^2 - μφ, the Ursell function U_4 ≤ 0:
        - ⟨φ(x_1)φ(x_3)⟩⟨φ(x_2)φ(x_4)⟩ - ⟨φ(x_1)φ(x_4)⟩⟨φ(x_2)φ(x_3)⟩ ≤ 0
 
 ### Lean file mapping
-- `griffiths_first` (CorrelationInequalities.lean:43) -- GKS-I
-- `griffiths_second` (CorrelationInequalities.lean:60) -- GKS-II
-- `fkg_inequality` (CorrelationInequalities.lean:78) -- FKG
-- `lebowitz_inequality` (CorrelationInequalities.lean:100) -- Lebowitz
-- `schwinger_two_monotone` (CorrelationInequalities.lean:118) -- consequence of GKS-II + Dirichlet monotonicity
+- `gap_hasSchwingerNMonotone` -- canonical explicit monotonicity frontier
+- `schwinger_two_monotone_from_lattice` -- 2-point continuum monotonicity from lattice approximation
+- `griffiths_second_13_24` / `griffiths_second_14_23` -- permutation-channel GKS-II consequences
+- `fkg_inequality` -- FKG interface
+- `lebowitz_inequality` -- Lebowitz interface
 
 ### Proof ideas
 - **GKS-I/II:** The standard proof goes through the lattice approximation. On the lattice, GKS uses the "Griffiths trick": expand exp(-H) as a product of factors, each involving a single site, then use the lattice ferromagnetic structure. For GKS-II, duplicate variables t = (ξ+χ)/√2, q = (ξ-χ)/√2 and apply GKS-I to the doubled system.
@@ -109,8 +111,10 @@ where L(k) is the iterated reflection limit.
     |∫ ∏_{j∈J} k^{(j)} dμ| ≤ ∏_{j∈J} L(k^{(j)})
 
 ### Lean file mapping
-- `chessboard_estimate` (MultipleReflections.lean:54)
-- `schwinger_uniform_bound` (MultipleReflections.lean:98)
+- `gap_hasChessboardEstimate` -- explicit chessboard frontier
+- `gap_hasSchwingerUniformBound` -- explicit uniform Schwinger bound frontier
+- `determinant_bound`
+- `partition_function_ratio_bound`
 
 ### Proof strategy for chessboard_estimate
 This is an iterated Schwarz inequality. In d=2 with 2 orthogonal reflections:
@@ -132,12 +136,11 @@ Let P = even + linear. Then S{f} = lim_{Λ↗R^2} S_Λ{f} exists and satisfies O
 4. **General f:** Decompose f = f_+ - f_- and use the non-negative convergence.
 
 ### Lean file mapping
-- `schwinger_monotone_in_volume` (InfiniteVolumeLimit.lean:61) -- monotonicity
-- `schwingerN_monotone_in_volume` (InfiniteVolumeLimit.lean:71)
-- `schwinger_uniformly_bounded` (InfiniteVolumeLimit.lean:87) -- uniform bound
-- `infinite_volume_schwinger_exists` (InfiniteVolumeLimit.lean:103) -- existence
-- `infiniteVolumeMeasure` (InfiniteVolumeLimit.lean:114) -- measure construction
-- `infiniteVolumeMeasure_isProbability` (InfiniteVolumeLimit.lean:119)
+- `schwinger_monotone_in_volume` (`InfiniteVolumeLimit/Part1.lean`) -- explicit monotonicity input form
+- `schwinger_uniformly_bounded` (`InfiniteVolumeLimit/Part1.lean`) -- explicit uniform-bound form
+- `infinite_volume_schwinger_exists` (`InfiniteVolumeLimit/Part1.lean`) -- abstract limit-existence endpoint
+- `gap_infiniteVolumeLimit_exists` (`InfiniteVolumeLimit/Part1.lean`) -- explicit WP3 frontier
+- `infiniteVolumeMeasure` / `infiniteVolumeMeasure_isProbability` (`InfiniteVolumeLimit/Part3.lean`)
 
 ### Proof ideas
 - `schwinger_monotone_in_volume`: For Λ_1 ⊂ Λ_2 with Dirichlet BC:
@@ -167,5 +170,6 @@ For 0 < m, f ∈ L^1 ∩ L^p supported in K:
 8. **Final bound:** ‖f^{(n)}‖_{L^p}^p = 4^n ‖f‖_{L^p}^p. The 4^{-n} exponent cancels this.
 
 ### Lean file mapping for 11.3.1
-- `schwinger_uniform_bound` (MultipleReflections.lean:98) -- uses chessboard_estimate
-- `determinant_bound` (MultipleReflections.lean:80) -- Z_+^2/Z ≤ exp(O(|Λ|))
+- `gap_hasSchwingerUniformBound` -- canonical explicit upper-bound frontier
+- `gap_hasChessboardEstimate` -- canonical explicit chessboard frontier
+- `determinant_bound` -- Z_+^2/Z ≤ exp(O(|Λ|))

@@ -127,39 +127,6 @@ theorem wick_fourth_semibounded (mass : ℝ) (_hmass : 0 < mass) (κ : UVCutoff)
 
 /-! ## Abstract interaction-integrability interface -/
 
-/-- Analytic interaction estimates used by finite-volume construction. This
-    packages the substantial Chapter 8 bounds as explicit assumptions. -/
-class InteractionIntegrabilityModel (params : Phi4Params) where
-  interactionCutoff_in_L2 :
-    ∀ (Λ : Rectangle) (κ : UVCutoff),
-      MemLp (interactionCutoff params Λ κ) 2
-        (freeFieldMeasure params.mass params.mass_pos)
-  interactionCutoff_converges_L2 :
-    ∀ (Λ : Rectangle),
-      Filter.Tendsto
-        (fun (κ : ℝ) => if h : 0 < κ then
-          ∫ ω, (interactionCutoff params Λ ⟨κ, h⟩ ω - interaction params Λ ω) ^ 2
-            ∂(freeFieldMeasure params.mass params.mass_pos)
-          else 0)
-        Filter.atTop
-        (nhds 0)
-  /-- Almost-everywhere pointwise UV convergence toward `interaction`. -/
-  interactionCutoff_tendsto_ae :
-    ∀ (Λ : Rectangle),
-      ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
-        Filter.Tendsto
-          (fun (κ : ℝ) => if h : 0 < κ then interactionCutoff params Λ ⟨κ, h⟩ ω else 0)
-          Filter.atTop
-          (nhds (interaction params Λ ω))
-  interaction_in_L2 :
-    ∀ (Λ : Rectangle),
-      MemLp (interaction params Λ) 2
-        (freeFieldMeasure params.mass params.mass_pos)
-  exp_interaction_Lp :
-    ∀ (Λ : Rectangle) {p : ℝ≥0∞}, p ≠ ⊤ →
-      MemLp (fun ω => Real.exp (-(interaction params Λ ω)))
-        p (freeFieldMeasure params.mass params.mass_pos)
-
 /-- UV/L² interaction input: cutoff moments, UV convergence, and L² control of
     the limiting interaction. -/
 class InteractionUVModel (params : Phi4Params) where
@@ -188,20 +155,6 @@ class InteractionUVModel (params : Phi4Params) where
       MemLp (interaction params Λ) 2
         (freeFieldMeasure params.mass params.mass_pos)
 
-/-- Any full interaction-integrability model provides the UV/L² subinterface. -/
-instance (priority := 100) interactionUVModel_of_integrability
-    (params : Phi4Params)
-    [InteractionIntegrabilityModel params] :
-    InteractionUVModel params where
-  interactionCutoff_in_L2 :=
-    InteractionIntegrabilityModel.interactionCutoff_in_L2 (params := params)
-  interactionCutoff_converges_L2 :=
-    InteractionIntegrabilityModel.interactionCutoff_converges_L2 (params := params)
-  interactionCutoff_tendsto_ae :=
-    InteractionIntegrabilityModel.interactionCutoff_tendsto_ae (params := params)
-  interaction_in_L2 :=
-    InteractionIntegrabilityModel.interaction_in_L2 (params := params)
-
 /-- Minimal interaction input used by finite-volume measure normalization and
     moment integrability: integrability of the Boltzmann weight `exp(-V_Λ)` in
     every finite `Lᵖ`. -/
@@ -210,29 +163,6 @@ class InteractionWeightModel (params : Phi4Params) where
     ∀ (Λ : Rectangle) {p : ℝ≥0∞}, p ≠ ⊤ →
       MemLp (fun ω => Real.exp (-(interaction params Λ ω)))
         p (freeFieldMeasure params.mass params.mass_pos)
-
-/-- Any full interaction-integrability model provides the weight-integrability
-    subinterface. -/
-instance (priority := 100) interactionWeightModel_of_integrability
-    (params : Phi4Params)
-    [InteractionIntegrabilityModel params] :
-    InteractionWeightModel params where
-  exp_interaction_Lp := InteractionIntegrabilityModel.exp_interaction_Lp (params := params)
-
-/-- The combined UV/L² and weight-integrability subinterfaces reconstruct the
-    original interaction-integrability interface. -/
-instance (priority := 100) interactionIntegrabilityModel_of_uv_weight
-    (params : Phi4Params)
-    [InteractionUVModel params]
-    [InteractionWeightModel params] :
-    InteractionIntegrabilityModel params where
-  interactionCutoff_in_L2 := InteractionUVModel.interactionCutoff_in_L2 (params := params)
-  interactionCutoff_converges_L2 :=
-    InteractionUVModel.interactionCutoff_converges_L2 (params := params)
-  interactionCutoff_tendsto_ae :=
-    InteractionUVModel.interactionCutoff_tendsto_ae (params := params)
-  interaction_in_L2 := InteractionUVModel.interaction_in_L2 (params := params)
-  exp_interaction_Lp := InteractionWeightModel.exp_interaction_Lp (params := params)
 
 /-- Assumption-explicit WP1 target: the Boltzmann weight `exp(-V_Λ)` lies in
     every finite `Lᵖ` for the φ⁴₂ interaction. This is the Chapter 8 analytic

@@ -13,9 +13,9 @@ regularity inputs. It should not be read as a fully local proof that the φ⁴�
 construction has already established OS0-OS4 from first principles inside this
 repository.
 
-The hard mathematical content is still split across legacy `...Model` class
-assumptions and theorem-level frontiers. This file assembles those inputs into
-the `OsterwalderSchraderAxioms` API used downstream.
+The hard mathematical content is still open through explicit theorem hypotheses
+and frontier theorems. This file assembles those inputs into the
+`OsterwalderSchraderAxioms` API used downstream.
 
 The four axioms are:
 - **OS0 (Temperedness)**: S_n are tempered distributions on S(ℝ^{2n})
@@ -33,145 +33,22 @@ noncomputable section
 
 open MeasureTheory Reconstruction
 
-/-! ## Abstract OS-axiom interfaces -/
+/-! ## Packaged Schwinger input -/
 
 /-- Canonical packaged Schwinger functions used by the OS interfaces. -/
 class SchwingerFunctionModel (params : Phi4Params) where
   schwingerFunctions : SchwingerFunctions 1
 
-/-- Core OS input: OS0/OS2/E3 data over a packaged Schwinger function model.
-    Weak-coupling E4 clustering is separated into `OSE4ClusterModel`. -/
-class OSAxiomCoreModel (params : Phi4Params)
-    extends SchwingerFunctionModel params where
-  os0 :
-    ∀ n, Continuous (SchwingerFunctionModel.schwingerFunctions (params := params) n)
-  schwinger_linear :
-    ∀ n, IsLinearMap ℂ (SchwingerFunctionModel.schwingerFunctions (params := params) n)
-  os2_translation :
-    ∀ (n : ℕ) (a : Fin 2 → ℝ) (f g : SchwartzNPoint 1 n),
-      (∀ x, g.toFun x = f.toFun (fun i => x i + a)) →
-      SchwingerFunctionModel.schwingerFunctions (params := params) n f =
-        SchwingerFunctionModel.schwingerFunctions (params := params) n g
-  os2_rotation :
-    ∀ (n : ℕ) (R : Matrix (Fin 2) (Fin 2) ℝ),
-      R.transpose * R = 1 → R.det = 1 →
-      ∀ (f g : SchwartzNPoint 1 n),
-        (∀ x, g.toFun x = f.toFun (fun i => R.mulVec (x i))) →
-        SchwingerFunctionModel.schwingerFunctions (params := params) n f =
-          SchwingerFunctionModel.schwingerFunctions (params := params) n g
-  e3_symmetric :
-    ∀ (n : ℕ) (σ : Equiv.Perm (Fin n)) (f g : SchwartzNPoint 1 n),
-      (∀ x, g.toFun x = f.toFun (fun i => x (σ i))) →
-      SchwingerFunctionModel.schwingerFunctions (params := params) n f =
-        SchwingerFunctionModel.schwingerFunctions (params := params) n g
-
-/-- OS0 temperedness/linearity interface over packaged Schwinger functions. -/
-class OSTemperedModel (params : Phi4Params)
-    [SchwingerFunctionModel params] where
-  os0 :
-    ∀ n, Continuous (SchwingerFunctionModel.schwingerFunctions (params := params) n)
-  schwinger_linear :
-    ∀ n, IsLinearMap ℂ (SchwingerFunctionModel.schwingerFunctions (params := params) n)
-
-/-- OS2 Euclidean covariance interface over packaged Schwinger functions. -/
-class OSEuclideanCovarianceModel (params : Phi4Params)
-    [SchwingerFunctionModel params] where
-  os2_translation :
-    ∀ (n : ℕ) (a : Fin 2 → ℝ) (f g : SchwartzNPoint 1 n),
-      (∀ x, g.toFun x = f.toFun (fun i => x i + a)) →
-      SchwingerFunctionModel.schwingerFunctions (params := params) n f =
-        SchwingerFunctionModel.schwingerFunctions (params := params) n g
-  os2_rotation :
-    ∀ (n : ℕ) (R : Matrix (Fin 2) (Fin 2) ℝ),
-      R.transpose * R = 1 → R.det = 1 →
-      ∀ (f g : SchwartzNPoint 1 n),
-        (∀ x, g.toFun x = f.toFun (fun i => R.mulVec (x i))) →
-        SchwingerFunctionModel.schwingerFunctions (params := params) n f =
-          SchwingerFunctionModel.schwingerFunctions (params := params) n g
-
-/-- OS E3 permutation symmetry interface over packaged Schwinger functions. -/
-class OSE3SymmetryModel (params : Phi4Params)
-    [SchwingerFunctionModel params] where
-  e3_symmetric :
-    ∀ (n : ℕ) (σ : Equiv.Perm (Fin n)) (f g : SchwartzNPoint 1 n),
-      (∀ x, g.toFun x = f.toFun (fun i => x (σ i))) →
-      SchwingerFunctionModel.schwingerFunctions (params := params) n f =
-        SchwingerFunctionModel.schwingerFunctions (params := params) n g
-
-instance (priority := 100) osTemperedModel_of_osaCoreModel
-    (params : Phi4Params) [OSAxiomCoreModel params] :
-    OSTemperedModel params where
-  os0 := OSAxiomCoreModel.os0 (params := params)
-  schwinger_linear := OSAxiomCoreModel.schwinger_linear (params := params)
-
-instance (priority := 100) osEuclideanCovarianceModel_of_osaCoreModel
-    (params : Phi4Params) [OSAxiomCoreModel params] :
-    OSEuclideanCovarianceModel params where
-  os2_translation := OSAxiomCoreModel.os2_translation (params := params)
-  os2_rotation := OSAxiomCoreModel.os2_rotation (params := params)
-
-instance (priority := 100) osE3SymmetryModel_of_osaCoreModel
-    (params : Phi4Params) [OSAxiomCoreModel params] :
-    OSE3SymmetryModel params where
-  e3_symmetric := OSAxiomCoreModel.e3_symmetric (params := params)
-
-/-- OS core package reconstructed from explicit Schwinger/OS0/OS2/E3
-    subinterfaces. -/
-instance (priority := 100) osaCoreModel_of_submodels
-    (params : Phi4Params)
-    [SchwingerFunctionModel params]
-    [OSTemperedModel params]
-    [OSEuclideanCovarianceModel params]
-    [OSE3SymmetryModel params] :
-    OSAxiomCoreModel params where
-  toSchwingerFunctionModel := inferInstance
-  os0 := OSTemperedModel.os0 (params := params)
-  schwinger_linear := OSTemperedModel.schwinger_linear (params := params)
-  os2_translation := OSEuclideanCovarianceModel.os2_translation (params := params)
-  os2_rotation := OSEuclideanCovarianceModel.os2_rotation (params := params)
-  e3_symmetric := OSE3SymmetryModel.e3_symmetric (params := params)
-
-/-- Weak-coupling E4 cluster input, parameterized over Schwinger packaging only. -/
-class OSE4ClusterModel (params : Phi4Params)
-    [SchwingerFunctionModel params] where
-  /-- A model-specific weak-coupling threshold below which clustering is available. -/
-  weak_coupling_threshold : ℝ
-  weak_coupling_threshold_pos : 0 < weak_coupling_threshold
-  e4_cluster_of_weak_coupling :
-    params.coupling < weak_coupling_threshold →
-      ∀ (n m : ℕ) (f : SchwartzNPoint 1 n) (g : SchwartzNPoint 1 m),
-        ∀ ε : ℝ, ε > 0 → ∃ R : ℝ, R > 0 ∧
-            ∀ a : SpacetimeDim 1, a 0 = 0 → (∑ i : Fin 1, (a (Fin.succ i))^2) > R^2 →
-            ∀ (g_a : SchwartzNPoint 1 m),
-              (∀ x : NPointDomain 1 m, g_a x = g (fun i => x i - a)) →
-              ‖SchwingerFunctionModel.schwingerFunctions (params := params) (n + m)
-                  (f.tensorProduct g_a) -
-                SchwingerFunctionModel.schwingerFunctions (params := params) n f *
-                  SchwingerFunctionModel.schwingerFunctions (params := params) m g‖ < ε
-
-/-- Measure-level reflection positivity for linear observables against
-    `infiniteVolumeMeasure`, kept separate from core Schwinger packaging so the
-    distributional OS interface does not silently bundle an independent
-    concrete positivity API. -/
-class MeasureOS3Model (params : Phi4Params)
-    [InfiniteVolumeMeasureModel params] where
-  os3 :
-    ∀ (n : ℕ) (f : Fin n → TestFun2D) (c : Fin n → ℂ),
-      (∀ i, supportedInPositiveTime (f i)) →
-        0 ≤ (∑ i, ∑ j, c i * starRingEnd ℂ (c j) *
-          ∫ ω, ω (testFunTimeReflect (f i)) * ω (f j)
-            ∂(infiniteVolumeMeasure params)).re
-
-/-- Distributional E2 reflection positivity interface for the OS reconstruction API.
-    Kept separate from core OS packaging so Schwinger-function data and E2
-    positivity are explicitly decoupled assumptions. -/
-class OSDistributionE2Model (params : Phi4Params)
-    [SchwingerFunctionModel params] where
-  e2_reflection_positive :
-    ∀ (F : BorchersSequence 1),
-      (∀ n, ∀ x : NPointDomain 1 n,
-        (F.funcs n).toFun x ≠ 0 → x ∈ PositiveTimeRegion 1 n) →
-      (OSInnerProduct 1 (SchwingerFunctionModel.schwingerFunctions (params := params)) F F).re ≥ 0
+/-- Honest theorem-level frontier: measure-level reflection positivity for
+    linear observables against `infiniteVolumeMeasure`. -/
+theorem gap_measure_os3_reflection_positive (params : Phi4Params)
+    [InfiniteVolumeMeasureModel params]
+    (n : ℕ) (f : Fin n → TestFun2D) (c : Fin n → ℂ)
+    (hsupp : ∀ i, supportedInPositiveTime (f i)) :
+    0 ≤ (∑ i, ∑ j, c i * starRingEnd ℂ (c j) *
+      ∫ ω, ω (testFunTimeReflect (f i)) * ω (f j)
+        ∂(infiniteVolumeMeasure params)).re := by
+  sorry
 
 /-! ## Schwinger functions as distributions
 
@@ -191,187 +68,58 @@ def phi4SchwingerFunctions (params : Phi4Params)
     SchwingerFunctions 1 :=
   SchwingerFunctionModel.schwingerFunctions (params := params)
 
-/-! ## OS0: Temperedness -/
-
-/-- **OS0 (Temperedness)**: Each S_n is a continuous linear functional on
-    the Schwartz space S(ℝ^{n×2}), i.e., a tempered distribution.
-
-    This follows from the Lᵖ bounds on the field: since ω(f) ∈ Lᵖ for all p,
-    the products ω(f₁)⋯ω(fₙ) are integrable and depend continuously on the
-    test functions in the Schwartz topology. -/
-theorem phi4_os0 (params : Phi4Params)
-    [SchwingerFunctionModel params]
-    [OSTemperedModel params] :
-    ∀ n, Continuous (phi4SchwingerFunctions params n) := by
-  simpa [phi4SchwingerFunctions] using
-    (OSTemperedModel.os0 (params := params))
-
-theorem phi4_os0_linear (params : Phi4Params)
-    [SchwingerFunctionModel params]
-    [OSTemperedModel params] :
-    ∀ n, IsLinearMap ℂ (phi4SchwingerFunctions params n) := by
-  simpa [phi4SchwingerFunctions] using
-    (OSTemperedModel.schwinger_linear (params := params))
-
-/-! ## OS1: Regularity (Linear Growth) -/
-
-/-- **OS1 (Regularity)**: The generating functional satisfies the linear growth bound
-    |S{f}| ≤ exp(c · N'(f)).
-
-    This is Theorem 12.5.1, the culmination of the integration by parts analysis.
-    It is the most technically demanding of the OS axioms to verify. -/
-theorem phi4_os1 (params : Phi4Params)
-    [InfiniteVolumeMeasureModel params]
-    [RegularityModel params] :
-    ∃ c : ℝ, ∀ f : TestFun2D,
-      |∫ ω, Real.exp (ω f) ∂(infiniteVolumeMeasure params)| ≤
-        Real.exp (c * normFunctional f) := by
-  simpa [normFunctional] using
-    (RegularityModel.generating_functional_bound (params := params))
-
-/-! ## OS2: Euclidean Covariance -/
-
-/-- **OS2a (Translation invariance)**: The Schwinger functions are invariant
-    under Euclidean translations:
-      S_n(x₁+a,...,xₙ+a) = S_n(x₁,...,xₙ) for all a ∈ ℝ².
-
-    This follows because the infinite volume measure is translation invariant
-    (the interaction and free measure are both translation invariant, and the
-    infinite volume limit preserves this symmetry). -/
-theorem phi4_os2_translation (params : Phi4Params)
-    [SchwingerFunctionModel params]
-    [OSEuclideanCovarianceModel params] :
-    ∀ (n : ℕ) (a : Fin 2 → ℝ) (f g : SchwartzNPoint 1 n),
-      (∀ x, g.toFun x = f.toFun (fun i => x i + a)) →
-      phi4SchwingerFunctions params n f = phi4SchwingerFunctions params n g := by
-  intro n a f g hfg
-  simpa [phi4SchwingerFunctions] using
-    (OSEuclideanCovarianceModel.os2_translation (params := params) n a f g hfg)
-
-/-- **OS2b (Rotation invariance)**: The Schwinger functions are invariant
-    under SO(2) rotations:
-      S_n(Rx₁,...,Rxₙ) = S_n(x₁,...,xₙ) for all R ∈ SO(2).
-
-    This follows from the rotational invariance of the Laplacian
-    and hence of the free covariance, combined with the rotational
-    invariance of the interaction ∫ :φ⁴: dx. -/
-theorem phi4_os2_rotation (params : Phi4Params)
-    [SchwingerFunctionModel params]
-    [OSEuclideanCovarianceModel params] :
-    ∀ (n : ℕ) (R : Matrix (Fin 2) (Fin 2) ℝ),
-      R.transpose * R = 1 → R.det = 1 →
-      ∀ (f g : SchwartzNPoint 1 n),
-        (∀ x, g.toFun x = f.toFun (fun i => R.mulVec (x i))) →
-        phi4SchwingerFunctions params n f = phi4SchwingerFunctions params n g := by
-  intro n R horth hdet f g hfg
-  simpa [phi4SchwingerFunctions] using
-    (OSEuclideanCovarianceModel.os2_rotation (params := params) n R horth hdet f g hfg)
-
-/-- Distributional E2 reflection positivity for the packaged φ⁴₂ Schwinger functions. -/
-theorem phi4_e2_distributional (params : Phi4Params)
-    [SchwingerFunctionModel params]
-    [OSDistributionE2Model params] :
-    ∀ (F : BorchersSequence 1),
-      (∀ n, ∀ x : NPointDomain 1 n,
-        (F.funcs n).toFun x ≠ 0 → x ∈ PositiveTimeRegion 1 n) →
-      (OSInnerProduct 1 (phi4SchwingerFunctions params) F F).re ≥ 0 := by
-  intro F hF
-  simpa [phi4SchwingerFunctions] using
-    OSDistributionE2Model.e2_reflection_positive (params := params) F hF
-
 /-! ## Main theorem: OS axioms hold -/
 
-/-- Canonical weak-coupling threshold carried by `OSE4ClusterModel`. -/
-def os4WeakCouplingThreshold (params : Phi4Params)
-    [SchwingerFunctionModel params]
-    [OSE4ClusterModel params] : ℝ :=
-  OSE4ClusterModel.weak_coupling_threshold (params := params)
-
 /-- Assembly theorem: if the explicit OS interfaces are provided and weak
-    coupling is available, the packaged Schwinger functions satisfy OS0-OS4. -/
-theorem phi4_satisfies_OS (params : Phi4Params)
-    [OSAxiomCoreModel params]
-    [OSDistributionE2Model params]
-    [OSE4ClusterModel params]
-    (hsmall : params.coupling < os4WeakCouplingThreshold params) :
-    ∃ OS : OsterwalderSchraderAxioms 1,
-      OS.S = phi4SchwingerFunctions params := by
-  refine ⟨{
-    S := phi4SchwingerFunctions params
-    E0_tempered := phi4_os0 params
-    E1_translation_invariant := phi4_os2_translation params
-    E1_rotation_invariant := phi4_os2_rotation params
-    E2_reflection_positive := phi4_e2_distributional params
-    E3_symmetric := OSE3SymmetryModel.e3_symmetric (params := params)
-    E4_cluster := by
-      simpa [phi4SchwingerFunctions, os4WeakCouplingThreshold] using
-        OSE4ClusterModel.e4_cluster_of_weak_coupling (params := params) hsmall
-  }, rfl⟩
+    coupling is available, the packaged Schwinger functions satisfy OS0-OS4.
 
-/-- Honest frontier: construction of the core Schwinger OS package from
-    explicit Schwinger-data assumptions. -/
-theorem gap_osaCoreModel_nonempty (params : Phi4Params)
-    (S : SchwingerFunctions 1)
-    (hos0 : ∀ n, Continuous (S n))
-    (hos0_linear : ∀ n, IsLinearMap ℂ (S n))
+    The remaining OS0/OS2/E2/E3 obligations are still explicit hypotheses here;
+    they have not yet all been surfaced as local named frontier theorems. -/
+theorem phi4_satisfies_OS (params : Phi4Params)
+    [SchwingerFunctionModel params]
+    (hos0 : ∀ n, Continuous (phi4SchwingerFunctions params n))
     (hos2_translation :
       ∀ (n : ℕ) (a : Fin 2 → ℝ) (f g : SchwartzNPoint 1 n),
         (∀ x, g.toFun x = f.toFun (fun i => x i + a)) →
-        S n f = S n g)
+        phi4SchwingerFunctions params n f = phi4SchwingerFunctions params n g)
     (hos2_rotation :
       ∀ (n : ℕ) (R : Matrix (Fin 2) (Fin 2) ℝ),
         R.transpose * R = 1 → R.det = 1 →
         ∀ (f g : SchwartzNPoint 1 n),
           (∀ x, g.toFun x = f.toFun (fun i => R.mulVec (x i))) →
-          S n f = S n g)
-    (he3_symmetric :
-      ∀ (n : ℕ) (σ : Equiv.Perm (Fin n)) (f g : SchwartzNPoint 1 n),
-        (∀ x, g.toFun x = f.toFun (fun i => x (σ i))) →
-        S n f = S n g) :
-    Nonempty (OSAxiomCoreModel params) := by
-  refine ⟨{
-    toSchwingerFunctionModel := { schwingerFunctions := S }
-    os0 := hos0
-    schwinger_linear := hos0_linear
-    os2_translation := hos2_translation
-    os2_rotation := hos2_rotation
-    e3_symmetric := he3_symmetric
-  }⟩
-
-/-- Honest frontier: distributional E2 from explicit reflection-positivity data. -/
-theorem gap_osDistributionE2_nonempty (params : Phi4Params)
-    [SchwingerFunctionModel params]
+          phi4SchwingerFunctions params n f = phi4SchwingerFunctions params n g)
     (he2 :
       ∀ (F : BorchersSequence 1),
         (∀ n, ∀ x : NPointDomain 1 n,
           (F.funcs n).toFun x ≠ 0 → x ∈ PositiveTimeRegion 1 n) →
-        (OSInnerProduct 1 (SchwingerFunctionModel.schwingerFunctions (params := params)) F F).re ≥ 0) :
-    Nonempty (OSDistributionE2Model params) := by
-  exact ⟨{
-    e2_reflection_positive := he2
-  }⟩
-
-/-- Honest frontier: weak-coupling E4 clustering from explicit cluster data. -/
-theorem gap_osE4Cluster_nonempty (params : Phi4Params)
-    [SchwingerFunctionModel params]
+        (OSInnerProduct 1 (phi4SchwingerFunctions params) F F).re ≥ 0)
+    (he3_symmetric :
+      ∀ (n : ℕ) (σ : Equiv.Perm (Fin n)) (f g : SchwartzNPoint 1 n),
+        (∀ x, g.toFun x = f.toFun (fun i => x (σ i))) →
+        phi4SchwingerFunctions params n f = phi4SchwingerFunctions params n g)
     (threshold : ℝ)
-    (hthreshold_pos : 0 < threshold)
     (hcluster :
       params.coupling < threshold →
         ∀ (n m : ℕ) (f : SchwartzNPoint 1 n) (g : SchwartzNPoint 1 m),
           ∀ ε : ℝ, ε > 0 → ∃ R : ℝ, R > 0 ∧
-            ∀ a : SpacetimeDim 1, a 0 = 0 → (∑ i : Fin 1, (a (Fin.succ i))^2) > R^2 →
+              ∀ a : SpacetimeDim 1, a 0 = 0 → (∑ i : Fin 1, (a (Fin.succ i))^2) > R^2 →
               ∀ (g_a : SchwartzNPoint 1 m),
                 (∀ x : NPointDomain 1 m, g_a x = g (fun i => x i - a)) →
-                ‖SchwingerFunctionModel.schwingerFunctions (params := params) (n + m)
-                    (f.tensorProduct g_a) -
-                  SchwingerFunctionModel.schwingerFunctions (params := params) n f *
-                    SchwingerFunctionModel.schwingerFunctions (params := params) m g‖ < ε) :
-    Nonempty (OSE4ClusterModel params) := by
-  exact ⟨{
-    weak_coupling_threshold := threshold
-    weak_coupling_threshold_pos := hthreshold_pos
-    e4_cluster_of_weak_coupling := hcluster
-  }⟩
+                ‖phi4SchwingerFunctions params (n + m) (f.tensorProduct g_a) -
+                  phi4SchwingerFunctions params n f *
+                    phi4SchwingerFunctions params m g‖ < ε)
+    (hsmall : params.coupling < threshold) :
+    ∃ OS : OsterwalderSchraderAxioms 1,
+      OS.S = phi4SchwingerFunctions params := by
+  refine ⟨{
+    S := phi4SchwingerFunctions params
+    E0_tempered := hos0
+    E1_translation_invariant := hos2_translation
+    E1_rotation_invariant := hos2_rotation
+    E2_reflection_positive := he2
+    E3_symmetric := he3_symmetric
+    E4_cluster := by
+      simpa using hcluster hsmall
+  }, rfl⟩
 
 end

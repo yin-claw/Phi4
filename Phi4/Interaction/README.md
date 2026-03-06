@@ -17,7 +17,7 @@ and reconstruction bridges.
   - Wick quartic semiboundedness and cutoff lower-bound infrastructure.
   - Interface classes and base constructors:
     `InteractionUVModel`, `InteractionWeightModel`,
-    `InteractionIntegrabilityModel`.
+    `InteractionWeightModel`.
   - Early `L^p` routes from a.e. lower bounds and summable bad-event control.
 - `Part1Tail.lean`
   - Continuation of Part 1 infrastructure:
@@ -30,7 +30,7 @@ and reconstruction bridges.
   - Shifted-index moment/bad-set bridges that prepare high-level endpoints.
 - `Part3.lean`
   - Geometric/exponential-moment-powered constructors for
-    `InteractionWeightModel` and `InteractionIntegrabilityModel`.
+    `InteractionWeightModel`.
   - Public endpoint theorems:
     `exp_interaction_Lp`, `partition_function_pos`,
     `partition_function_integrable`, and explicit constructive variants from

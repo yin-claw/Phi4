@@ -177,15 +177,15 @@ def freeCovKernel (mass : ℝ) (x y : Spacetime2D) : ℝ :=
   ∫ t in Set.Ioi (0 : ℝ),
     (4 * Real.pi * t)⁻¹ * Real.exp (-(mass ^ 2 * t + ‖x - y‖ ^ 2 / (4 * t)))
 
-/-- Interface identifying the Hilbert-space covariance used by
-    `freeFieldMeasure` with the Green-kernel bilinear form.
+/-- Honest theorem-level frontier: the Hilbert-space covariance used by
+    `freeFieldMeasure` equals the Green-kernel bilinear form.
     This is the sound bridge between the `freeCovarianceCLM` representation
     and the explicit kernel `freeCovKernel`. -/
-class FreeCovarianceKernelModel (mass : ℝ) (hmass : 0 < mass) where
-  covariance_eq_kernel :
+theorem gap_covariance_eq_kernel (mass : ℝ) (hmass : 0 < mass) :
     ∀ (f g : TestFun2D),
       GaussianField.covariance (freeCovarianceCLM mass hmass) f g =
-        ∫ x, ∫ y, f x * freeCovKernel mass x y * g y
+        ∫ x, ∫ y, f x * freeCovKernel mass x y * g y := by
+  sorry
 
 /-- Rewrite the free covariance kernel using the 2D Schwinger integral identity. -/
 theorem freeCovKernel_eq_besselK0

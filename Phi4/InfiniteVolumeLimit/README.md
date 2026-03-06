@@ -12,9 +12,10 @@ finite volume -> monotone/bounded Schwinger family -> infinite-volume objects.
   - Exhaustion setup (`exhaustingRectangles`).
   - Monotonicity and uniform-bound infrastructure.
   - Existence of infinite-volume Schwinger limits (`infinite_volume_schwinger_exists*`).
-  - Core models and interfaces:
-    `InfiniteVolumeSchwingerModel`, `SchwingerUniformBoundModel`,
-    `SchwingerLimitModel`, `InfiniteVolumeMeasureModel`, `InfiniteVolumeMomentModel`.
+  - Remaining core interfaces:
+    `SchwingerLimitModel`, `InfiniteVolumeMeasureModel`.
+  - Canonical explicit WP3 frontier:
+    `gap_infiniteVolumeLimit_exists`.
 - `Part2.lean`
   - Infinite-volume 4-point cumulant definitions and channel bounds.
   - Truncated 4-point positivity and upper bounds in all pairing channels.

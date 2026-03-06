@@ -967,18 +967,7 @@ theorem connectedSchwingerTwo_sq_le_mul_diag
       linarith [hmul_nonneg']
   simpa [B] using hcs
 
-/-! ## Finite-volume comparison interface -/
-
-/-- Comparison input controlling interacting two-point functions by the free Gaussian
-    two-point function. This packages the nontrivial domination estimate proved via
-    correlation-inequality/random-walk methods (e.g. Gaussian upper bounds in the
-    even φ⁴ setting) as an explicit assumption for downstream development. -/
-class FiniteVolumeComparisonModel (params : Phi4Params) where
-  schwingerTwo_le_free : ∀ (Λ : Rectangle)
-      (f g : TestFun2D)
-      (_hf : ∀ x, 0 ≤ f x) (_hg : ∀ x, 0 ≤ g x),
-      schwingerTwo params Λ f g ≤
-        ∫ ω, ω f * ω g ∂(freeFieldMeasure params.mass params.mass_pos)
+/-! ## Finite-volume comparison frontier -/
 
 /-- Honest theorem-level frontier for the standard finite-volume comparison
     estimate. The explicit `HasExpInteractionLp` hypothesis keeps the theorem

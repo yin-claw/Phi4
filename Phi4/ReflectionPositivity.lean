@@ -21,9 +21,8 @@ RP holds for:
 RP is OS axiom E2 and is the key to constructing the physical Hilbert space
 from the Euclidean theory.
 
-The local RP proofs are not completed in this branch. The legacy model classes
-below remain, but the theorem-level frontiers make the open obligations
-explicit.
+The local RP proofs are not completed in this branch. The theorem-level
+frontiers below make the open obligations explicit.
 
 ## References
 
@@ -79,37 +78,7 @@ def testFunTimeReflect (f : TestFun2D) : TestFun2D :=
 def supportedInPositiveTime (f : TestFun2D) : Prop :=
   ∀ x : Spacetime2D, x 0 ≤ 0 → f x = 0
 
-/-! ## Abstract reflection-positivity interfaces -/
-
-/-- Free Gaussian reflection positivity at fixed mass. This packages the analytic
-    RP proof for `freeFieldMeasure` as an explicit assumption interface. -/
-class FreeReflectionPositivityModel (mass : ℝ) (hmass : 0 < mass) where
-  free_covariance_reflection_positive :
-    ∀ (n : ℕ) (f : Fin n → TestFun2D) (c : Fin n → ℂ),
-      (∀ i, supportedInPositiveTime (f i)) →
-      0 ≤ (∑ i, ∑ j, c i * starRingEnd ℂ (c j) *
-        ∫ ω, ω (testFunTimeReflect (f i)) * ω (f j)
-          ∂(freeFieldMeasure mass hmass)).re
-
-/-- Dirichlet covariance reflection positivity on time-symmetric rectangles. -/
-class DirichletReflectionPositivityModel (mass : ℝ) (hmass : 0 < mass) where
-  dirichlet_covariance_reflection_positive :
-    ∀ [BoundaryKernelModel mass hmass] (Λ : Rectangle),
-      Λ.IsTimeSymmetric →
-      ∀ (n : ℕ) (f : Fin n → TestFun2D) (c : Fin n → ℂ),
-      (∀ i, supportedInPositiveTime (f i)) →
-      0 ≤ (∑ i, ∑ j, c i * starRingEnd ℂ (c j) *
-        ↑(∫ x, ∫ y, (testFunTimeReflect (f i)) x * dirichletCov Λ mass hmass x y * (f j) y)).re
-
-/-- Interacting finite-volume reflection positivity on time-symmetric rectangles. -/
-class InteractingReflectionPositivityModel (params : Phi4Params) where
-  interacting_measure_reflection_positive :
-    ∀ (Λ : Rectangle), Λ.IsTimeSymmetric →
-      ∀ (n : ℕ) (f : Fin n → TestFun2D) (c : Fin n → ℂ),
-      (∀ i, supportedInPositiveTime (f i)) →
-      0 ≤ (∑ i, ∑ j, c i * starRingEnd ℂ (c j) *
-        ∫ ω, ω (testFunTimeReflect (f i)) * ω (f j)
-          ∂(finiteVolumeMeasure params Λ)).re
+/-! ## Reflection-positivity frontiers -/
 
 /-- Honest theorem-level frontier for free Gaussian reflection positivity. -/
 theorem gap_free_covariance_reflection_positive

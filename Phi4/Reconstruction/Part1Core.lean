@@ -81,102 +81,7 @@ abbrev ConnectedTwoPointDecayAtParams (params : Phi4Params)
         |connectedTwoPoint params f g_shifted| ≤
           Cfg * Real.exp (-m_gap * ‖a‖)
 
-/-! ## Uniform weak-coupling decay interface -/
-
-/-- Optional global weak-coupling decay input used for the explicit
-    cross-parameter OS4 statement. This is intentionally separate from
-    `ReconstructionInputModel`, which only carries fixed-`params` data. -/
-class UniformWeakCouplingDecayModel (params : Phi4Params)
-    [SchwingerLimitModel params] where
-  phi4_os4_weak_coupling :
-    ∃ coupling_bound : ℝ, 0 < coupling_bound ∧
-      ∀ p : Phi4Params, [SchwingerLimitModel p] →
-        p.coupling < coupling_bound →
-          ConnectedTwoPointDecayAtParams p
-
-/-! ## Abstract reconstruction inputs -/
-
-/-- Linear-growth input needed at fixed `params` for OS-to-Wightman
-    reconstruction. -/
-class ReconstructionLinearGrowthModel (params : Phi4Params)
-    [SchwingerFunctionModel params] where
-  os_package : OsterwalderSchraderAxioms 1
-  os_package_eq : os_package.S = phi4SchwingerFunctions params
-  linear_growth : OSLinearGrowthCondition 1 os_package
-
-/-- Backward-compatible existential view of `ReconstructionLinearGrowthModel`. -/
-theorem ReconstructionLinearGrowthModel.phi4_linear_growth (params : Phi4Params)
-    [SchwingerFunctionModel params]
-    [ReconstructionLinearGrowthModel params] :
-    ∃ OS : OsterwalderSchraderAxioms 1,
-      OS.S = phi4SchwingerFunctions params ∧
-      Nonempty (OSLinearGrowthCondition 1 OS) := by
-  refine ⟨ReconstructionLinearGrowthModel.os_package (params := params),
-    ReconstructionLinearGrowthModel.os_package_eq (params := params), ?_⟩
-  exact ⟨ReconstructionLinearGrowthModel.linear_growth (params := params)⟩
-
-/-- Fixed-`params` weak-coupling decay input, separated from linear-growth data. -/
-class ReconstructionWeakCouplingModel (params : Phi4Params)
-    [SchwingerLimitModel params] where
-  /-- A canonical weak-coupling threshold for the current parameter set. -/
-  weak_coupling_threshold : ℝ
-  weak_coupling_threshold_pos : 0 < weak_coupling_threshold
-  connectedTwoPoint_decay_of_weak_coupling :
-    params.coupling < weak_coupling_threshold →
-      ConnectedTwoPointDecayAtParams params
-
-/-- A global uniform weak-coupling decay model induces a fixed-parameter
-    weak-coupling threshold model by specialization to `params`. -/
-instance (priority := 90) reconstructionWeakCouplingModel_of_uniform
-    (params : Phi4Params)
-    [SchwingerLimitModel params]
-    [UniformWeakCouplingDecayModel params] :
-    ReconstructionWeakCouplingModel params where
-  weak_coupling_threshold :=
-    (UniformWeakCouplingDecayModel.phi4_os4_weak_coupling (params := params)).choose
-  weak_coupling_threshold_pos :=
-    (UniformWeakCouplingDecayModel.phi4_os4_weak_coupling (params := params)).choose_spec.1
-  connectedTwoPoint_decay_of_weak_coupling := by
-    intro hsmall
-    exact
-      (UniformWeakCouplingDecayModel.phi4_os4_weak_coupling (params := params)).choose_spec.2
-        params hsmall
-
-/-- Backward-compatible aggregate reconstruction input model. -/
-class ReconstructionInputModel (params : Phi4Params)
-    [SchwingerLimitModel params]
-    [SchwingerFunctionModel params]
-    extends ReconstructionLinearGrowthModel params,
-      ReconstructionWeakCouplingModel params
-
-instance (priority := 100) reconstructionInputModel_of_submodels
-    (params : Phi4Params)
-    [SchwingerLimitModel params]
-    [SchwingerFunctionModel params]
-    [ReconstructionLinearGrowthModel params]
-    [ReconstructionWeakCouplingModel params] :
-    ReconstructionInputModel params where
-  toReconstructionLinearGrowthModel := inferInstance
-  toReconstructionWeakCouplingModel := inferInstance
-
-/-- Abstract OS-to-Wightman reconstruction backend for fixed `params`.
-    Kept separate from `ReconstructionInputModel` so fixed-`params`
-    analytic assumptions and reconstruction machinery are not bundled together. -/
-class WightmanReconstructionModel (params : Phi4Params)
-    where
-  wightman_reconstruction :
-    ∀ (OS : OsterwalderSchraderAxioms 1),
-      OSLinearGrowthCondition 1 OS →
-        ∃ (Wfn : WightmanFunctions 1),
-          IsWickRotationPair OS.S Wfn.W
-
-/-- Existence of a weak-coupling threshold guaranteeing connected 2-point decay. -/
-abbrev ConnectedTwoPointDecayThreshold (params : Phi4Params)
-    [SchwingerLimitModel params]
-    [ReconstructionWeakCouplingModel params] : Prop :=
-  ∃ coupling_bound : ℝ, 0 < coupling_bound ∧
-    (params.coupling < coupling_bound →
-      ConnectedTwoPointDecayAtParams params)
+/-! ## Explicit reconstruction inputs -/
 
 /-! ## Product-Tensor Bridge Towards E0' -/
 
@@ -266,7 +171,7 @@ theorem phi4_productTensor_mixed_bound_of_uniform_generating_bound
 theorem phi4_positive_order_linear_growth_of_productTensor_approx
     (params : Phi4Params)
     [SchwingerFunctionModel params]
-    [OSTemperedModel params]
+    (hS_cont : ∀ n, Continuous (phi4SchwingerFunctions params n))
     (sobolev_index : ℕ) (alpha beta gamma : ℝ)
     (hprod :
       ∀ (n : ℕ) (_hn : 0 < n) (f : Fin n → TestFun2D),
@@ -286,13 +191,13 @@ theorem phi4_positive_order_linear_growth_of_productTensor_approx
   intro n hn g
   rcases happrox n hn g with ⟨u, hu_tendsto⟩
   let Cn : ℝ := alpha * beta ^ n * (n.factorial : ℝ) ^ gamma
-  have hS_cont : Continuous (phi4SchwingerFunctions params n) := phi4_os0 params n
+  have hS_cont' : Continuous (phi4SchwingerFunctions params n) := hS_cont n
   have hS_tendsto :
       Filter.Tendsto
         (fun k => phi4SchwingerFunctions params n (schwartzProductTensorFromTestFamily (u k)))
         Filter.atTop
         (nhds (phi4SchwingerFunctions params n g)) :=
-    (hS_cont.tendsto g).comp hu_tendsto
+    (hS_cont'.tendsto g).comp hu_tendsto
   have hnorm_tendsto :
       Filter.Tendsto
         (fun k => ‖phi4SchwingerFunctions params n (schwartzProductTensorFromTestFamily (u k))‖)
@@ -342,7 +247,7 @@ theorem phi4_linear_growth_of_productTensor_approx_and_zero
     (params : Phi4Params)
     [SchwingerLimitModel params]
     [SchwingerFunctionModel params]
-    [OSTemperedModel params]
+    (hS_cont : ∀ n, Continuous (phi4SchwingerFunctions params n))
     (OS : OsterwalderSchraderAxioms 1)
     (hS : OS.S = phi4SchwingerFunctions params)
     (sobolev_index : ℕ)
@@ -382,7 +287,7 @@ theorem phi4_linear_growth_of_productTensor_approx_and_zero
   by_cases hn : 0 < n
   · simpa [hS] using
       (phi4_positive_order_linear_growth_of_productTensor_approx
-        params sobolev_index alpha beta gamma hprod happrox n hn g)
+        params hS_cont sobolev_index alpha beta gamma hprod happrox n hn g)
   · have hn0 : n = 0 := Nat.eq_zero_of_not_pos hn
     subst hn0
     simpa [hS] using hzero g
@@ -422,15 +327,13 @@ theorem phi4_normalized_order0_of_linear_and_compat_of_zero
     (params : Phi4Params)
     [SchwingerLimitModel params]
     [SchwingerFunctionModel params]
-    [OSTemperedModel params]
+    (hlin0 : IsLinearMap ℂ (phi4SchwingerFunctions params 0))
     (hcompat :
       ∀ (n : ℕ) (f : Fin n → TestFun2D),
         phi4SchwingerFunctions params n (schwartzProductTensorFromTestFamily f) =
           (infiniteVolumeSchwinger params n f : ℂ))
     (hzero : ∀ f : Fin 0 → TestFun2D, infiniteVolumeSchwinger params 0 f = 1) :
     ∀ g : SchwartzNPoint 1 0, phi4SchwingerFunctions params 0 g = g 0 := by
-  have hlin0 : IsLinearMap ℂ (phi4SchwingerFunctions params 0) :=
-    phi4_os0_linear params 0
   intro g
   let f0 : Fin 0 → TestFun2D := fun i => False.elim (Fin.elim0 i)
   have hone : phi4SchwingerFunctions params 0 (schwartzProductTensorFromTestFamily f0) = 1 :=
@@ -458,7 +361,7 @@ theorem phi4_linear_growth_of_mixed_bound_productTensor_approx_and_given_normali
     (params : Phi4Params)
     [SchwingerLimitModel params]
     [SchwingerFunctionModel params]
-    [OSTemperedModel params]
+    (hS_cont : ∀ n, Continuous (phi4SchwingerFunctions params n))
     (OS : OsterwalderSchraderAxioms 1)
     (hS : OS.S = phi4SchwingerFunctions params)
     (alpha beta gamma : ℝ)
@@ -532,7 +435,7 @@ theorem phi4_linear_growth_of_mixed_bound_productTensor_approx_and_given_normali
   have hzero := phi4_zero_linear_growth_of_normalized_order0
     params alpha' beta gamma halpha'_one hnormalized
   exact phi4_linear_growth_of_productTensor_approx_and_zero
-    params OS hS 0 alpha' beta gamma halpha' hbeta hprod happrox hzero
+    params hS_cont OS hS 0 alpha' beta gamma halpha' hbeta hprod happrox hzero
 
 /-- Sequence approximation by product tensors from dense image of the
     product-tensor map at fixed positive order. -/
@@ -566,10 +469,40 @@ theorem phi4_productTensor_approx_of_dense_range
     Schwinger bound bridge are provided explicitly. -/
 theorem gap_phi4_linear_growth (params : Phi4Params)
     [SchwingerLimitModel params]
-    [OSAxiomCoreModel params]
-    [OSDistributionE2Model params]
-    [OSE4ClusterModel params]
-    (hsmall : params.coupling < os4WeakCouplingThreshold params)
+    [SchwingerFunctionModel params]
+    (hos0 : ∀ n, Continuous (phi4SchwingerFunctions params n))
+    (hos0_linear : ∀ n, IsLinearMap ℂ (phi4SchwingerFunctions params n))
+    (hos2_translation :
+      ∀ (n : ℕ) (a : Fin 2 → ℝ) (f g : SchwartzNPoint 1 n),
+        (∀ x, g.toFun x = f.toFun (fun i => x i + a)) →
+        phi4SchwingerFunctions params n f = phi4SchwingerFunctions params n g)
+    (hos2_rotation :
+      ∀ (n : ℕ) (R : Matrix (Fin 2) (Fin 2) ℝ),
+        R.transpose * R = 1 → R.det = 1 →
+        ∀ (f g : SchwartzNPoint 1 n),
+          (∀ x, g.toFun x = f.toFun (fun i => R.mulVec (x i))) →
+          phi4SchwingerFunctions params n f = phi4SchwingerFunctions params n g)
+    (he2 :
+      ∀ (F : BorchersSequence 1),
+        (∀ n, ∀ x : NPointDomain 1 n,
+          (F.funcs n).toFun x ≠ 0 → x ∈ PositiveTimeRegion 1 n) →
+        (OSInnerProduct 1 (phi4SchwingerFunctions params) F F).re ≥ 0)
+    (he3_symmetric :
+      ∀ (n : ℕ) (σ : Equiv.Perm (Fin n)) (f g : SchwartzNPoint 1 n),
+        (∀ x, g.toFun x = f.toFun (fun i => x (σ i))) →
+        phi4SchwingerFunctions params n f = phi4SchwingerFunctions params n g)
+    (threshold : ℝ)
+    (hcluster :
+      params.coupling < threshold →
+        ∀ (n m : ℕ) (f : SchwartzNPoint 1 n) (g : SchwartzNPoint 1 m),
+          ∀ ε : ℝ, ε > 0 → ∃ R : ℝ, R > 0 ∧
+              ∀ a : SpacetimeDim 1, a 0 = 0 → (∑ i : Fin 1, (a (Fin.succ i))^2) > R^2 →
+              ∀ (g_a : SchwartzNPoint 1 m),
+                (∀ x : NPointDomain 1 m, g_a x = g (fun i => x i - a)) →
+                ‖phi4SchwingerFunctions params (n + m) (f.tensorProduct g_a) -
+                  phi4SchwingerFunctions params n f *
+                    phi4SchwingerFunctions params m g‖ < ε)
+    (hsmall : params.coupling < threshold)
     (alpha beta gamma : ℝ)
     (hbeta : 0 < beta)
     (hmixed :
@@ -598,10 +531,11 @@ theorem gap_phi4_linear_growth (params : Phi4Params)
     ∃ OS : OsterwalderSchraderAxioms 1,
       OS.S = phi4SchwingerFunctions params ∧
       Nonempty (OSLinearGrowthCondition 1 OS) := by
-  rcases phi4_satisfies_OS params hsmall with ⟨OS, hS⟩
+  rcases phi4_satisfies_OS params hos0 hos2_translation hos2_rotation he2 he3_symmetric
+      threshold hcluster hsmall with ⟨OS, hS⟩
   have hnormalized : ∀ g : SchwartzNPoint 1 0, phi4SchwingerFunctions params 0 g = g 0 :=
-    phi4_normalized_order0_of_linear_and_compat_of_zero params hcompat hzero
+    phi4_normalized_order0_of_linear_and_compat_of_zero params (hos0_linear 0) hcompat hzero
   exact phi4_linear_growth_of_mixed_bound_productTensor_approx_and_given_normalized_order0
-    params OS hS alpha beta gamma hbeta hmixed hreduce
+    params hos0 OS hS alpha beta gamma hbeta hmixed hreduce
     (fun n hn g => phi4_productTensor_approx_of_dense_range hn g (hdense n hn))
     hnormalized

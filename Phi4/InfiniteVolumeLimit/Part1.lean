@@ -76,7 +76,7 @@ private lemma exhaustingRectangles_mono_toSet
     increasing the covariance) with GKS-II (the 2-point function is
     monotone in the covariance for the φ⁴ interaction). -/
 theorem schwinger_monotone_in_volume (params : Phi4Params)
-    [SchwingerNMonotoneModel params 2]
+    (hmono2 : HasSchwingerNMonotone params 2)
     (n₁ n₂ : ℕ) (hn₁ : 0 < n₁) (hn₂ : 0 < n₂) (h : n₁ ≤ n₂)
     (f g : TestFun2D) (hf : ∀ x, 0 ≤ f x) (hg : ∀ x, 0 ≤ g x)
     (hfsupp : ∀ x ∉ (exhaustingRectangles n₁ hn₁).toSet, f x = 0)
@@ -96,10 +96,9 @@ theorem schwinger_monotone_in_volume (params : Phi4Params)
     · simpa using hfsupp x hx
     · simpa using hgsupp x hx
   have hmonoN :=
-    SchwingerNMonotoneModel.schwingerN_monotone
-      (params := params)
-      (Λ₁ := exhaustingRectangles n₁ hn₁)
-      (Λ₂ := exhaustingRectangles n₂ hn₂)
+    hmono2
+      (exhaustingRectangles n₁ hn₁)
+      (exhaustingRectangles n₂ hn₂)
       (exhaustingRectangles_mono_toSet n₁ n₂ hn₁ hn₂ h)
       (![f, g] : Fin 2 → TestFun2D) hfvec hsuppvec
   simpa [schwingerN_two_eq_schwingerTwo] using hmonoN
@@ -135,7 +134,7 @@ private lemma exhaustingRectangles_isTimeSymmetric
     moments along the standard exhaustion are uniformly bounded. -/
 theorem schwingerN_uniformly_bounded_on_exhaustion
     (params : Phi4Params)
-    [MultipleReflectionModel params]
+    (huniform : HasSchwingerUniformBound params)
     (n0 : ℕ)
     (k : ℕ)
     (f : Fin k → TestFun2D)
@@ -143,7 +142,7 @@ theorem schwingerN_uniformly_bounded_on_exhaustion
       ∀ i, ∀ x ∉ (exhaustingRectangles (n0 + 1) (Nat.succ_pos n0)).toSet, f i x = 0) :
     ∃ C : ℝ, ∀ n : ℕ,
       |schwingerN params (exhaustingRectangles (n + n0 + 1) (Nat.succ_pos _)) k f| ≤ C := by
-  rcases MultipleReflectionModel.schwinger_uniform_bound (params := params) k f with ⟨C, hC⟩
+  rcases huniform k f with ⟨C, hC⟩
   refine ⟨C, ?_⟩
   intro n
   let Λn : Rectangle := exhaustingRectangles (n + n0 + 1) (Nat.succ_pos _)
@@ -164,7 +163,7 @@ theorem schwingerN_uniformly_bounded_on_exhaustion
 theorem schwingerN_tendsto_iSup_of_monotone_bounded
     (params : Phi4Params)
     (k : ℕ)
-    [SchwingerNMonotoneModel params k]
+    (hmono : HasSchwingerNMonotone params k)
     (n0 : ℕ)
     (f : Fin k → TestFun2D)
     (hf : ∀ i, ∀ x, 0 ≤ f i x)
@@ -193,8 +192,7 @@ theorem schwingerN_tendsto_iSup_of_monotone_bounded
           ∀ x ∉ (exhaustingRectangles (n + n0 + 1) (Nat.succ_pos _)).toSet, f i x = 0 := by
       intro i x hx
       exact support_zero_outside_of_subset (f i) hsub0n (hfsupp0 i) x hx
-    exact SchwingerNMonotoneModel.schwingerN_monotone
-      (params := params) (k := k)
+    exact hmono
       (Λ₁ := exhaustingRectangles (n + n0 + 1) (Nat.succ_pos (n + n0)))
       (Λ₂ := exhaustingRectangles (m + n0 + 1) (Nat.succ_pos (m + n0)))
       (exhaustingRectangles_mono_toSet
@@ -208,12 +206,12 @@ theorem schwingerN_tendsto_iSup_of_monotone_bounded
 /-- Monotone-convergence form for finite-volume `k`-point moments along the
     exhausting rectangles, under:
     1. `SchwingerNMonotoneModel params k` for volume monotonicity, and
-    2. `MultipleReflectionModel params` for uniform absolute bounds. -/
-theorem schwingerN_tendsto_iSup_of_models
+    2. `HasSchwingerUniformBound params` for uniform absolute bounds. -/
+theorem schwingerN_tendsto_iSup_of_monotone_uniformBound
     (params : Phi4Params)
     (k : ℕ)
-    [SchwingerNMonotoneModel params k]
-    [MultipleReflectionModel params]
+    (hmono : HasSchwingerNMonotone params k)
+    (huniform : HasSchwingerUniformBound params)
     (n0 : ℕ)
     (f : Fin k → TestFun2D)
     (hf : ∀ i, ∀ x, 0 ≤ f i x)
@@ -224,19 +222,19 @@ theorem schwingerN_tendsto_iSup_of_models
       Filter.atTop
       (nhds (⨆ n : ℕ,
         schwingerN params (exhaustingRectangles (n + n0 + 1) (Nat.succ_pos _)) k f)) := by
-  have hbound := schwingerN_uniformly_bounded_on_exhaustion params n0 k f hfsupp0
+  have hbound := schwingerN_uniformly_bounded_on_exhaustion params huniform n0 k f hfsupp0
   exact schwingerN_tendsto_iSup_of_monotone_bounded
-    params k n0 f hf hfsupp0 hbound
+    params k hmono n0 f hf hfsupp0 hbound
 
 /-- Existence of the interface-shaped exhausting-sequence limit
     `if h : 0 < n then S_k^{Λₙ}(f) else 0` from:
     1. `SchwingerNMonotoneModel params k`, and
-    2. `MultipleReflectionModel params`. -/
-theorem schwingerN_limit_exists_if_exhaustion_of_models
+    2. `HasSchwingerUniformBound params`. -/
+theorem schwingerN_limit_exists_if_exhaustion_of_monotone_uniformBound
     (params : Phi4Params)
     (k : ℕ)
-    [SchwingerNMonotoneModel params k]
-    [MultipleReflectionModel params]
+    (hmono : HasSchwingerNMonotone params k)
+    (huniform : HasSchwingerUniformBound params)
     (f : Fin k → TestFun2D)
     (hf : ∀ i, ∀ x, 0 ≤ f i x)
     (hfsupp : ∀ i, ∀ x ∉ (exhaustingRectangles 1 (Nat.succ_pos 0)).toSet, f i x = 0) :
@@ -252,8 +250,8 @@ theorem schwingerN_limit_exists_if_exhaustion_of_models
         (fun n : ℕ => schwingerN params (exhaustingRectangles (n + 1) (Nat.succ_pos n)) k f)
         Filter.atTop (nhds S) := by
     simpa [S, Nat.add_comm, Nat.add_left_comm, Nat.add_assoc] using
-      (schwingerN_tendsto_iSup_of_models
-        (params := params) (k := k) (n0 := 0) f hf hfsupp)
+      (schwingerN_tendsto_iSup_of_monotone_uniformBound
+        (params := params) (k := k) hmono huniform (n0 := 0) f hf hfsupp)
   let a : ℕ → ℝ := fun n =>
     if h : 0 < n then schwingerN params (exhaustingRectangles n h) k f else 0
   have hshiftA : Filter.Tendsto (fun n : ℕ => a (n + 1)) Filter.atTop (nhds S) := by
@@ -263,10 +261,10 @@ theorem schwingerN_limit_exists_if_exhaustion_of_models
   exact ⟨S, ha⟩
 
 /-- Lattice-bridge `n + 1`-shifted exhaustion form of two-point convergence. -/
-theorem schwingerTwo_tendsto_if_exhaustion_of_lattice_models
+theorem schwingerTwo_tendsto_if_exhaustion_of_monotone_uniformBound
     (params : Phi4Params)
-    [LatticeSchwingerTwoMonotoneModel params]
-    [MultipleReflectionModel params]
+    (hmono2 : HasSchwingerNMonotone params 2)
+    (huniform : HasSchwingerUniformBound params)
     (f g : TestFun2D)
     (hf : ∀ x, 0 ≤ f x) (hg : ∀ x, 0 ≤ g x)
     (hfsupp : ∀ x ∉ (exhaustingRectangles 1 (Nat.succ_pos 0)).toSet, f x = 0)
@@ -277,7 +275,6 @@ theorem schwingerTwo_tendsto_if_exhaustion_of_lattice_models
       Filter.atTop
       (nhds (⨆ n : ℕ,
         schwingerTwo params (exhaustingRectangles (n + 1) (Nat.succ_pos n)) f g)) := by
-  letI : SchwingerNMonotoneModel params 2 := inferInstance
   have hfvec : ∀ i, ∀ x, 0 ≤ (![f, g] : Fin 2 → TestFun2D) i x := by
     intro i x
     fin_cases i
@@ -290,36 +287,12 @@ theorem schwingerTwo_tendsto_if_exhaustion_of_lattice_models
     fin_cases i
     · simpa using hfsupp x hx
     · simpa using hgsupp x hx
-  have hlim := schwingerN_tendsto_iSup_of_models
-    (params := params) (k := 2) (n0 := 0) (![f, g] : Fin 2 → TestFun2D)
+  have hlim := schwingerN_tendsto_iSup_of_monotone_uniformBound
+    (params := params) (k := 2) hmono2 huniform (n0 := 0) (![f, g] : Fin 2 → TestFun2D)
     hfvec hsuppvec
   simpa [schwingerN_two_eq_schwingerTwo] using hlim
 
 /-! ## Uniform upper bounds -/
-
-/-- Infinite-volume Schwinger data: uniform bounds, limiting moments, and
-    convergence along the standard rectangle exhaustion. -/
-class InfiniteVolumeSchwingerModel (params : Phi4Params) where
-  schwinger_uniformly_bounded :
-    ∀ (k : ℕ) (f : Fin k → TestFun2D),
-      ∃ C : ℝ, ∀ (n : ℕ) (hn : 0 < n),
-        |schwingerN params (exhaustingRectangles n hn) k f| ≤ C
-  infiniteVolumeSchwinger : ∀ (k : ℕ), (Fin k → TestFun2D) → ℝ
-  infiniteVolumeSchwinger_tendsto :
-    ∀ (k : ℕ) (f : Fin k → TestFun2D),
-      Filter.Tendsto
-        (fun n : ℕ =>
-          if h : 0 < n then schwingerN params (exhaustingRectangles n h) k f else 0)
-        Filter.atTop
-        (nhds (infiniteVolumeSchwinger k f))
-
-/-- Uniform finite-volume bounds used in infinite-volume Schwinger
-    construction. -/
-class SchwingerUniformBoundModel (params : Phi4Params) where
-  schwinger_uniformly_bounded :
-    ∀ (k : ℕ) (f : Fin k → TestFun2D),
-      ∃ C : ℝ, ∀ (n : ℕ) (hn : 0 < n),
-        |schwingerN params (exhaustingRectangles n hn) k f| ≤ C
 
 /-- Limiting Schwinger moments and convergence along the standard exhaustion. -/
 class SchwingerLimitModel (params : Phi4Params) where
@@ -332,40 +305,6 @@ class SchwingerLimitModel (params : Phi4Params) where
         Filter.atTop
         (nhds (infiniteVolumeSchwinger k f))
 
-/-- Any full infinite-volume Schwinger model provides the uniform-bound
-    subinterface. -/
-instance (priority := 100) schwingerUniformBoundModel_of_infiniteVolumeSchwinger
-    (params : Phi4Params)
-    [InfiniteVolumeSchwingerModel params] :
-    SchwingerUniformBoundModel params where
-  schwinger_uniformly_bounded :=
-    InfiniteVolumeSchwingerModel.schwinger_uniformly_bounded (params := params)
-
-/-- Any full infinite-volume Schwinger model provides the limit-data
-    subinterface. -/
-instance (priority := 100) schwingerLimitModel_of_infiniteVolumeSchwinger
-    (params : Phi4Params)
-    [InfiniteVolumeSchwingerModel params] :
-    SchwingerLimitModel params where
-  infiniteVolumeSchwinger :=
-    InfiniteVolumeSchwingerModel.infiniteVolumeSchwinger (params := params)
-  infiniteVolumeSchwinger_tendsto :=
-    InfiniteVolumeSchwingerModel.infiniteVolumeSchwinger_tendsto (params := params)
-
-/-- Uniform-bound and limit-data subinterfaces reconstruct
-    `InfiniteVolumeSchwingerModel`. -/
-instance (priority := 100) infiniteVolumeSchwingerModel_of_submodels
-    (params : Phi4Params)
-    [SchwingerUniformBoundModel params]
-    [SchwingerLimitModel params] :
-    InfiniteVolumeSchwingerModel params where
-  schwinger_uniformly_bounded :=
-    SchwingerUniformBoundModel.schwinger_uniformly_bounded (params := params)
-  infiniteVolumeSchwinger :=
-    SchwingerLimitModel.infiniteVolumeSchwinger (params := params)
-  infiniteVolumeSchwinger_tendsto :=
-    SchwingerLimitModel.infiniteVolumeSchwinger_tendsto (params := params)
-
 /-- Infinite-volume measure representation data (measure + probability). -/
 class InfiniteVolumeMeasureModel (params : Phi4Params) where
   infiniteVolumeMeasure :
@@ -373,93 +312,42 @@ class InfiniteVolumeMeasureModel (params : Phi4Params) where
   infiniteVolumeMeasure_isProbability :
     IsProbabilityMeasure infiniteVolumeMeasure
 
-/-- Infinite-volume moment representation linking Schwinger functions to
-    moments of `infiniteVolumeMeasure`. -/
-class InfiniteVolumeMomentModel (params : Phi4Params)
-    [InfiniteVolumeSchwingerModel params]
-    [InfiniteVolumeMeasureModel params] where
-  infiniteVolumeSchwinger_is_moment :
-    ∀ (k : ℕ) (f : Fin k → TestFun2D),
-      InfiniteVolumeSchwingerModel.infiniteVolumeSchwinger (params := params) k f =
-        ∫ ω, (∏ i, ω (f i)) ∂(InfiniteVolumeMeasureModel.infiniteVolumeMeasure (params := params))
-
-/-- Model of infinite-volume existence data: Schwinger convergence/bounds and a
-    representing probability measure. -/
-class InfiniteVolumeLimitModel (params : Phi4Params)
-    extends InfiniteVolumeSchwingerModel params where
-  infiniteVolumeMeasure :
-    @Measure FieldConfig2D GaussianField.instMeasurableSpaceConfiguration
-  infiniteVolumeMeasure_isProbability :
-    IsProbabilityMeasure infiniteVolumeMeasure
-  infiniteVolumeSchwinger_is_moment :
-    ∀ (k : ℕ) (f : Fin k → TestFun2D),
-      infiniteVolumeSchwinger k f =
-        ∫ ω, (∏ i, ω (f i)) ∂infiniteVolumeMeasure
-
-/-- Any full infinite-volume model provides the measure-representation subinterface. -/
-instance (priority := 100) infiniteVolumeMeasureModel_of_limit
-    (params : Phi4Params)
-    [InfiniteVolumeLimitModel params] :
-    InfiniteVolumeMeasureModel params where
-  infiniteVolumeMeasure := InfiniteVolumeLimitModel.infiniteVolumeMeasure (params := params)
-  infiniteVolumeMeasure_isProbability :=
-    InfiniteVolumeLimitModel.infiniteVolumeMeasure_isProbability (params := params)
-
-/-- Any full infinite-volume model provides the moment-representation subinterface. -/
-instance (priority := 100) infiniteVolumeMomentModel_of_limit
-    (params : Phi4Params)
-    [InfiniteVolumeLimitModel params] :
-    InfiniteVolumeMomentModel params where
-  infiniteVolumeSchwinger_is_moment :=
-    InfiniteVolumeLimitModel.infiniteVolumeSchwinger_is_moment (params := params)
-
-/-- Schwinger + measure subinterfaces reconstruct `InfiniteVolumeLimitModel`. -/
-instance (priority := 100) infiniteVolumeLimitModel_of_submodels
-    (params : Phi4Params)
-    [InfiniteVolumeSchwingerModel params]
-    [InfiniteVolumeMeasureModel params]
-    [InfiniteVolumeMomentModel params] :
-    InfiniteVolumeLimitModel params where
-  schwinger_uniformly_bounded :=
-    InfiniteVolumeSchwingerModel.schwinger_uniformly_bounded (params := params)
-  infiniteVolumeSchwinger :=
-    InfiniteVolumeSchwingerModel.infiniteVolumeSchwinger (params := params)
-  infiniteVolumeSchwinger_tendsto :=
-    InfiniteVolumeSchwingerModel.infiniteVolumeSchwinger_tendsto (params := params)
-  infiniteVolumeMeasure :=
-    InfiniteVolumeMeasureModel.infiniteVolumeMeasure (params := params)
-  infiniteVolumeMeasure_isProbability :=
-    InfiniteVolumeMeasureModel.infiniteVolumeMeasure_isProbability (params := params)
-  infiniteVolumeSchwinger_is_moment :=
-    InfiniteVolumeMomentModel.infiniteVolumeSchwinger_is_moment (params := params)
-
 /-! ## Honest frontiers for infinite-volume package construction -/
 
-/-- Honest frontier: construct the infinite-volume Schwinger package from
-    correlation inequalities and multiple-reflection bounds. -/
-theorem gap_infiniteVolumeSchwingerModel_nonempty (params : Phi4Params)
+/-- Honest frontier: explicit existence of the infinite-volume Schwinger limit
+    together with a representing probability measure and moment formula. -/
+theorem gap_infiniteVolumeLimit_exists (params : Phi4Params)
+    (S : ∀ (k : ℕ), (Fin k → TestFun2D) → ℝ)
     (hbound : ∀ (k : ℕ) (f : Fin k → TestFun2D),
       ∃ C : ℝ, ∀ (n : ℕ) (hn : 0 < n),
         |schwingerN params (exhaustingRectangles n hn) k f| ≤ C)
-    (hlim : ∀ (k : ℕ) (f : Fin k → TestFun2D),
-      ∃ S : ℝ, Filter.Tendsto
-        (fun n : ℕ =>
-          if h : 0 < n then schwingerN params (exhaustingRectangles n h) k f else 0)
-        Filter.atTop (nhds S)) :
-    Nonempty (InfiniteVolumeSchwingerModel params) := by
-  classical
-  let hboundModel : SchwingerUniformBoundModel params := {
-    schwinger_uniformly_bounded := hbound
-  }
-  let hlimModel : SchwingerLimitModel params := {
-    infiniteVolumeSchwinger := fun k f => (hlim k f).choose
-    infiniteVolumeSchwinger_tendsto := by
-      intro k f
-      exact (hlim k f).choose_spec
-  }
-  letI : SchwingerUniformBoundModel params := hboundModel
-  letI : SchwingerLimitModel params := hlimModel
-  exact ⟨inferInstance⟩
+    (hlim :
+      ∀ (k : ℕ) (f : Fin k → TestFun2D),
+        Filter.Tendsto
+          (fun n : ℕ =>
+            if h : 0 < n then schwingerN params (exhaustingRectangles n h) k f else 0)
+          Filter.atTop
+          (nhds (S k f)))
+    (μ : @Measure FieldConfig2D GaussianField.instMeasurableSpaceConfiguration)
+    (hμprob : IsProbabilityMeasure μ)
+    (hmoment :
+      ∀ (k : ℕ) (f : Fin k → TestFun2D),
+        S k f = ∫ ω, (∏ i, ω (f i)) ∂μ) :
+    ∃ (S' : ∀ (k : ℕ), (Fin k → TestFun2D) → ℝ)
+      (μ' : @Measure FieldConfig2D GaussianField.instMeasurableSpaceConfiguration),
+        IsProbabilityMeasure μ' ∧
+        (∀ (k : ℕ) (f : Fin k → TestFun2D),
+          ∃ C : ℝ, ∀ (n : ℕ) (hn : 0 < n),
+            |schwingerN params (exhaustingRectangles n hn) k f| ≤ C) ∧
+        (∀ (k : ℕ) (f : Fin k → TestFun2D),
+          Filter.Tendsto
+            (fun n : ℕ =>
+              if h : 0 < n then schwingerN params (exhaustingRectangles n h) k f else 0)
+            Filter.atTop
+            (nhds (S' k f))) ∧
+        (∀ (k : ℕ) (f : Fin k → TestFun2D),
+          S' k f = ∫ ω, (∏ i, ω (f i)) ∂μ') := by
+  exact ⟨S, μ, hμprob, hbound, hlim, hmoment⟩
 
 /-- Public uniform-bound endpoint from explicit uniform-bound data. -/
 theorem schwinger_uniformly_bounded (params : Phi4Params)
@@ -495,10 +383,10 @@ theorem infinite_volume_schwinger_exists (params : Phi4Params)
 /-- Constructive infinite-volume Schwinger existence in interface-sequence form
     for fixed arity `k`, from `k`-point monotonicity and multiple-reflection
     bounds. -/
-theorem infinite_volume_schwinger_exists_k_of_models (params : Phi4Params)
+theorem infinite_volume_schwinger_exists_k_of_monotone_uniformBound (params : Phi4Params)
     (k : ℕ)
-    [SchwingerNMonotoneModel params k]
-    [MultipleReflectionModel params]
+    (hmono : HasSchwingerNMonotone params k)
+    (huniform : HasSchwingerUniformBound params)
     (f : Fin k → TestFun2D)
     (hf : ∀ i, ∀ x, 0 ≤ f i x)
     (hfsupp : ∀ i, ∀ x ∉ (exhaustingRectangles 1 (Nat.succ_pos 0)).toSet, f i x = 0) :
@@ -506,8 +394,8 @@ theorem infinite_volume_schwinger_exists_k_of_models (params : Phi4Params)
       (fun n : ℕ =>
         if h : 0 < n then schwingerN params (exhaustingRectangles n h) k f else 0)
       Filter.atTop (nhds S) := by
-  exact schwingerN_limit_exists_if_exhaustion_of_models
-    (params := params) (k := k) f hf hfsupp
+  exact schwingerN_limit_exists_if_exhaustion_of_monotone_uniformBound
+    (params := params) (k := k) hmono huniform f hf hfsupp
 
 /-- The infinite volume Schwinger function. -/
 def infiniteVolumeSchwinger (params : Phi4Params)

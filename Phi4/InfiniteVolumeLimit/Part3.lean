@@ -278,19 +278,6 @@ theorem infiniteVolumeMeasure_isProbability (params : Phi4Params)
     (InfiniteVolumeMeasureModel.infiniteVolumeMeasure_isProbability
       (params := params))
 
-/-- The infinite volume Schwinger functions are the moments of the
-    infinite volume measure. -/
-theorem infiniteVolumeSchwinger_is_moment (params : Phi4Params)
-    [InfiniteVolumeSchwingerModel params]
-    [InfiniteVolumeMeasureModel params]
-    [InfiniteVolumeMomentModel params]
-    (k : ℕ) (f : Fin k → TestFun2D) :
-    infiniteVolumeSchwinger params k f =
-      ∫ ω, (∏ i, ω (f i)) ∂(infiniteVolumeMeasure params) := by
-  simpa [infiniteVolumeSchwinger, infiniteVolumeMeasure] using
-    (InfiniteVolumeMomentModel.infiniteVolumeSchwinger_is_moment
-      (params := params) k f)
-
 /-- Zeroth infinite-volume Schwinger function normalization:
     `S_0 = 1` for any choice of the unique `Fin 0 → TestFun2D`. -/
 theorem infiniteVolumeSchwinger_zero (params : Phi4Params)

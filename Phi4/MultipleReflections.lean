@@ -20,9 +20,8 @@ estimates of Chapter 8, this gives bounds that are uniform in the volume.
 These uniform bounds are the second ingredient (after monotonicity) for the
 infinite volume limit.
 
-This file still exposes its main inputs through `MultipleReflectionModel`.
-The theorem-level frontier below records the actual chessboard/uniform-bound
-target explicitly.
+This file now records its main missing content through explicit theorem-level
+frontiers rather than a downstream-consumed model bundle.
 
 ## References
 
@@ -43,26 +42,23 @@ theorem Rectangle.IsTimeSymmetric.pos_time_half_exists (Λ : Rectangle) (hΛ : �
   · linarith [Λ.hx]
   · linarith [Λ.hx]
 
-/-! ## Abstract multiple-reflection interface -/
+/-! ## Honest theorem-level frontiers -/
 
-/-- Multiple-reflection input estimates for a fixed interacting model. This
-    isolates the deep reflection/chessboard analysis so downstream infinite-volume
-    arguments can use explicit assumptions without placeholders. -/
-class MultipleReflectionModel (params : Phi4Params) where
-  /-- Chessboard estimate on a time-symmetric rectangle. -/
-  chessboard_estimate :
-    ∀ (Λ : Rectangle), Λ.IsTimeSymmetric →
-      ∀ (n : ℕ) (A : Fin n → FieldConfig2D → ℝ) (N : ℕ),
-        0 < N → (N : ℝ) ≤ Λ.area →
-        (∀ i, MemLp (A i) N (finiteVolumeMeasure params Λ)) →
-        |∫ ω, (∏ i, A i ω) ∂(finiteVolumeMeasure params Λ)| ≤
-          ∏ i, (∫ ω, |A i ω| ^ N ∂(finiteVolumeMeasure params Λ)) ^ ((1 : ℝ) / N)
-  /-- Uniform finite-volume bound for Schwinger functions on time-symmetric rectangles. -/
-  schwinger_uniform_bound :
-    ∀ (n : ℕ) (f : Fin n → TestFun2D),
-      ∃ C : ℝ, ∀ (Λ : Rectangle), Λ.IsTimeSymmetric →
-        (∀ i, ∀ x ∉ Λ.toSet, f i x = 0) →
-          |schwingerN params Λ n f| ≤ C
+/-- Assumption-explicit chessboard estimate on a time-symmetric rectangle. -/
+def HasChessboardEstimate (params : Phi4Params) : Prop :=
+  ∀ (Λ : Rectangle), Λ.IsTimeSymmetric →
+    ∀ (n : ℕ) (A : Fin n → FieldConfig2D → ℝ) (N : ℕ),
+      0 < N → (N : ℝ) ≤ Λ.area →
+      (∀ i, MemLp (A i) N (finiteVolumeMeasure params Λ)) →
+      |∫ ω, (∏ i, A i ω) ∂(finiteVolumeMeasure params Λ)| ≤
+        ∏ i, (∫ ω, |A i ω| ^ N ∂(finiteVolumeMeasure params Λ)) ^ ((1 : ℝ) / N)
+
+/-- Honest theorem-level frontier for the chessboard estimate needed in the
+    reflection-positivity to infinite-volume chain. -/
+theorem gap_hasChessboardEstimate
+    (params : Phi4Params) (hIW : HasExpInteractionLp params) :
+    HasChessboardEstimate params := by
+  sorry
 
 /-- Assumption-explicit uniform finite-volume Schwinger bound on
     time-symmetric rectangles. -/

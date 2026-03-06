@@ -31,16 +31,6 @@ noncomputable section
 open MeasureTheory
 open scoped ENNReal
 
-/-! ## Abstract regularity interfaces -/
-
-/-- Input for existence of infinite-volume Wick powers. -/
-class WickPowersModel (params : Phi4Params)
-    [InfiniteVolumeMeasureModel params] where
-  wick_powers_infinite_volume :
-    ∀ (j : ℕ) {p : ℝ≥0∞}, p ≠ ⊤ →
-      ∃ (W : ℕ → FieldConfig2D → Spacetime2D → ℝ),
-        ∀ x : Spacetime2D, MemLp (fun ω => W j ω x) p (infiniteVolumeMeasure params)
-
 /-! ## Integration by parts in infinite volume -/
 
 /-- The Wick cubic smeared against a test function: ∫ :φ(x)³: f(x) dx
@@ -82,44 +72,21 @@ theorem wickCubicSmeared_eq_lim_of_convergent
     wickCubicSmeared params f ω = V := by
   exact wickCubicSmeared_eq_of_tendsto params f ω V hconv
 
-/-- Regularity/IBP inputs for the infinite-volume φ⁴₂ theory beyond Wick-power
-    existence. -/
-class RegularityModel (params : Phi4Params)
-    [InfiniteVolumeMeasureModel params] where
-  /-- Almost-everywhere pointwise convergence of the UV-regularized Wick-cubic
-      smearings to `wickCubicSmeared`. -/
-  wickCubicSmeared_tendsto_ae :
-    ∀ (f : TestFun2D),
-      ∀ᵐ ω ∂(infiniteVolumeMeasure params),
-        Filter.Tendsto
-          (fun n : ℕ => ∫ x, wickPower 3 params.mass (standardUVCutoffSeq n) ω x * f x)
-          Filter.atTop
-          (nhds (wickCubicSmeared params f ω))
-  euclidean_equation_of_motion :
-    ∀ (f g : TestFun2D),
-      ∫ ω, ω f * ω g ∂(infiniteVolumeMeasure params) =
-        GaussianField.covariance (freeCovarianceCLM params.mass params.mass_pos) f g -
-        params.coupling *
-          ∫ ω, wickCubicSmeared params f ω * ω g ∂(infiniteVolumeMeasure params)
-  generating_functional_bound :
-    ∃ c : ℝ, ∀ f : TestFun2D,
-      |∫ ω, Real.exp (ω f) ∂(infiniteVolumeMeasure params)| ≤
-        Real.exp (c * SchwartzMap.seminorm ℝ 2 2 f)
-  nonlocal_phi4_bound :
-    ∀ (g : TestFun2D), ∃ C₁ C₂ : ℝ, ∀ (Λ : Rectangle),
-      |generatingFunctional params Λ g| ≤
-        Real.exp (C₁ * Λ.area + C₂)
-  generating_functional_bound_uniform :
-    ∀ (f : TestFun2D),
-      ∃ c : ℝ, ∀ Λ : Rectangle,
-        |generatingFunctional params Λ f| ≤ Real.exp (c * SchwartzMap.seminorm ℝ 2 2 f)
-
 /-- Honest theorem-level frontier for existence of infinite-volume Wick powers. -/
 theorem gap_wick_powers_infinite_volume (params : Phi4Params)
     [InfiniteVolumeMeasureModel params]
     (j : ℕ) {p : ℝ≥0∞} (hp : p ≠ ⊤) :
-    ∃ (W : ℕ → FieldConfig2D → Spacetime2D → ℝ),
-      ∀ x : Spacetime2D, MemLp (fun ω => W j ω x) p (infiniteVolumeMeasure params) := by
+    ∃ (W : FieldConfig2D → Spacetime2D → ℝ),
+      (∀ x : Spacetime2D,
+        AEStronglyMeasurable (fun ω => W ω x) (infiniteVolumeMeasure params)) ∧
+      (∀ x : Spacetime2D, MemLp (fun ω => W ω x) p (infiniteVolumeMeasure params)) ∧
+      ∀ (f : TestFun2D),
+        ∀ᵐ ω ∂(infiniteVolumeMeasure params),
+          Integrable (fun x : Spacetime2D => W ω x * f x) (volume : Measure Spacetime2D) ∧
+            Filter.Tendsto
+              (fun n : ℕ => ∫ x, wickPower j params.mass (standardUVCutoffSeq n) ω x * f x)
+              Filter.atTop
+              (nhds (∫ x, W ω x * f x)) := by
   sorry
 
 /-- Honest theorem-level frontier for almost-everywhere convergence of the

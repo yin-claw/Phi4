@@ -27,9 +27,9 @@ for direct merge. In particular:
 
 ## Current Honest Status
 
-- theorem-level `sorry` in core modules: `10`
-- legacy `class/structure .*Model`: `48`
-- canonical `gap_*` theorem frontiers: `18`
+- theorem-level `sorry` in core modules: `17`
+- legacy `class/structure .*Model`: `13`
+- canonical `gap_*` theorem frontiers: `22`
 - `axiom`: `0`
 - `def/abbrev := by sorry`: `0`
 
@@ -38,8 +38,16 @@ for direct merge. In particular:
 `main` is now more honest than it was before the branch comparison, because the
 open mathematics is no longer presented as “zero sorry therefore nearly done”.
 
+Recent local cleanup also deleted dead OS/reconstruction bundle classes and the
+unused `Phi4ModelBundle` file. The latest pass also removed the internal
+infinite-volume recombination classes and dead correlation bridge classes, so
+the remaining model-class surface is smaller and closer to the actual live
+dependency graph. The current slice also removed `MultipleReflectionModel` from
+the infinite-volume limit arguments and surfaced the chessboard estimate itself
+as the explicit frontier `gap_hasChessboardEstimate`.
+
 But the repository is still not close to completion:
 
 1. several major frontiers are now explicit theorem-level gaps,
-2. many additional obligations still remain hidden in legacy model classes,
+2. several OS-side obligations are explicit hypotheses but not yet named local frontiers,
 3. WP1 remains the controlling analytic blocker.

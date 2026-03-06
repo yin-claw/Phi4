@@ -42,27 +42,11 @@ theorem
     phi4_wightman_exists_of_interfaces_of_sq_integrable_data_and_linear_threshold_geometric_exp_moment_and_double_exp_moment_geometric
     (params : Phi4Params) :
     [SchwingerLimitModel params] →
-    [OSAxiomCoreModel params] →
-    [WightmanReconstructionModel params] →
-    [OSDistributionE2Model params] →
-    [OSE4ClusterModel params] →
+    [SchwingerFunctionModel params] →
     (hcutoff_meas :
       ∀ (Λ : Rectangle) (κ : UVCutoff),
         AEStronglyMeasurable (interactionCutoff params Λ κ)
           (freeFieldMeasure params.mass params.mass_pos)) →
-    (hcutoff_sq :
-      ∀ (Λ : Rectangle) (κ : UVCutoff),
-        Integrable (fun ω => (interactionCutoff params Λ κ ω) ^ 2)
-          (freeFieldMeasure params.mass params.mass_pos)) →
-    (hcutoff_conv :
-      ∀ (Λ : Rectangle),
-        Filter.Tendsto
-          (fun (κ : ℝ) => if h : 0 < κ then
-            ∫ ω, (interactionCutoff params Λ ⟨κ, h⟩ ω - interaction params Λ ω) ^ 2
-              ∂(freeFieldMeasure params.mass params.mass_pos)
-            else 0)
-          Filter.atTop
-          (nhds 0)) →
     (hcutoff_ae :
       ∀ (Λ : Rectangle),
         ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
@@ -70,14 +54,6 @@ theorem
             (fun (κ : ℝ) => if h : 0 < κ then interactionCutoff params Λ ⟨κ, h⟩ ω else 0)
             Filter.atTop
             (nhds (interaction params Λ ω))) →
-    (hinteraction_meas :
-      ∀ (Λ : Rectangle),
-        AEStronglyMeasurable (interaction params Λ)
-          (freeFieldMeasure params.mass params.mass_pos)) →
-    (hinteraction_sq :
-      ∀ (Λ : Rectangle),
-        Integrable (fun ω => (interaction params Λ ω) ^ 2)
-          (freeFieldMeasure params.mass params.mass_pos)) →
     (hcore :
       ∀ (Λ : Rectangle) (q : ℝ), 0 < q →
         ∃ a D r D2 r2 : ℝ,
@@ -103,7 +79,39 @@ theorem
               Real.exp ((-(2 * q)) * interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω)
               ∂(freeFieldMeasure params.mass params.mass_pos)
             ≤ D2 * r2 ^ n)) →
-    (hsmall : params.coupling < os4WeakCouplingThreshold params) →
+    (hos0 : ∀ n, Continuous (phi4SchwingerFunctions params n)) →
+    (hos0_linear : ∀ n, IsLinearMap ℂ (phi4SchwingerFunctions params n)) →
+    (hos2_translation :
+      ∀ (n : ℕ) (a : Fin 2 → ℝ) (f g : SchwartzNPoint 1 n),
+        (∀ x, g.toFun x = f.toFun (fun i => x i + a)) →
+        phi4SchwingerFunctions params n f = phi4SchwingerFunctions params n g) →
+    (hos2_rotation :
+      ∀ (n : ℕ) (R : Matrix (Fin 2) (Fin 2) ℝ),
+        R.transpose * R = 1 → R.det = 1 →
+        ∀ (f g : SchwartzNPoint 1 n),
+          (∀ x, g.toFun x = f.toFun (fun i => R.mulVec (x i))) →
+          phi4SchwingerFunctions params n f = phi4SchwingerFunctions params n g) →
+    (he2 :
+      ∀ (F : BorchersSequence 1),
+        (∀ n, ∀ x : NPointDomain 1 n,
+          (F.funcs n).toFun x ≠ 0 → x ∈ PositiveTimeRegion 1 n) →
+        (OSInnerProduct 1 (phi4SchwingerFunctions params) F F).re ≥ 0) →
+    (he3_symmetric :
+      ∀ (n : ℕ) (σ : Equiv.Perm (Fin n)) (f g : SchwartzNPoint 1 n),
+        (∀ x, g.toFun x = f.toFun (fun i => x (σ i))) →
+        phi4SchwingerFunctions params n f = phi4SchwingerFunctions params n g) →
+    (threshold : ℝ) →
+    (hcluster :
+      params.coupling < threshold →
+        ∀ (n m : ℕ) (f : SchwartzNPoint 1 n) (g : SchwartzNPoint 1 m),
+          ∀ ε : ℝ, ε > 0 → ∃ R : ℝ, R > 0 ∧
+              ∀ a : SpacetimeDim 1, a 0 = 0 → (∑ i : Fin 1, (a (Fin.succ i))^2) > R^2 →
+              ∀ (g_a : SchwartzNPoint 1 m),
+                (∀ x : NPointDomain 1 m, g_a x = g (fun i => x i - a)) →
+                ‖phi4SchwingerFunctions params (n + m) (f.tensorProduct g_a) -
+                  phi4SchwingerFunctions params n f *
+                    phi4SchwingerFunctions params m g‖ < ε) →
+    (hsmall : params.coupling < threshold) →
     (alpha beta gamma : ℝ) →
     (hbeta : 0 < beta) →
     (huniform : ∀ h : TestFun2D, ∃ c : ℝ, ∀ Λ : Rectangle,
@@ -124,46 +132,41 @@ theorem
       ∀ (n : ℕ) (_hn : 0 < n),
         DenseRange (fun f : Fin n → TestFun2D =>
           schwartzProductTensorFromTestFamily f)) →
+    (hreconstruct : ∀ (OS : OsterwalderSchraderAxioms 1),
+      OSLinearGrowthCondition 1 OS →
+        ∃ (Wfn : WightmanFunctions 1),
+          IsWickRotationPair OS.S Wfn.W) →
     ∃ (Wfn : WightmanFunctions 1),
       ∃ (OS : OsterwalderSchraderAxioms 1),
         OS.S = phi4SchwingerFunctions params ∧
         IsWickRotationPair OS.S Wfn.W := by
-  intro _hlimit _hcore _hrec _he2 _he4
-    hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
-    hinteraction_meas hinteraction_sq hcore
-    hsmall alpha beta gamma hbeta huniform hcompat hreduce hdense
-  have hlin_nonempty : Nonempty (ReconstructionLinearGrowthModel params) := by
-    rcases
-        interactionIntegrabilityModel_nonempty_of_sq_integrable_data_and_linear_threshold_geometric_exp_moment_and_double_exp_moment_geometric
-          (params := params)
-          hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
-          hinteraction_meas hinteraction_sq hcore with ⟨hIntModel⟩
-    letI : InteractionIntegrabilityModel params := hIntModel
-    have hmixed :
-        ∀ (n : ℕ) (_hn : 0 < n) (f : Fin n → TestFun2D), ∃ c : ℝ,
-          ‖phi4SchwingerFunctions params n (schwartzProductTensorFromTestFamily f)‖ ≤
-            ∑ i : Fin n, (Nat.factorial n : ℝ) *
-              (Real.exp (c * normFunctional (f i)) +
-                Real.exp (c * normFunctional (-(f i)))) := by
-      intro n hn f
-      exact phi4_productTensor_mixed_bound_of_uniform_generating_bound
-        params huniform hcompat n hn f
-    have hzero : ∀ f : Fin 0 → TestFun2D, infiniteVolumeSchwinger params 0 f = 1 := by
-      intro f
-      exact infiniteVolumeSchwinger_zero (params := params) f
-    rcases gap_phi4_linear_growth params hsmall alpha beta gamma hbeta
-        hmixed hcompat hzero hreduce hdense with ⟨OS, hOS, hlg_nonempty⟩
-    rcases hlg_nonempty with ⟨hlg⟩
-    exact ⟨{
-      os_package := OS
-      os_package_eq := hOS
-      linear_growth := hlg
-    }⟩
-  rcases hlin_nonempty with ⟨hlin⟩
-  letI : ReconstructionLinearGrowthModel params := hlin
+  intro _hlimit _hsch
+    hcutoff_meas hcutoff_ae hcore
+    hos0 hos0_linear hos2_translation hos2_rotation he2 he3_symmetric threshold hcluster
+    hsmall alpha beta gamma hbeta huniform hcompat hreduce hdense hreconstruct
+  rcases
+      interactionWeightModel_nonempty_of_sq_integrable_data_and_linear_threshold_geometric_exp_moment_and_double_exp_moment_geometric
+        (params := params)
+        hcutoff_meas hcutoff_ae hcore with ⟨hIntModel⟩
+  letI : InteractionWeightModel params := hIntModel
+  have hmixed :
+      ∀ (n : ℕ) (_hn : 0 < n) (f : Fin n → TestFun2D), ∃ c : ℝ,
+        ‖phi4SchwingerFunctions params n (schwartzProductTensorFromTestFamily f)‖ ≤
+          ∑ i : Fin n, (Nat.factorial n : ℝ) *
+            (Real.exp (c * normFunctional (f i)) +
+              Real.exp (c * normFunctional (-(f i)))) := by
+    intro n hn f
+    exact phi4_productTensor_mixed_bound_of_uniform_generating_bound
+      params huniform hcompat n hn f
+  have hzero : ∀ f : Fin 0 → TestFun2D, infiniteVolumeSchwinger params 0 f = 1 := by
+    intro f
+    exact infiniteVolumeSchwinger_zero (params := params) f
+  rcases gap_phi4_linear_growth params hos0 hos0_linear hos2_translation hos2_rotation he2
+      he3_symmetric threshold hcluster hsmall alpha beta gamma hbeta
+      hmixed hcompat hzero hreduce hdense with ⟨OS, hOS, hlg_nonempty⟩
   exact phi4_wightman_exists params
-    (hlinear := ReconstructionLinearGrowthModel.phi4_linear_growth (params := params))
-    (hreconstruct := WightmanReconstructionModel.wightman_reconstruction (params := params))
+    (hlinear := ⟨OS, hOS, hlg_nonempty⟩)
+    (hreconstruct := hreconstruct)
 
 
 end

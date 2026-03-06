@@ -17,10 +17,9 @@ open scoped ENNReal NNReal
   theorem, then combine explicit nonempty UV+weight witnesses directly.
 -/
 
-/-- Core square-data composition: once UV data is promoted to
-    `InteractionUVModel` and a constructive `InteractionWeightModel` endpoint is
-    available, obtain `InteractionIntegrabilityModel` without route wrappers. -/
-theorem interactionIntegrabilityModel_nonempty_from_sq_integrable_data_and_weight
+/-- Core square-data composition: construct `InteractionUVModel` from
+    explicit square-integrability/convergence data. -/
+theorem interactionUVModel_nonempty_from_sq_integrable_data
     (params : Phi4Params)
     (hcutoff_meas :
       ∀ (Λ : Rectangle) (κ : UVCutoff),
@@ -53,11 +52,9 @@ theorem interactionIntegrabilityModel_nonempty_from_sq_integrable_data_and_weigh
     (hinteraction_sq :
       ∀ (Λ : Rectangle),
         Integrable (fun ω => (interaction params Λ ω) ^ 2)
-          (freeFieldMeasure params.mass params.mass_pos))
-    (hW : Nonempty (InteractionWeightModel params)) :
-    Nonempty (InteractionIntegrabilityModel params) := by
-  rcases hW with ⟨hweight⟩
-  letI : InteractionUVModel params := {
+          (freeFieldMeasure params.mass params.mass_pos)) :
+    Nonempty (InteractionUVModel params) :=
+  ⟨{
     interactionCutoff_in_L2 := by
       intro Λ κ
       exact (memLp_two_iff_integrable_sq (hcutoff_meas Λ κ)).2 (hcutoff_sq Λ κ)
@@ -66,11 +63,9 @@ theorem interactionIntegrabilityModel_nonempty_from_sq_integrable_data_and_weigh
     interaction_in_L2 := by
       intro Λ
       exact (memLp_two_iff_integrable_sq (hinteraction_meas Λ)).2 (hinteraction_sq Λ)
-  }
-  letI : InteractionWeightModel params := hweight
-  exact ⟨inferInstance⟩
+  }⟩
 
-/-- Construct `InteractionIntegrabilityModel` from:
+/-- Construct `InteractionWeightModel` from:
     1. square-integrability/measurability UV data (promoted to
        `InteractionUVModel`),
     2. explicit real-parameterized a.e. UV convergence for cutoffs, and
@@ -82,25 +77,12 @@ theorem interactionIntegrabilityModel_nonempty_from_sq_integrable_data_and_weigh
     This theorem wires the new Cauchy/AM-GM bad-part infrastructure into the
     production integrability path without introducing interface wrappers. -/
 theorem
-    interactionIntegrabilityModel_nonempty_of_sq_integrable_data_and_linear_lower_bound_off_bad_sets_and_sq_exp_moment_geometric_and_bad_measure_geometric_ennreal
+    interactionWeightModel_nonempty_of_sq_integrable_data_and_linear_lower_bound_off_bad_sets_and_sq_exp_moment_geometric_and_bad_measure_geometric_ennreal
     (params : Phi4Params)
     (hcutoff_meas :
       ∀ (Λ : Rectangle) (κ : UVCutoff),
         AEStronglyMeasurable (interactionCutoff params Λ κ)
           (freeFieldMeasure params.mass params.mass_pos))
-    (hcutoff_sq :
-      ∀ (Λ : Rectangle) (κ : UVCutoff),
-        Integrable (fun ω => (interactionCutoff params Λ κ ω) ^ 2)
-          (freeFieldMeasure params.mass params.mass_pos))
-    (hcutoff_conv :
-      ∀ (Λ : Rectangle),
-        Filter.Tendsto
-          (fun (κ : ℝ) => if h : 0 < κ then
-            ∫ ω, (interactionCutoff params Λ ⟨κ, h⟩ ω - interaction params Λ ω) ^ 2
-              ∂(freeFieldMeasure params.mass params.mass_pos)
-            else 0)
-          Filter.atTop
-          (nhds 0))
     (hcutoff_ae :
       ∀ (Λ : Rectangle),
         ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
@@ -108,14 +90,6 @@ theorem
             (fun (κ : ℝ) => if h : 0 < κ then interactionCutoff params Λ ⟨κ, h⟩ ω else 0)
             Filter.atTop
             (nhds (interaction params Λ ω)))
-    (hinteraction_meas :
-      ∀ (Λ : Rectangle),
-        AEStronglyMeasurable (interaction params Λ)
-          (freeFieldMeasure params.mass params.mass_pos))
-    (hinteraction_sq :
-      ∀ (Λ : Rectangle),
-        Integrable (fun ω => (interaction params Λ ω) ^ 2)
-          (freeFieldMeasure params.mass params.mass_pos))
     (hdecomp :
       ∀ (Λ : Rectangle) (q : ℝ), 0 < q →
         ∃ a b : ℝ, 0 < a ∧
@@ -146,11 +120,7 @@ theorem
                 Cb ≠ ⊤ ∧ rb < 1 ∧
                 (∀ n : ℕ,
                   (freeFieldMeasure params.mass params.mass_pos) (bad n) ≤ Cb * rb ^ n)) :
-    Nonempty (InteractionIntegrabilityModel params) := by
-  refine interactionIntegrabilityModel_nonempty_from_sq_integrable_data_and_weight
-    (params := params)
-    hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
-    hinteraction_meas hinteraction_sq ?_
+    Nonempty (InteractionWeightModel params) := by
   refine interactionWeightModel_nonempty_of_standardSeq_succ_tendsto_ae_and_geometric_exp_moment_bound
     (params := params) ?_ ?_ ?_
   · intro Λ
@@ -178,7 +148,7 @@ theorem
       D2 r2 hD2 hr20 hr21 hMoment2
       Cb rb hCb hrb1 hbadMeasure
 
-/-- Construct `InteractionIntegrabilityModel` from:
+/-- Construct `InteractionWeightModel` from:
     1. square-integrable/measurable UV data,
     2. per-volume geometric shifted-cutoff exponential moments at parameter `q`,
     3. geometric shifted-cutoff exponential moments at doubled parameter `2q`,
@@ -187,25 +157,12 @@ theorem
     The doubled-parameter moments are converted internally into the `MemLp`-2
     and second-moment decomposition data needed by the hard-core bad-set route. -/
 theorem
-    interactionIntegrabilityModel_nonempty_of_sq_integrable_data_and_linear_threshold_geometric_exp_moment_and_double_exp_moment_geometric
+    interactionWeightModel_nonempty_of_sq_integrable_data_and_linear_threshold_geometric_exp_moment_and_double_exp_moment_geometric
     (params : Phi4Params)
     (hcutoff_meas :
       ∀ (Λ : Rectangle) (κ : UVCutoff),
         AEStronglyMeasurable (interactionCutoff params Λ κ)
           (freeFieldMeasure params.mass params.mass_pos))
-    (hcutoff_sq :
-      ∀ (Λ : Rectangle) (κ : UVCutoff),
-        Integrable (fun ω => (interactionCutoff params Λ κ ω) ^ 2)
-          (freeFieldMeasure params.mass params.mass_pos))
-    (hcutoff_conv :
-      ∀ (Λ : Rectangle),
-        Filter.Tendsto
-          (fun (κ : ℝ) => if h : 0 < κ then
-            ∫ ω, (interactionCutoff params Λ ⟨κ, h⟩ ω - interaction params Λ ω) ^ 2
-              ∂(freeFieldMeasure params.mass params.mass_pos)
-            else 0)
-          Filter.atTop
-          (nhds 0))
     (hcutoff_ae :
       ∀ (Λ : Rectangle),
         ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
@@ -213,14 +170,6 @@ theorem
             (fun (κ : ℝ) => if h : 0 < κ then interactionCutoff params Λ ⟨κ, h⟩ ω else 0)
             Filter.atTop
             (nhds (interaction params Λ ω)))
-    (hinteraction_meas :
-      ∀ (Λ : Rectangle),
-        AEStronglyMeasurable (interaction params Λ)
-          (freeFieldMeasure params.mass params.mass_pos))
-    (hinteraction_sq :
-      ∀ (Λ : Rectangle),
-        Integrable (fun ω => (interaction params Λ ω) ^ 2)
-          (freeFieldMeasure params.mass params.mass_pos))
     (hcore :
       ∀ (Λ : Rectangle) (q : ℝ), 0 < q →
         ∃ a D r D2 r2 : ℝ,
@@ -246,12 +195,11 @@ theorem
               Real.exp ((-(2 * q)) * interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω)
               ∂(freeFieldMeasure params.mass params.mass_pos)
             ≤ D2 * r2 ^ n)) :
-    Nonempty (InteractionIntegrabilityModel params) := by
+    Nonempty (InteractionWeightModel params) := by
   refine
-    interactionIntegrabilityModel_nonempty_of_sq_integrable_data_and_linear_lower_bound_off_bad_sets_and_sq_exp_moment_geometric_and_bad_measure_geometric_ennreal
+    interactionWeightModel_nonempty_of_sq_integrable_data_and_linear_lower_bound_off_bad_sets_and_sq_exp_moment_geometric_and_bad_measure_geometric_ennreal
       (params := params)
-      hcutoff_meas hcutoff_sq hcutoff_conv hcutoff_ae
-      hinteraction_meas hinteraction_sq ?_
+      hcutoff_meas hcutoff_ae ?_
   intro Λ q hq
   rcases hcore Λ q hq with
     ⟨a, D, r, D2, r2, ha, hD, hr0, hrr1, hD2, hr20, hr21, hInt, hM, hInt2, hMoment2raw⟩

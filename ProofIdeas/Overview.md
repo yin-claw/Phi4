@@ -49,11 +49,11 @@ The construction of the phi^4_2 quantum field theory proceeds through these stag
 These assumptions are the deepest remaining obligations:
 
 1. **Interaction integrability grounding** (`InteractionUVModel`, `InteractionWeightModel`) for Chapter 8 finite-volume control.
-2. **Reflection positivity + chessboard grounding** (`Free/Dirichlet/InteractingReflectionPositivityModel`, `MultipleReflectionModel`).
-3. **Infinite-volume assembly grounding** (`SchwingerUniformBoundModel`, `SchwingerLimitModel`, `InfiniteVolumeMeasureModel`, `InfiniteVolumeMomentModel`).
+2. **Reflection positivity + chessboard grounding** (`Free/Dirichlet/InteractingReflectionPositivityModel`, `gap_hasChessboardEstimate`, `gap_hasSchwingerUniformBound`).
+3. **Infinite-volume assembly grounding** (`gap_infiniteVolumeLimit_exists`, `SchwingerLimitModel`, `InfiniteVolumeMeasureModel`).
 4. **Regularity grounding** (`WickCubicConvergenceModel`, `EuclideanEquationModel`, `GeneratingFunctionalBoundModel`, `NonlocalPhi4BoundModel`, `UniformGeneratingFunctionalBoundModel`).
-5. **OS packaging grounding** (`OSTemperedModel`, `OSEuclideanCovarianceModel`, `OSE3SymmetryModel`, `OSDistributionE2Model`, `OSE4ClusterModel`).
-6. **Reconstruction backend grounding** (`ReconstructionLinearGrowthModel`, `WightmanReconstructionModel`), with upstream dependency audits for trusted closure.
+5. **OS packaging grounding** (explicit OS0/OS2/E2/E3 obligations together with `gap_measure_os3_reflection_positive`).
+6. **Reconstruction backend grounding** (`gap_phi4_linear_growth` plus trusted upstream closure for the final Wightman reconstruction backend).
 
 ## Detailed Notes
 
