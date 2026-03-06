@@ -20,6 +20,10 @@ The main inequalities are:
 These hold for the φ⁴ interaction because P(φ) = λφ⁴ + (lower order) with λ > 0
 satisfies the Griffiths-Simon conditions.
 
+In the current repository state, most of this file still packages these inputs
+through legacy `...Model` classes. The theorem-level frontier below records the
+main monotonicity obligation explicitly.
+
 ## References
 
 * [Glimm-Jaffe] Chapter 4 (lattice version), Section 10.2 (continuum version)
@@ -105,6 +109,24 @@ class SchwingerNMonotoneModel (params : Phi4Params) (k : ℕ) where
       (_hf : ∀ i, ∀ x, 0 ≤ f i x)
       (_hfΛ : ∀ i, ∀ x ∉ Λ₁.toSet, f i x = 0),
       schwingerN params Λ₁ k f ≤ schwingerN params Λ₂ k f
+
+/-- Assumption-explicit monotonicity property for finite-volume `k`-point
+    Schwinger moments under domain inclusion. -/
+def HasSchwingerNMonotone (params : Phi4Params) (k : ℕ) : Prop :=
+  ∀ (Λ₁ Λ₂ : Rectangle)
+    (_h : Λ₁.toSet ⊆ Λ₂.toSet)
+    (f : Fin k → TestFun2D)
+    (_hf : ∀ i, ∀ x, 0 ≤ f i x)
+    (_hfΛ : ∀ i, ∀ x ∉ Λ₁.toSet, f i x = 0),
+    schwingerN params Λ₁ k f ≤ schwingerN params Λ₂ k f
+
+/-- Honest theorem-level frontier for finite-volume Schwinger monotonicity.
+    The `HasExpInteractionLp` hypothesis keeps the theorem tied to the genuine
+    interacting measure rather than a hidden interface package. -/
+theorem gap_hasSchwingerNMonotone
+    (params : Phi4Params) (hIW : HasExpInteractionLp params) (k : ℕ) :
+    HasSchwingerNMonotone params k := by
+  sorry
 
 /-- Positivity interface for finite-volume `k`-point Schwinger moments on
     nonnegative test-function inputs. -/

@@ -8,9 +8,10 @@ import OSReconstruction.Wightman.Reconstruction
 /-!
 # Wightman Reconstruction for φ⁴₂
 
-Having established that the φ⁴₂ Schwinger functions satisfy OS0-OS3 (in `OSAxioms.lean`),
-we apply the Osterwalder-Schrader reconstruction theorem from the OSreconstruction library
-to obtain a relativistic (Minkowski) quantum field theory satisfying the Wightman axioms.
+This file organizes the reconstruction step from OS data to Wightman data.
+It is an assembly layer over explicit hypotheses and legacy interface inputs;
+it should not be read as showing that the local φ⁴₂ construction has already
+completed the full reconstruction chain.
 
 The OS reconstruction theorem (Osterwalder-Schrader II, 1975) states:
   OS axioms E0-E4 + linear growth condition E0' ⟹ Wightman axioms W1-W4

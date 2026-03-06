@@ -21,6 +21,10 @@ RP holds for:
 RP is OS axiom E2 and is the key to constructing the physical Hilbert space
 from the Euclidean theory.
 
+The local RP proofs are not completed in this branch. The legacy model classes
+below remain, but the theorem-level frontiers make the open obligations
+explicit.
+
 ## References
 
 * [Glimm-Jaffe] Sections 7.10, 10.4
@@ -106,6 +110,40 @@ class InteractingReflectionPositivityModel (params : Phi4Params) where
       0 ≤ (∑ i, ∑ j, c i * starRingEnd ℂ (c j) *
         ∫ ω, ω (testFunTimeReflect (f i)) * ω (f j)
           ∂(finiteVolumeMeasure params Λ)).re
+
+/-- Honest theorem-level frontier for free Gaussian reflection positivity. -/
+theorem gap_free_covariance_reflection_positive
+    (mass : ℝ) (hmass : 0 < mass)
+    (n : ℕ) (f : Fin n → TestFun2D) (c : Fin n → ℂ)
+    (hpos : ∀ i, supportedInPositiveTime (f i)) :
+    0 ≤ (∑ i, ∑ j, c i * starRingEnd ℂ (c j) *
+      ∫ ω, ω (testFunTimeReflect (f i)) * ω (f j)
+        ∂(freeFieldMeasure mass hmass)).re := by
+  sorry
+
+/-- Honest theorem-level frontier for Dirichlet-covariance reflection
+    positivity on time-symmetric rectangles. -/
+theorem gap_dirichlet_covariance_reflection_positive
+    (mass : ℝ) (hmass : 0 < mass)
+    [BoundaryKernelModel mass hmass]
+    (Λ : Rectangle) (hΛ : Λ.IsTimeSymmetric)
+    (n : ℕ) (f : Fin n → TestFun2D) (c : Fin n → ℂ)
+    (hpos : ∀ i, supportedInPositiveTime (f i)) :
+    0 ≤ (∑ i, ∑ j, c i * starRingEnd ℂ (c j) *
+      ↑(∫ x, ∫ y, (testFunTimeReflect (f i)) x * dirichletCov Λ mass hmass x y * (f j) y)).re := by
+  sorry
+
+/-- Honest theorem-level frontier for interacting finite-volume reflection
+    positivity on time-symmetric rectangles. -/
+theorem gap_interacting_measure_reflection_positive
+    (params : Phi4Params) (hIW : HasExpInteractionLp params)
+    (Λ : Rectangle) (hΛ : Λ.IsTimeSymmetric)
+    (n : ℕ) (f : Fin n → TestFun2D) (c : Fin n → ℂ)
+    (hpos : ∀ i, supportedInPositiveTime (f i)) :
+    0 ≤ (∑ i, ∑ j, c i * starRingEnd ℂ (c j) *
+      ∫ ω, ω (testFunTimeReflect (f i)) * ω (f j)
+        ∂(finiteVolumeMeasure params Λ)).re := by
+  sorry
 
 /-! ## Reflection positivity of the free covariance -/
 

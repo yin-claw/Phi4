@@ -20,6 +20,10 @@ estimates of Chapter 8, this gives bounds that are uniform in the volume.
 These uniform bounds are the second ingredient (after monotonicity) for the
 infinite volume limit.
 
+This file still exposes its main inputs through `MultipleReflectionModel`.
+The theorem-level frontier below records the actual chessboard/uniform-bound
+target explicitly.
+
 ## References
 
 * [Glimm-Jaffe] Sections 10.5-10.6
@@ -59,6 +63,21 @@ class MultipleReflectionModel (params : Phi4Params) where
       ∃ C : ℝ, ∀ (Λ : Rectangle), Λ.IsTimeSymmetric →
         (∀ i, ∀ x ∉ Λ.toSet, f i x = 0) →
           |schwingerN params Λ n f| ≤ C
+
+/-- Assumption-explicit uniform finite-volume Schwinger bound on
+    time-symmetric rectangles. -/
+def HasSchwingerUniformBound (params : Phi4Params) : Prop :=
+  ∀ (n : ℕ) (f : Fin n → TestFun2D),
+    ∃ C : ℝ, ∀ (Λ : Rectangle), Λ.IsTimeSymmetric →
+      (∀ i, ∀ x ∉ Λ.toSet, f i x = 0) →
+        |schwingerN params Λ n f| ≤ C
+
+/-- Honest theorem-level frontier for the chessboard/multiple-reflection bound
+    needed in the infinite-volume construction. -/
+theorem gap_hasSchwingerUniformBound
+    (params : Phi4Params) (hIW : HasExpInteractionLp params) :
+    HasSchwingerUniformBound params := by
+  sorry
 
 /-! ## Chessboard estimates -/
 

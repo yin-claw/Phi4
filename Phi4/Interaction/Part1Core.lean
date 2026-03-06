@@ -56,9 +56,26 @@ def standardUVCutoffSeq (n : ℕ) : UVCutoff :=
   ⟨n + 1, by exact_mod_cast Nat.succ_pos n⟩
 
 /-- The interaction V_Λ = lim_{κ→∞} V_{Λ,κ} (UV limit with fixed volume cutoff).
-    The limit exists in L² by Theorem 8.5.3. -/
+    This is currently implemented as a `limsup` along the canonical cutoff
+    sequence. When pointwise convergence is known, it agrees with the ordinary
+    limit. -/
 def interaction (params : Phi4Params) (Λ : Rectangle) (ω : FieldConfig2D) : ℝ :=
   Filter.limsup (fun n : ℕ => interactionCutoff params Λ (standardUVCutoffSeq n) ω) Filter.atTop
+
+/-- If the canonical UV-cutoff sequence converges pointwise, then `interaction`
+    agrees with that limit. -/
+theorem interaction_eq_of_tendsto
+    (params : Phi4Params) (Λ : Rectangle) (ω : FieldConfig2D) (V : ℝ)
+    (hconv :
+      Filter.Tendsto
+        (fun n : ℕ => interactionCutoff params Λ (standardUVCutoffSeq n) ω)
+        Filter.atTop
+        (nhds V)) :
+    interaction params Λ ω = V := by
+  change Filter.limsup
+      (fun n : ℕ => interactionCutoff params Λ (standardUVCutoffSeq n) ω)
+      Filter.atTop = V
+  exact hconv.limsup_eq
 
 /-- If the canonical UV-cutoff sequence converges pointwise, then `interaction`
     agrees with the ordinary limit (so the limsup definition is not ambiguous). -/
@@ -70,8 +87,7 @@ theorem interaction_eq_lim_of_convergent
         Filter.atTop
         (nhds V)) :
     interaction params Λ ω = V := by
-  unfold interaction
-  simpa using hconv.limsup_eq
+  exact interaction_eq_of_tendsto params Λ ω V hconv
 
 /-! ## Semiboundedness of the Wick-ordered quartic
 
@@ -217,6 +233,22 @@ instance (priority := 100) interactionIntegrabilityModel_of_uv_weight
     InteractionUVModel.interactionCutoff_tendsto_ae (params := params)
   interaction_in_L2 := InteractionUVModel.interaction_in_L2 (params := params)
   exp_interaction_Lp := InteractionWeightModel.exp_interaction_Lp (params := params)
+
+/-- Assumption-explicit WP1 target: the Boltzmann weight `exp(-V_Λ)` lies in
+    every finite `Lᵖ` for the φ⁴₂ interaction. This is the Chapter 8 analytic
+    core underlying finite-volume normalization and downstream moment bounds. -/
+def HasExpInteractionLp (params : Phi4Params) : Prop :=
+  ∀ (Λ : Rectangle) {p : ℝ≥0∞}, p ≠ ⊤ →
+    MemLp (fun ω => Real.exp (-(interaction params Λ ω)))
+      p (freeFieldMeasure params.mass params.mass_pos)
+
+/-- Honest theorem-level frontier for the Chapter 8 interaction-integrability
+    core. This is the canonical theorem counterpart to `InteractionWeightModel`.
+    The statement is kept explicit even while legacy model interfaces remain in
+    use elsewhere in the repository. -/
+theorem gap_hasExpInteractionLp (params : Phi4Params) :
+    HasExpInteractionLp params := by
+  sorry
 
 /-- Almost-everywhere convergence of the canonical cutoff sequence
     `κ_n = n + 1` to the limiting interaction, from explicit real-parameterized

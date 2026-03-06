@@ -8,13 +8,14 @@ import OSReconstruction.Wightman.Reconstruction
 /-!
 # OS Axioms for φ⁴₂
 
-This is the main theorem file. We verify that the infinite-volume φ⁴₂ Schwinger
-functions satisfy the Osterwalder-Schrader axioms E0-E3, and package E4 under
-an explicit weak-coupling hypothesis.
+This file packages OS-style consequences from currently available Schwinger and
+regularity inputs. It should not be read as a fully local proof that the φ⁴₂
+construction has already established OS0-OS4 from first principles inside this
+repository.
 
-**Theorem 12.1.1 (Glimm-Jaffe)**: The generating functional S{f} of the φ⁴₂ theory
-exists and satisfies the Euclidean axioms OS0-OS3. Hence (by the OS reconstruction
-theorem) it yields a quantum field theory satisfying the Wightman axioms W1-W3.
+The hard mathematical content is still split across legacy `...Model` class
+assumptions and theorem-level frontiers. This file assembles those inputs into
+the `OsterwalderSchraderAxioms` API used downstream.
 
 The four axioms are:
 - **OS0 (Temperedness)**: S_n are tempered distributions on S(ℝ^{2n})
@@ -180,7 +181,11 @@ The infinite volume Schwinger functions define tempered distributions on S(ℝ^{
     Here d = 1 because OSreconstruction uses spacetime dimension d+1, and we have d+1 = 2.
 
     S_n : S(ℝ^{n×2}) → ℂ is defined by:
-      S_n(f) = ∫ φ(x₁)⋯φ(xₙ) f(x₁,...,xₙ) dx₁⋯dxₙ dμ(φ) -/
+      S_n(f) = ∫ φ(x₁)⋯φ(xₙ) f(x₁,...,xₙ) dx₁⋯dxₙ dμ(φ)
+
+    In the current branch this is a packaging layer over
+    `SchwingerFunctionModel`, not yet a direct local construction from the
+    infinite-volume measure. -/
 def phi4SchwingerFunctions (params : Phi4Params)
     [SchwingerFunctionModel params] :
     SchwingerFunctions 1 :=
@@ -282,9 +287,8 @@ def os4WeakCouplingThreshold (params : Phi4Params)
     [OSE4ClusterModel params] : ℝ :=
   OSE4ClusterModel.weak_coupling_threshold (params := params)
 
-/-- Interface-level OS package theorem: if Schwinger/OS0/OS2/E3/E2/E4 interfaces
-    are provided and weak coupling is available, the packaged Schwinger functions
-    satisfy OS0-OS4. -/
+/-- Assembly theorem: if the explicit OS interfaces are provided and weak
+    coupling is available, the packaged Schwinger functions satisfy OS0-OS4. -/
 theorem phi4_satisfies_OS (params : Phi4Params)
     [OSAxiomCoreModel params]
     [OSDistributionE2Model params]

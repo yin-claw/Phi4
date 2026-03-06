@@ -45,12 +45,30 @@ class WickPowersModel (params : Phi4Params)
 
 /-- The Wick cubic smeared against a test function: ∫ :φ(x)³: f(x) dx
     evaluated in the infinite-volume measure.
-    This arises from the functional derivative of V = λ∫:φ⁴:dx. -/
+    This arises from the functional derivative of V = λ∫:φ⁴:dx.
+    As in `interaction`, the current implementation uses `limsup` along the
+    canonical cutoff sequence; when convergence is known, it agrees with the
+    ordinary limit. -/
 def wickCubicSmeared (params : Phi4Params) (f : TestFun2D)
     (ω : FieldConfig2D) : ℝ :=
   Filter.limsup
     (fun n : ℕ => ∫ x, wickPower 3 params.mass (standardUVCutoffSeq n) ω x * f x)
     Filter.atTop
+
+/-- If the canonical UV-smearing sequence converges pointwise, then
+    `wickCubicSmeared` agrees with that limit. -/
+theorem wickCubicSmeared_eq_of_tendsto
+    (params : Phi4Params) (f : TestFun2D) (ω : FieldConfig2D) (V : ℝ)
+    (hconv :
+      Filter.Tendsto
+        (fun n : ℕ => ∫ x, wickPower 3 params.mass (standardUVCutoffSeq n) ω x * f x)
+        Filter.atTop
+        (nhds V)) :
+    wickCubicSmeared params f ω = V := by
+  change Filter.limsup
+      (fun n : ℕ => ∫ x, wickPower 3 params.mass (standardUVCutoffSeq n) ω x * f x)
+      Filter.atTop = V
+  exact hconv.limsup_eq
 
 /-- If the canonical UV-smearing sequence converges pointwise, then
     `wickCubicSmeared` agrees with that ordinary limit. -/
@@ -62,8 +80,7 @@ theorem wickCubicSmeared_eq_lim_of_convergent
         Filter.atTop
         (nhds V)) :
     wickCubicSmeared params f ω = V := by
-  unfold wickCubicSmeared
-  simpa using hconv.limsup_eq
+  exact wickCubicSmeared_eq_of_tendsto params f ω V hconv
 
 /-- Regularity/IBP inputs for the infinite-volume φ⁴₂ theory beyond Wick-power
     existence. -/
@@ -97,11 +114,43 @@ class RegularityModel (params : Phi4Params)
       ∃ c : ℝ, ∀ Λ : Rectangle,
         |generatingFunctional params Λ f| ≤ Real.exp (c * SchwartzMap.seminorm ℝ 2 2 f)
 
+/-- Honest theorem-level frontier for existence of infinite-volume Wick powers. -/
+theorem gap_wick_powers_infinite_volume (params : Phi4Params)
+    [InfiniteVolumeMeasureModel params]
+    (j : ℕ) {p : ℝ≥0∞} (hp : p ≠ ⊤) :
+    ∃ (W : ℕ → FieldConfig2D → Spacetime2D → ℝ),
+      ∀ x : Spacetime2D, MemLp (fun ω => W j ω x) p (infiniteVolumeMeasure params) := by
+  sorry
+
+/-- Honest theorem-level frontier for almost-everywhere convergence of the
+    smeared Wick-cubic UV limit. -/
+theorem gap_wickCubicSmeared_tendsto_ae (params : Phi4Params)
+    [InfiniteVolumeMeasureModel params]
+    (f : TestFun2D) :
+    ∀ᵐ ω ∂(infiniteVolumeMeasure params),
+      Filter.Tendsto
+        (fun n : ℕ => ∫ x, wickPower 3 params.mass (standardUVCutoffSeq n) ω x * f x)
+        Filter.atTop
+        (nhds (wickCubicSmeared params f ω)) := by
+  sorry
+
+/-- Honest theorem-level frontier for the Euclidean equation of motion in
+    infinite volume. -/
+theorem gap_euclidean_equation_of_motion (params : Phi4Params)
+    [InfiniteVolumeMeasureModel params]
+    (f g : TestFun2D) :
+    ∫ ω, ω f * ω g ∂(infiniteVolumeMeasure params) =
+      GaussianField.covariance (freeCovarianceCLM params.mass params.mass_pos) f g -
+      params.coupling *
+        ∫ ω, wickCubicSmeared params f ω * ω g ∂(infiniteVolumeMeasure params) := by
+  sorry
+
 /-! ## Generating functional bound (OS1) -/
 
 /-- Norm functional for the generating functional bound.
-    In the current interface this is taken to be a fixed Schwartz seminorm
-    controlling the growth estimate. -/
+    In the current interface this is the fixed Schwartz seminorm `(2,2)`.
+    This file records the current choice explicitly rather than claiming it is
+    canonical for every downstream formulation of OS1. -/
 def normFunctional (g : TestFun2D) : ℝ :=
   SchwartzMap.seminorm ℝ 2 2 g
 

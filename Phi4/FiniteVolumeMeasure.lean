@@ -980,4 +980,15 @@ class FiniteVolumeComparisonModel (params : Phi4Params) where
       schwingerTwo params Λ f g ≤
         ∫ ω, ω f * ω g ∂(freeFieldMeasure params.mass params.mass_pos)
 
+/-- Honest theorem-level frontier for the standard finite-volume comparison
+    estimate. The explicit `HasExpInteractionLp` hypothesis keeps the theorem
+    tied to the actual interacting measure normalization. -/
+theorem gap_schwingerTwo_le_free (params : Phi4Params) (Λ : Rectangle)
+    (hIW : HasExpInteractionLp params)
+    (f g : TestFun2D)
+    (hf : ∀ x, 0 ≤ f x) (hg : ∀ x, 0 ≤ g x) :
+    schwingerTwo params Λ f g ≤
+      ∫ ω, ω f * ω g ∂(freeFieldMeasure params.mass params.mass_pos) := by
+  sorry
+
 end
