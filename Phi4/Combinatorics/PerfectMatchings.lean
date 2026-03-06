@@ -510,7 +510,7 @@ private def compressFin (n : ℕ) (j : Fin (n + 2)) (hj : 0 < j.val)
     split_ifs with h <;> omega⟩
 
 /-- Expand `Fin n` back into `Fin (n+2)` avoiding `0` and `j` (with `0 < j`). -/
-private def expandFin (n : ℕ) (j : Fin (n + 2)) (_hj : 0 < j.val)
+def expandFin (n : ℕ) (j : Fin (n + 2)) (_hj : 0 < j.val)
     (k : Fin n) : Fin (n + 2) :=
   if _ : k.val + 1 < j.val then
     ⟨k.val + 1, by omega⟩
@@ -962,7 +962,7 @@ private lemma expand_compress_remaining {n : ℕ} (π : Pairing (2 * n + 2)) (hn
   · rw [compressFinTotal_eq_compressFin (2*n) (by omega) _ hj q.2 hvalid.2.2.1 hvalid.2.2.2]
     exact congrArg Fin.val (expandFin_compressFin (2*n) _ hj q.2 hvalid.2.2.1 hvalid.2.2.2)
 
-private theorem decompPairing_injective (n : ℕ) :
+theorem decompPairing_injective (n : ℕ) :
     Function.Injective (decompPairing n) := by
   intro π₁ π₂ h
   have hj : partnerIdx n π₁ = partnerIdx n π₂ := congrArg Prod.fst h
@@ -1149,7 +1149,7 @@ private lemma expandedPairing_compressedPairing (n : ℕ) (j : Fin (2 * n + 1))
               ⟨p, hp_mem, rfl⟩, ?_⟩
       unfold compressPairTotal; ext1 <;> exact compress_expand _
 
-private theorem decompPairing_surjective (n : ℕ) :
+theorem decompPairing_surjective (n : ℕ) :
     Function.Surjective (decompPairing n) := by
   intro ⟨j, σ⟩
   exact ⟨expandedPairing n j σ, by
@@ -1195,3 +1195,74 @@ theorem pairing_card_eq_doubleFactorial (n : ℕ) :
       show (2 * (n + 1) + 1) * (2 * (n + 1) - 1).doubleFactorial =
         (2 * n + 1 + 2) * (2 * n + 1).doubleFactorial
       congr 1
+
+/-! ## Public API for Wick's theorem -/
+
+/-- The decomposition bijection as an equivalence. -/
+noncomputable def decompPairingEquiv (n : ℕ) :
+    Pairing (2 * n + 2) ≃ Fin (2 * n + 1) × Pairing (2 * n) :=
+  Equiv.ofBijective (decompPairing n) ⟨decompPairing_injective n, decompPairing_surjective n⟩
+
+/-- The partner of 0 in `expandedPairing n j σ` as a Fin value. -/
+private def expandedPartner (n : ℕ) (j : Fin (2 * n + 1)) : Fin (2 * n + 2) :=
+  ⟨j.val + 1, by have := j.isLt; omega⟩
+
+private lemma expandedPartner_pos (n : ℕ) (j : Fin (2 * n + 1)) :
+    (0 : ℕ) < (expandedPartner n j).val := by
+  simp [expandedPartner]
+
+/-- `expandFin` matches `Fin.succ ∘ Fin.succAbove`: both are order-preserving injections
+    from `Fin (2*n)` to `Fin (2*n+2)` avoiding `{0, ⟨j+1, _⟩}`. -/
+theorem expandFin_eq_succ_succAbove (n : ℕ) (j : Fin (2 * n + 1))
+    (x : Fin (2 * n)) :
+    expandFin (2 * n) (expandedPartner n j) (expandedPartner_pos n j) x =
+      Fin.succ (Fin.succAbove j x) := by
+  ext
+  unfold expandFin expandedPartner
+  simp only [Fin.val_mk, Fin.val_succ, Fin.succAbove]
+  split_ifs <;> simp_all [Fin.lt_def] <;> omega
+
+/-- The pairs of `expandedPairing n j σ` decompose as the new pair plus lifted σ-pairs. -/
+theorem expandedPairing_pairs (n : ℕ) (j : Fin (2 * n + 1)) (σ : Pairing (2 * n)) :
+    (expandedPairing n j σ).pairs =
+      {(⟨0, by omega⟩, expandedPartner n j)} ∪
+        σ.pairs.image (fun q =>
+          (expandFin (2 * n) (expandedPartner n j) (expandedPartner_pos n j) q.1,
+           expandFin (2 * n) (expandedPartner n j) (expandedPartner_pos n j) q.2)) := by
+  unfold expandedPairing expandedPartner
+  rfl
+
+/-- Product decomposition for expanded pairings. -/
+theorem expandedPairing_prod_decomp {α : Type*} [CommMonoid α]
+    (n : ℕ) (j : Fin (2 * n + 1)) (σ : Pairing (2 * n))
+    (F : Fin (2 * n + 2) × Fin (2 * n + 2) → α) :
+    ∏ p ∈ (expandedPairing n j σ).pairs, F p =
+      F (⟨0, by omega⟩, expandedPartner n j) *
+        ∏ q ∈ σ.pairs, F (expandFin (2 * n) (expandedPartner n j) (expandedPartner_pos n j) q.1,
+                          expandFin (2 * n) (expandedPartner n j) (expandedPartner_pos n j) q.2) := by
+  rw [expandedPairing_pairs]
+  rw [Finset.prod_union]
+  · rw [Finset.prod_singleton]
+    congr 1
+    rw [Finset.prod_image]
+    intro q₁ hq₁ q₂ hq₂ heq
+    have h1 := congrArg Prod.fst heq
+    have h2 := congrArg Prod.snd heq
+    simp only at h1 h2
+    have hn_pos : 0 < 2 * n := by
+      rcases n with _ | n
+      · exact Fin.elim0 q₁.1
+      · omega
+    ext
+    · exact congrArg Fin.val (expandFin_injective (2*n) hn_pos _ _ _ _ h1)
+    · exact congrArg Fin.val (expandFin_injective (2*n) hn_pos _ _ _ _ h2)
+  · rw [Finset.disjoint_left]
+    intro p hp
+    rw [Finset.mem_singleton] at hp
+    subst hp
+    intro hp2
+    rw [Finset.mem_image] at hp2
+    rcases hp2 with ⟨q, _, hq⟩
+    have h1 := congrArg (fun p : Fin _ × Fin _ => p.1.val) hq
+    simp only at h1
+    exact expandFin_ne_zero (2*n) _ _ q.1 h1
