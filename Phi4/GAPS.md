@@ -6,9 +6,9 @@ This file records the current proof boundary on `main`.
 
 ## Trust Snapshot
 
-- theorem-level `sorry` in core modules: `12`
+- theorem-level `sorry` in core modules: `20`
 - legacy `class/structure .*Model`: `13`
-- canonical `gap_*` theorem frontiers: `22` (3 now proved)
+- canonical `gap_*` theorem frontiers: `29`
 - `axiom`: `0`
 - `def/abbrev := by sorry`: `0`
 
@@ -20,35 +20,35 @@ assumption-free completion. The open mathematics is currently split between:
 
 ## Explicit Theorem-Level Frontiers
 
-### PROVED (no sorry)
-
-1. `gap_pairing_card` — double factorial count of perfect matchings
-2. `gap_wicks_theorem_even` — Wick's theorem for even moments
-3. `gap_feynman_graph_expansion` — Feynman graph sum equals Gaussian moment
-
-### OPEN (sorry)
-
+1. `gap_pairing_card`
+2. `gap_wicks_theorem_even`
+3. `gap_feynman_graph_expansion`
 4. `gap_localized_graph_exponential_decay`
-5. `gap_covariance_eq_kernel` — requires non-diagonal CLM or ω→0 limit
-   (see ProofIdeas/CovarianceMismatch.md)
-6. `gap_hasExpInteractionLp` — **WP1 blocker** (Chapter 8)
-7. `gap_schwingerTwo_le_free`
-8. `gap_hasSchwingerNMonotone`
-9. `gap_hasChessboardEstimate`
-10. `gap_hasSchwingerUniformBound`
-11. `gap_free_covariance_reflection_positive`
-    (1D Green's function factorization infrastructure in GreenFunction/OneDimGreen.lean)
-12. `gap_dirichlet_covariance_reflection_positive`
-13. `gap_interacting_measure_reflection_positive`
-14. `gap_infiniteVolumeLimit_exists`
-15. `gap_wick_powers_infinite_volume`
-16. `gap_wickCubicSmeared_tendsto_ae`
-17. `gap_euclidean_equation_of_motion`
-18. `gap_generating_functional_bound`
-19. `gap_generating_functional_bound_uniform`
-20. `gap_nonlocal_phi4_bound`
-21. `gap_measure_os3_reflection_positive`
-22. `gap_phi4_linear_growth`
+5. `gap_covariance_eq_kernel`
+6. `gap_uvMollifier_continuous`
+7. `gap_interactionCutoff_sq_integrable`
+8. `gap_interactionCutoff_L2_convergence`
+9. `gap_interactionCutoff_ae_convergence`
+10. `gap_interaction_aestronglyMeasurable`
+11. `gap_interaction_sq_integrable`
+12. `gap_exponential_moment_geometric_bound`
+13. `gap_hasExpInteractionLp`
+14. `gap_schwingerTwo_le_free`
+15. `gap_hasSchwingerNMonotone`
+16. `gap_hasChessboardEstimate`
+17. `gap_hasSchwingerUniformBound`
+18. `gap_free_covariance_reflection_positive`
+19. `gap_dirichlet_covariance_reflection_positive`
+20. `gap_interacting_measure_reflection_positive`
+21. `gap_infiniteVolumeLimit_exists`
+22. `gap_wick_powers_infinite_volume`
+23. `gap_wickCubicSmeared_tendsto_ae`
+24. `gap_euclidean_equation_of_motion`
+25. `gap_generating_functional_bound`
+26. `gap_generating_functional_bound_uniform`
+27. `gap_nonlocal_phi4_bound`
+28. `gap_measure_os3_reflection_positive`
+29. `gap_phi4_linear_growth`
 
 ## Explicit But Not Yet Named OS Obligations
 
@@ -79,6 +79,7 @@ not yet cover the full mathematical debt of the repository.
 
 WP1 remains the primary blocker:
 - proving the finite-volume Boltzmann-weight integrability and normalization
-  needed for the interacting measure.
+  needed for the interacting measure, together with the newly surfaced
+  analytic-input obligations in `Interaction/AnalyticInputs.lean`.
 
 Everything downstream depends on that analytic core.

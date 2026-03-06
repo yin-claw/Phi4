@@ -1,6 +1,6 @@
 # Phi4 Audit Notes
 
-Date: 2026-03-05
+Date: 2026-03-06
 
 ## Main vs Simplified Branch Review
 
@@ -27,9 +27,9 @@ for direct merge. In particular:
 
 ## Current Honest Status
 
-- theorem-level `sorry` in core modules: `17`
+- theorem-level `sorry` in core modules: `20`
 - legacy `class/structure .*Model`: `13`
-- canonical `gap_*` theorem frontiers: `22`
+- canonical `gap_*` theorem frontiers: `29`
 - `axiom`: `0`
 - `def/abbrev := by sorry`: `0`
 
@@ -44,7 +44,10 @@ infinite-volume recombination classes and dead correlation bridge classes, so
 the remaining model-class surface is smaller and closer to the actual live
 dependency graph. The current slice also removed `MultipleReflectionModel` from
 the infinite-volume limit arguments and surfaced the chessboard estimate itself
-as the explicit frontier `gap_hasChessboardEstimate`.
+as the explicit frontier `gap_hasChessboardEstimate`. More recently, several
+WP1 analytic-input obligations were surfaced explicitly in
+`Interaction/AnalyticInputs.lean`, which increased the visible frontier count
+without changing the no-axiom / no-`def := by sorry` trust boundary.
 
 But the repository is still not close to completion:
 

@@ -211,10 +211,21 @@ theorem sq_setIntegral_le_volume_mul_setIntegral_sq {f : Spacetime2D → ℝ}
   -- h2: (∫ f)² ≤ V * ∫ f²
   exact h2
 
+/-- The L² expectation E[(wickPower 4 mass κ · y)²] is uniformly bounded on compact sets.
+    This follows from the polynomial bound on wickMonomial, Gaussian moment bounds,
+    and continuity of the UV mollifier in the Schwartz topology (which makes the
+    Gaussian variance ‖T(δ_{κ,y})‖² continuous and hence bounded on compacts). -/
+theorem wickPower_sq_expectation_bounded_on_compact (mass : ℝ) (hmass : 0 < mass)
+    (κ : UVCutoff) (K : Set Spacetime2D) (hK : IsCompact K) :
+    ∃ M : ℝ, 0 ≤ M ∧ ∀ y ∈ K,
+      ∫ ω, (wickPower 4 mass κ ω y) ^ 2
+        ∂(freeFieldMeasure mass hmass) ≤ M := by
+  sorry
+
 /-- The function (ω, x) ↦ (wickPower 4 mass κ ω x)² is integrable on the product
     of the free field measure with Lebesgue measure restricted to Λ.
-    Uses Fubini's criterion: integrable in ω for each x, and the ω-integral
-    is integrable in x over Λ. -/
+    Uses Fubini's criterion (integrable_prod_iff'): integrable in ω for each y,
+    and the ω-integral is integrable in y over Λ. -/
 theorem wickPower_sq_integrable_prod (params : Phi4Params) (Λ : Rectangle)
     (κ : UVCutoff) :
     Integrable
@@ -224,9 +235,7 @@ theorem wickPower_sq_integrable_prod (params : Phi4Params) (Λ : Rectangle)
         (MeasureTheory.volume.restrict Λ.toSet)) := by
   let μ := freeFieldMeasure params.mass params.mass_pos
   let ν := MeasureTheory.volume.restrict Λ.toSet
-  -- Use integrable_prod_iff': integrable on product iff
-  -- (1) for a.e. x ∂ν, ω ↦ f(ω,x) is integrable ∂μ, and
-  -- (2) x ↦ ∫ ‖f(ω,x)‖ dμ(ω) is integrable ∂ν
+  letI : IsProbabilityMeasure μ := freeFieldMeasure_isProbability params.mass params.mass_pos
   -- Joint AEStronglyMeasurable for wickPower² on the product
   have hmeas : AEStronglyMeasurable
       (fun p : FieldConfig2D × Spacetime2D => (wickPower 4 params.mass κ p.1 p.2) ^ 2)
@@ -234,15 +243,38 @@ theorem wickPower_sq_integrable_prod (params : Phi4Params) (Λ : Rectangle)
     exact ((wickPower_stronglyMeasurable_uncurry 4 params.mass κ).pow 2).aestronglyMeasurable
   rw [MeasureTheory.integrable_prod_iff' hmeas]
   constructor
-  · -- (1) For a.e. x ∂ν, ω ↦ wickPower(ω,x)² is integrable ∂μ
-    filter_upwards with x
-    exact wickPower_sq_integrable params.mass params.mass_pos κ x
-  · -- (2) x ↦ ∫ |wickPower(ω,x)²| dμ(ω) is integrable ∂ν
-    -- Since wickPower² ≥ 0, the norm is just the value: ‖w²‖ = w²
-    -- So this is x ↦ ∫ wickPower(ω,x)² dμ(ω) = E[wickPower(·,x)²]
-    -- This is constant in x by translation invariance of the Gaussian measure,
-    -- hence integrable on the finite-volume set Λ.
-    sorry
+  · -- (1) For a.e. y ∂ν, ω ↦ wickPower(ω,y)² is integrable ∂μ
+    -- This follows from wickPower_sq_integrable for every y
+    filter_upwards with y
+    exact wickPower_sq_integrable params.mass params.mass_pos κ y
+  · -- (2) y ↦ ∫ ‖wickPower(ω,y)²‖ dμ(ω) is integrable ∂ν
+    -- Since (wickPower ω y)² ≥ 0, ‖·‖ = id, so this is y ↦ ∫ (wickPower ω y)² dμ
+    -- The function is bounded on compact Λ (uniform L² bound) and ν is finite
+    obtain ⟨M, hMnn, hM⟩ := wickPower_sq_expectation_bounded_on_compact
+      params.mass params.mass_pos κ Λ.toSet Λ.toSet_isCompact
+    -- Show the norm simplifies since squares are nonneg
+    have hnorm_eq : (fun y => ∫ ω, ‖(wickPower 4 params.mass κ ω y) ^ 2‖ ∂μ) =
+        (fun y => ∫ ω, (wickPower 4 params.mass κ ω y) ^ 2 ∂μ) := by
+      ext y; congr 1; ext ω; exact Real.norm_of_nonneg (sq_nonneg _)
+    rw [hnorm_eq]
+    -- Measurability of the partial integral
+    have hsm : AEStronglyMeasurable
+        (fun y => ∫ ω, (wickPower 4 params.mass κ ω y) ^ 2 ∂μ) ν :=
+      (StronglyMeasurable.integral_prod_left
+        ((wickPower_stronglyMeasurable_uncurry 4 params.mass κ).pow 2)).aestronglyMeasurable
+    -- ν is a finite measure (Λ compact)
+    have hν_fin : ν Set.univ < ⊤ := by
+      rw [MeasureTheory.Measure.restrict_apply_univ]
+      exact Λ.toSet_isCompact.measure_lt_top
+    -- Use Integrable.mono with constant function M (integrable on finite measure)
+    haveI : IsFiniteMeasure ν := ⟨hν_fin⟩
+    have hconst : Integrable (fun _ : Spacetime2D => M) ν := integrable_const M
+    apply hconst.mono hsm
+    -- a.e. bound: on ν = vol.restrict Λ, a.e. y ∈ Λ.toSet
+    filter_upwards [MeasureTheory.ae_restrict_mem Λ.toSet_measurableSet] with y hy
+    rw [Real.norm_of_nonneg (integral_nonneg (fun ω => sq_nonneg _)),
+        Real.norm_of_nonneg hMnn]
+    exact hM y hy
 
 /-- The cutoff interaction is square-integrable under the free field measure.
     This is a consequence of the Gaussian structure: V_{Λ,κ} is an integral
