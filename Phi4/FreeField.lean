@@ -10,20 +10,25 @@ import Mathlib.Analysis.Calculus.BumpFunction.InnerProduct
 /-!
 # Free Euclidean Field in 2D
 
-The free Euclidean field is the centered Gaussian measure on S'(ℝ²) with covariance
-C = (-Δ + m²)⁻¹. This is the starting point for the φ⁴₂ construction.
+The free Euclidean field is a centered Gaussian measure on S'(ℝ²). The Gaussian
+measure is constructed using `GaussianField.measure` from the gaussian-field
+library, which works for any continuous linear map T : E →L[ℝ] H. The covariance
+is C(f,g) = ⟨T(f), T(g)⟩_H.
 
-The Gaussian measure is constructed using the `GaussianField.measure` from the
-gaussian-field library, which works for any nuclear Fréchet space E and any
-continuous linear map T : E →L[ℝ] H to a Hilbert space H. The covariance is
-then C(f,g) = ⟨T(f), T(g)⟩_H.
+**Important**: The CLM `freeCovarianceCLM` is diagonal in the Hermite basis
+(via `spectralCLM`) with eigenvalues (2n₁+1) + (2n₂+1) + m². This gives the
+covariance of the **harmonic oscillator resolvent** (-Δ + |x|² + m²)⁻¹, NOT
+the flat-space resolvent (-Δ + m²)⁻¹. The flat-space Green's function is defined
+separately as `freeCovKernel` and is used for position-space kernel estimates.
+See `covariance_spectral_sum` and ProofIdeas/CovarianceMismatch.md.
 
 ## Main definitions
 
-* `freeEigenvalue` — Eigenvalues λₘ of (-Δ + m²) in the Hermite basis
+* `freeEigenvalue` — Eigenvalues λₘ of (-Δ + |x|² + m²) in the Hermite basis
 * `freeSingularValue` — Singular values σₘ = λₘ⁻¹/² of the covariance
-* `freeCovarianceCLM` — The CLM T : S(ℝ²) →L[ℝ] ℓ² encoding the free covariance
+* `freeCovarianceCLM` — The CLM T : S(ℝ²) →L[ℝ] ℓ² (harmonic oscillator covariance)
 * `freeFieldMeasure` — The Gaussian probability measure dφ_C on S'(ℝ²)
+* `freeCovKernel` — Flat-space Green's function (-Δ + m²)⁻¹
 
 ## References
 
@@ -48,8 +53,8 @@ Note: These are eigenvalues of the harmonic oscillator (-Δ + x² + m²), NOT of
 the flat-space operator (-Δ + m²). The latter has continuous spectrum [m², ∞).
 We use the harmonic oscillator basis because it gives a nuclear embedding
 S(ℝ²) ↪ L²(ℝ²) via the Dynin-Mityagin theorem, which is required for the
-Gaussian measure construction. The covariance C = (-Δ + m²)⁻¹ is then
-represented in this basis with matrix elements ⟨ψₘ, (-Δ+m²)⁻¹ ψₙ⟩. -/
+Gaussian measure construction. Since `spectralCLM` is diagonal in this basis,
+`freeCovarianceCLM` gives the harmonic oscillator covariance (-Δ+|x|²+m²)⁻¹. -/
 
 /-- Eigenvalue of the harmonic oscillator (-Δ + x² + m²) for the m-th
     Hermite basis function (Cantor-paired index).
@@ -134,6 +139,13 @@ theorem freeFieldMeasure_isProbability (mass : ℝ) (hmass : 0 < mass) :
     IsProbabilityMeasure (freeFieldMeasure mass hmass) :=
   GaussianField.measure_isProbability _
 
+/-- Cross-moment formula: E[ω(f)ω(g)] = covariance T f g. -/
+theorem freeField_cross_moment (mass : ℝ) (hmass : 0 < mass)
+    (f g : TestFun2D) :
+    ∫ ω, ω f * ω g ∂(freeFieldMeasure mass hmass) =
+      GaussianField.covariance (freeCovarianceCLM mass hmass) f g :=
+  GaussianField.cross_moment_eq_covariance _ f g
+
 /-- Exponential moments of linear pairings under the free field measure. -/
 theorem freeField_pairing_exp_integrable (mass : ℝ) (hmass : 0 < mass)
     (f : TestFun2D) (t : ℝ) :
@@ -154,33 +166,75 @@ theorem freeField_pairing_exp_integrable (mass : ℝ) (hmass : 0 < mass)
   simpa [Function.comp] using
     hmapInt.comp_measurable (GaussianField.configuration_eval_measurable f)
 
-/-! ## The free covariance as a kernel
+/-! ## Spectral decomposition of the free covariance
 
-The covariance C(x,y) = (-Δ + m²)⁻¹(x,y) has an explicit integral kernel
-in d=2. It is the modified Bessel function K₀(m|x-y|) up to normalization:
-  C(x,y) = (2π)⁻¹ K₀(m|x-y|)
+The covariance defined by `freeCovarianceCLM` decomposes as a sum over the
+Hermite basis, since the CLM is diagonal:
+  C(f,g) = Σₘ σₘ² · ĉₘ(f) · ĉₘ(g)
+where σₘ = freeSingularValue, ĉₘ = DyninMityaginSpace.coeff.
 
-Key properties:
-- C(x,y) ~ -(2π)⁻¹ ln|x-y| as |x-y| → 0 (logarithmic divergence in d=2)
-- C(x,y) ~ const × |x-y|⁻¹/² e^{-m|x-y|} as |x-y| → ∞ (exponential decay)
+**Important**: This is the covariance of the harmonic oscillator resolvent
+(-Δ + |x|² + m²)⁻¹, NOT the flat-space resolvent (-Δ + m²)⁻¹. The two
+operators differ because the Hermite basis diagonalizes the harmonic
+oscillator but not the flat Laplacian. See ProofIdeas/CovarianceMismatch.md.
 -/
 
-/-- The pointwise covariance C(x,y) = (-Δ+m²)⁻¹(x,y) as a function on ℝ² × ℝ².
-    This is the Green's function / Euclidean propagator.
+/-- The Hilbert-space covariance equals the spectral sum:
+    C(f,g) = Σₘ σₘ² · ĉₘ(f) · ĉₘ(g)
+    where σₘ = (freeSingularValue mass m) and ĉₘ = DyninMityaginSpace.coeff m.
+
+    This decomposes the covariance in the Hermite eigenbasis. -/
+theorem covariance_spectral_sum (mass : ℝ) (hmass : 0 < mass)
+    (f g : TestFun2D) :
+    GaussianField.covariance (freeCovarianceCLM mass hmass) f g =
+      ∑' m, (freeSingularValue mass m) ^ 2 *
+        DyninMityaginSpace.coeff m f * DyninMityaginSpace.coeff m g := by
+  unfold GaussianField.covariance freeCovarianceCLM
+  rw [GaussianField.ell2_inner_eq_tsum]
+  congr 1; ext m
+  simp only [GaussianField.spectralCLM_coord]
+  simp only [RCLike.inner_apply, RCLike.conj_to_real]
+  ring
+
+/-! ## The flat-space Green's function
+
+The flat-space Green's function G(x,y) = (-Δ + m²)⁻¹(x,y) has an explicit
+integral kernel in d=2: (2π)⁻¹ K₀(m|x-y|).
+
+**Note**: This kernel is for the flat-space operator (-Δ + m²)⁻¹, which is
+DIFFERENT from the covariance of `freeCovarianceCLM` (the harmonic oscillator
+resolvent (-Δ + |x|² + m²)⁻¹). The flat-space kernel is used for:
+- Position-space Feynman rules (`graphIntegral`, `localizedGraphIntegral`)
+- Covariance comparison estimates (C_D ≤ C ≤ C_N)
+- Bessel function bounds
+
+Key properties:
+- G(x,y) ~ -(2π)⁻¹ ln|x-y| as |x-y| → 0 (logarithmic divergence in d=2)
+- G(x,y) ~ const × |x-y|⁻¹/² e^{-m|x-y|} as |x-y| → ∞ (exponential decay)
+-/
+
+/-- The flat-space Green's function G(x,y) = (-Δ+m²)⁻¹(x,y) on ℝ².
 
     Defined via the heat kernel representation:
-      C(x,y) = ∫₀^∞ (4πt)⁻¹ exp(-m²t - |x-y|²/(4t)) dt
+      G(x,y) = ∫₀^∞ (4πt)⁻¹ exp(-m²t - |x-y|²/(4t)) dt
 
-    This integral converges for mass > 0 and equals (2π)⁻¹ K₀(m|x-y|)
-    where K₀ is the modified Bessel function of the second kind. -/
+    This integral converges for mass > 0 and equals (2π)⁻¹ K₀(m|x-y|).
+
+    **Warning**: This is NOT the kernel of the covariance defined by
+    `freeCovarianceCLM`, which is the harmonic oscillator resolvent.
+    See `covariance_spectral_sum` for the correct spectral decomposition
+    of the CLM-based covariance. -/
 def freeCovKernel (mass : ℝ) (x y : Spacetime2D) : ℝ :=
   ∫ t in Set.Ioi (0 : ℝ),
     (4 * Real.pi * t)⁻¹ * Real.exp (-(mass ^ 2 * t + ‖x - y‖ ^ 2 / (4 * t)))
 
-/-- Honest theorem-level frontier: the Hilbert-space covariance used by
-    `freeFieldMeasure` equals the Green-kernel bilinear form.
-    This is the sound bridge between the `freeCovarianceCLM` representation
-    and the explicit kernel `freeCovKernel`. -/
+/-- Honest theorem-level frontier: bridge between the Hilbert-space covariance
+    (harmonic oscillator resolvent) and the flat-space Green's function kernel.
+
+    **Status**: This bridge requires either (a) a non-diagonal CLM representing
+    (-Δ+m²)⁻¹ in the Hermite basis, or (b) treating the harmonic trap as an
+    IR regulator and taking ω → 0 in (-Δ + ω²|x|² + m²)⁻¹.
+    See ProofIdeas/CovarianceMismatch.md. -/
 theorem gap_covariance_eq_kernel (mass : ℝ) (hmass : 0 < mass) :
     ∀ (f g : TestFun2D),
       GaussianField.covariance (freeCovarianceCLM mass hmass) f g =

@@ -125,6 +125,15 @@ theorem wick_fourth_semibounded (mass : ℝ) (_hmass : 0 < mass) (κ : UVCutoff)
     -C * (Real.log κ.κ) ^ 2 = -6 * c ^ 2 := hleft
     _ ≤ wickPower 4 mass κ ω x := hbase
 
+/-- The Wick quartic is bounded below by a constant depending only on κ
+    (uniform in ω and x). This gives `c_κ` the regularized point covariance. -/
+theorem wick_fourth_lower_bound_const (mass : ℝ) (_hmass : 0 < mass) (κ : UVCutoff) :
+    ∃ B : ℝ, ∀ (ω : FieldConfig2D) (x : Spacetime2D),
+      -B ≤ wickPower 4 mass κ ω x := by
+  refine ⟨6 * (regularizedPointCovariance mass κ) ^ 2, fun ω x => ?_⟩
+  simp only [wickPower, wickMonomial_four]
+  nlinarith [sq_nonneg (rawFieldEval mass κ ω x ^ 2 - 3 * regularizedPointCovariance mass κ)]
+
 /-! ## Abstract interaction-integrability interface -/
 
 /-- UV/L² interaction input: cutoff moments, UV convergence, and L² control of

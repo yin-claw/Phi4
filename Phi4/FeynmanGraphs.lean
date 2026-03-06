@@ -208,14 +208,97 @@ def localizedGraphIntegral {r : ℕ} (G : FeynmanGraph r) (mass : ℝ)
       (∏ i, (Metric.closedBall (centers i) (1 : ℝ)).indicator (fun _ => (1 : ℝ)) (x i)) *
         (∏ l ∈ G.lines, freeCovKernel mass (x l.1.1) (x l.2.1))
 
-/-- Honest theorem-level frontier: Feynman graph expansion of Gaussian
-    moments as a sum over graph amplitudes. -/
+/-! ## Wick graphs: pairing → FeynmanGraph
+
+For Wick's theorem, each pairing on {0,...,2n-1} gives a Feynman graph
+where every vertex has exactly 1 leg and lines connect paired vertices. -/
+
+/-- Map from pairs to graph lines: (a, b) ↦ ((a, 0), (b, 0)). -/
+private def pairingLineFun {r : ℕ} (p : Fin r × Fin r) :
+    (Fin r × ℕ) × (Fin r × ℕ) :=
+  ((p.1, 0), (p.2, 0))
+
+private lemma pairingLineFun_injective (r : ℕ) :
+    Function.Injective (@pairingLineFun r) := by
+  intro ⟨a₁, b₁⟩ ⟨a₂, b₂⟩ h
+  simp [pairingLineFun, Prod.mk.injEq] at h
+  exact Prod.ext h.1 h.2
+
+/-- The Wick graph associated to a pairing: all vertices have 1 leg,
+    lines connect paired vertices. -/
+private def wickGraph {n : ℕ} (π : Pairing (2 * n)) : FeynmanGraph (2 * n) where
+  legs := fun _ => 1
+  lines := π.pairs.image pairingLineFun
+  line_valid := by
+    intro p hp
+    rw [Finset.mem_image] at hp
+    obtain ⟨q, _, rfl⟩ := hp
+    simp [pairingLineFun]
+  covering := by
+    intro v l hl
+    simp at hl; subst hl
+    obtain ⟨p, ⟨hpmem, hpor⟩, huniq⟩ := π.covers v
+    refine ⟨pairingLineFun p, ?_, ?_⟩
+    · exact ⟨Finset.mem_image_of_mem _ hpmem, by
+        cases hpor with
+        | inl h => left; simp [pairingLineFun, h]
+        | inr h => right; simp [pairingLineFun, h]⟩
+    · intro q ⟨hqmem, hqor⟩
+      rw [Finset.mem_image] at hqmem
+      obtain ⟨q', hq'mem, hq'eq⟩ := hqmem
+      subst hq'eq
+      simp [pairingLineFun] at hqor
+      have hq'_cover : q'.1 = v ∨ q'.2 = v := by
+        cases hqor with
+        | inl h => left; exact h
+        | inr h => right; exact h
+      have := huniq q' ⟨hq'mem, hq'_cover⟩
+      rw [this]
+  ordered := by
+    intro p hp
+    rw [Finset.mem_image] at hp
+    obtain ⟨q, hq, rfl⟩ := hp
+    simp [pairingLineFun]
+    exact π.ordered q hq
+
+private lemma wickGraph_injective (n : ℕ) :
+    Function.Injective (@wickGraph n) := by
+  intro π₁ π₂ h
+  have hlines : π₁.pairs.image pairingLineFun = π₂.pairs.image pairingLineFun := by
+    exact congr_arg FeynmanGraph.lines h
+  have := Finset.image_injective (pairingLineFun_injective (2 * n))
+  exact Pairing.ext' (this hlines)
+
+private lemma wickGraph_amplitude (n : ℕ) (π : Pairing (2 * n))
+    (mass : ℝ) (hmass : 0 < mass) (f : Fin (2 * n) → TestFun2D) :
+    graphAmplitude (wickGraph π) mass hmass f =
+      ∏ p ∈ π.pairs, GaussianField.covariance
+        (freeCovarianceCLM mass hmass) (f p.1) (f p.2) := by
+  simp only [graphAmplitude, wickGraph]
+  rw [Finset.prod_image (fun a _ b _ h =>
+    pairingLineFun_injective _ h)]
+  rfl
+
+/-- Feynman graph expansion of Gaussian moments as a sum over graph amplitudes.
+    For even r = 2n, this follows from Wick's theorem via the Wick graph
+    construction. For odd r, the integral vanishes. -/
 theorem gap_feynman_graph_expansion (mass : ℝ) (hmass : 0 < mass) :
     ∀ (r : ℕ) (f : Fin r → TestFun2D),
       ∃ (graphs : Finset (FeynmanGraph r)),
         ∫ ω, (∏ i, ω (f i)) ∂(freeFieldMeasure mass hmass) =
           ∑ G ∈ graphs, graphAmplitude G mass hmass f := by
-  sorry
+  intro r f
+  rcases Nat.even_or_odd r with ⟨n, hn⟩ | ⟨n, rfl⟩
+  · -- Even case: r = 2n, use Wick's theorem
+    have h2n : r = 2 * n := by omega
+    subst h2n
+    refine ⟨Finset.univ.map ⟨wickGraph, wickGraph_injective n⟩, ?_⟩
+    rw [wicks_eq mass hmass n f]
+    rw [Finset.sum_map]
+    congr 1; ext π
+    exact (wickGraph_amplitude n π mass hmass f).symm
+  · -- Odd case: r = 2n+1, integral vanishes
+    exact ⟨∅, by simp [wicks_theorem_odd mass hmass n f]⟩
 
 /-! ## Localized graph estimates
 

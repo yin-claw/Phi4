@@ -1,14 +1,21 @@
 # TODO: φ⁴₂ Development Plan
 
-Date: 2026-03-05
+Date: 2026-03-06
 
 ## Baseline
 
-- theorem-level `sorry` in core modules: `10`
-- legacy `...Model` classes: `48`
-- canonical `gap_*` theorem frontiers: `18`
+- theorem-level `sorry` in core modules: `12`
+- legacy `...Model` classes: `13`
+- canonical `gap_*` theorem frontiers: `22` (3 proved, 19 open)
 - `axiom`: `0`
 - `def/abbrev := by sorry`: `0`
+
+## Recent Progress (2026-03-06)
+
+- **PROVED** `gap_pairing_card`, `gap_wicks_theorem_even`, `gap_feynman_graph_expansion`
+- **NEW** `covariance_spectral_sum`: correct spectral formula for harmonic oscillator covariance
+- **NEW** `GreenFunction/OneDimGreen.lean`: 1D Green's function factorization and RP
+- **DOCUMENTED** `freeCovarianceCLM`/`freeCovKernel` mismatch (see ProofIdeas/CovarianceMismatch.md)
 
 ## Priority Order
 

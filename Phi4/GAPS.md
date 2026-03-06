@@ -1,14 +1,14 @@
 # Phi4 Proof-Gap Ledger
 
-Date: 2026-03-05
+Date: 2026-03-06
 
 This file records the current proof boundary on `main`.
 
 ## Trust Snapshot
 
-- theorem-level `sorry` in core modules: `17`
+- theorem-level `sorry` in core modules: `12`
 - legacy `class/structure .*Model`: `13`
-- canonical `gap_*` theorem frontiers: `22`
+- canonical `gap_*` theorem frontiers: `22` (3 now proved)
 - `axiom`: `0`
 - `def/abbrev := by sorry`: `0`
 
@@ -20,17 +20,24 @@ assumption-free completion. The open mathematics is currently split between:
 
 ## Explicit Theorem-Level Frontiers
 
-1. `gap_pairing_card`
-2. `gap_wicks_theorem_even`
-3. `gap_feynman_graph_expansion`
+### PROVED (no sorry)
+
+1. `gap_pairing_card` — double factorial count of perfect matchings
+2. `gap_wicks_theorem_even` — Wick's theorem for even moments
+3. `gap_feynman_graph_expansion` — Feynman graph sum equals Gaussian moment
+
+### OPEN (sorry)
+
 4. `gap_localized_graph_exponential_decay`
-5. `gap_covariance_eq_kernel`
-6. `gap_hasExpInteractionLp`
+5. `gap_covariance_eq_kernel` — requires non-diagonal CLM or ω→0 limit
+   (see ProofIdeas/CovarianceMismatch.md)
+6. `gap_hasExpInteractionLp` — **WP1 blocker** (Chapter 8)
 7. `gap_schwingerTwo_le_free`
 8. `gap_hasSchwingerNMonotone`
 9. `gap_hasChessboardEstimate`
 10. `gap_hasSchwingerUniformBound`
 11. `gap_free_covariance_reflection_positive`
+    (1D Green's function factorization infrastructure in GreenFunction/OneDimGreen.lean)
 12. `gap_dirichlet_covariance_reflection_positive`
 13. `gap_interacting_measure_reflection_positive`
 14. `gap_infiniteVolumeLimit_exists`
