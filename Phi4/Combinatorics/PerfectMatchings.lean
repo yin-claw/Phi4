@@ -672,6 +672,14 @@ private lemma compressFinTotal_injective_valid (n : ℕ) (hn : 0 < n)
   rw [dif_neg ha0, dif_neg haj, dif_neg hb0, dif_neg hbj] at h
   exact compressFin_injective n j hj a b ha0 haj hb0 hbj h
 
+/-- expandFin is injective (requires `0 < n` for the compressFinTotal round-trip). -/
+private lemma expandFin_injective (n : ℕ) (hn : 0 < n)
+    (j : Fin (n + 2)) (hj : 0 < j.val) (a b : Fin n)
+    (h : expandFin n j hj a = expandFin n j hj b) : a = b := by
+  calc a = compressFinTotal n hn j hj (expandFin n j hj a) := (compressFinTotal_expandFin n hn j hj a).symm
+    _ = compressFinTotal n hn j hj (expandFin n j hj b) := congrArg _ h
+    _ = b := compressFinTotal_expandFin n hn j hj b
+
 /-- The compressed pairing on `2n` elements after removing the pair at vertex 0
     from a pairing on `2n+2` elements. -/
 noncomputable def compressedPairing (n : ℕ) (π : Pairing (2 * n + 2)) :
@@ -788,110 +796,137 @@ noncomputable def expandedPairing (n : ℕ) (j : Fin (2 * n + 1)) (σ : Pairing 
   rw [h2n2]
   -- j' is the actual partner of 0 in Fin(2n+2): shift j by 1 since j ∈ Fin(2n+1)
   let j' : Fin (2 * n + 2) := ⟨j.val + 1, by omega⟩
-  have hj' : (0 : ℕ) < j'.val := by omega
+  have hj' : (0 : ℕ) < j'.val := by show 0 < j.val + 1; omega
+  let zero : Fin (2 * n + 2) := ⟨0, by omega⟩
   -- Build the pair set: {(0, j')} ∪ image of σ.pairs under expandPair
+  let ep : Fin (2*n) × Fin (2*n) → Fin (2*n+2) × Fin (2*n+2) :=
+    fun q => (expandFin (2*n) j' hj' q.1, expandFin (2*n) j' hj' q.2)
   exact {
     pairs :=
-      {(⟨0, by omega⟩, j')} ∪
-        σ.pairs.image (expandPair (2 * n) j' hj')
+      {(zero, j')} ∪ σ.pairs.image ep
     covers := by
       intro k
+      -- unfold ep in all subgoals so types mention expandFin directly
+      change ∀ _, _ at *
       by_cases hk0 : k.val = 0
-      · -- k = 0: covered by the new pair (0, j')
-        refine ⟨(⟨0, by omega⟩, j'), ⟨Finset.mem_union_left _ (Finset.mem_singleton_self _),
-          Or.inl (Fin.ext (by omega))⟩, ?_⟩
+      · refine ⟨(zero, j'), ⟨Finset.mem_union_left _ (Finset.mem_singleton_self _),
+          Or.inl (show zero = k from Fin.ext hk0.symm)⟩, ?_⟩
         intro p ⟨hp_mem, hp_covers⟩
         rcases Finset.mem_union.mp hp_mem with hp_new | hp_old
         · exact Finset.mem_singleton.mp hp_new
-        · -- p is in the expanded image, but p covers k=0, contradiction
-          rcases Finset.mem_image.mp hp_old with ⟨q, _, hq_eq⟩
-          subst hq_eq
+        · rcases Finset.mem_image.mp hp_old with ⟨q, _, hq_eq⟩
+          subst hq_eq; simp only [ep] at hp_covers
           rcases hp_covers with h1 | h2
-          · exact absurd (congrArg Fin.val h1) (expandFin_ne_zero (2*n) j' hj' q.1)
-          · exact absurd (congrArg Fin.val h2) (expandFin_ne_zero (2*n) j' hj' q.2)
+          · exfalso; exact expandFin_ne_zero (2*n) j' hj' q.1 (by rw [congrArg Fin.val h1, hk0])
+          · exfalso; exact expandFin_ne_zero (2*n) j' hj' q.2 (by rw [congrArg Fin.val h2, hk0])
       · by_cases hkj : k = j'
-        · -- k = j': also covered by the new pair (0, j')
-          subst hkj
-          refine ⟨(⟨0, by omega⟩, j'), ⟨Finset.mem_union_left _ (Finset.mem_singleton_self _),
+        · subst hkj
+          refine ⟨(zero, j'), ⟨Finset.mem_union_left _ (Finset.mem_singleton_self _),
             Or.inr rfl⟩, ?_⟩
           intro p ⟨hp_mem, hp_covers⟩
           rcases Finset.mem_union.mp hp_mem with hp_new | hp_old
           · exact Finset.mem_singleton.mp hp_new
           · rcases Finset.mem_image.mp hp_old with ⟨q, _, hq_eq⟩
-            subst hq_eq
+            subst hq_eq; simp only [ep] at hp_covers
             rcases hp_covers with h1 | h2
-            · exact absurd h1.symm (expandFin_ne_j (2*n) j' hj' q.1)
-            · exact absurd h2.symm (expandFin_ne_j (2*n) j' hj' q.2)
+            · exfalso; exact expandFin_ne_j (2*n) j' hj' q.1 h1
+            · exfalso; exact expandFin_ne_j (2*n) j' hj' q.2 h2
         · -- k ≠ 0, k ≠ j': covered by the expanded σ
-          -- k' = compressFin(k) is the preimage in Fin(2n)
           have hk0' : k.val ≠ 0 := hk0
           have hkj' : k ≠ j' := hkj
           let k' := compressFin (2*n) j' hj' k hk0' hkj'
-          -- σ covers k', get the pair q
           obtain ⟨q, ⟨hq_mem, hq_covers⟩, hq_uniq⟩ := σ.covers k'
-          let eq := expandPair (2*n) j' hj' q
-          refine ⟨eq, ⟨Finset.mem_union_right _ (Finset.mem_image.mpr ⟨q, hq_mem, rfl⟩), ?_⟩, ?_⟩
-          · -- eq covers k
+          refine ⟨ep q, ⟨Finset.mem_union_right _ (Finset.mem_image.mpr ⟨q, hq_mem, rfl⟩), ?_⟩, ?_⟩
+          · simp only [ep]
             rcases hq_covers with h1 | h2
-            · left; show (expandFin (2*n) j' hj' q.1) = k
+            · left
               rw [← expandFin_compressFin (2*n) j' hj' k hk0' hkj']
               exact congrArg _ h1
-            · right; show (expandFin (2*n) j' hj' q.2) = k
+            · right
               rw [← expandFin_compressFin (2*n) j' hj' k hk0' hkj']
               exact congrArg _ h2
-          · -- uniqueness
-            intro p' ⟨hp'_mem, hp'_covers⟩
+          · intro p' ⟨hp'_mem, hp'_covers⟩
             rcases Finset.mem_union.mp hp'_mem with hp'_new | hp'_old
-            · -- p' is the new pair (0, j'), but it can't cover k (since k≠0, k≠j')
-              have hp'_eq := Finset.mem_singleton.mp hp'_new
+            · have hp'_eq := Finset.mem_singleton.mp hp'_new
               subst hp'_eq
               rcases hp'_covers with h1 | h2
               · exact absurd (congrArg Fin.val h1).symm hk0
               · exact absurd h2.symm hkj
-            · -- p' is in expanded image
-              rcases Finset.mem_image.mp hp'_old with ⟨q', hq'_mem, hq'_eq⟩
-              subst hq'_eq
-              -- q' covers k' in σ
+            · rcases Finset.mem_image.mp hp'_old with ⟨q', hq'_mem, hq'_eq⟩
+              subst hq'_eq; simp only [ep] at hp'_covers
+              have h2n_pos : 0 < 2 * n := by
+                rcases Nat.eq_zero_or_pos n with rfl | hn
+                · -- n=0: k ∈ Fin 2, k.val≠0 so k.val=1, but j∈Fin 1 so j'=⟨1,_⟩=k
+                  exfalso; exact hkj' (Fin.ext (by omega))
+                · omega
               have hq'_covers_k' : q'.1 = k' ∨ q'.2 = k' := by
                 rcases hp'_covers with h1 | h2
                 · left
-                  have : expandFin (2*n) j' hj' q'.1 = k := h1
-                  have h2 : expandFin (2*n) j' hj' k' = k :=
-                    expandFin_compressFin (2*n) j' hj' k hk0' hkj'
-                  have h3 : expandFin (2*n) j' hj' q'.1 = expandFin (2*n) j' hj' k' := by
-                    rw [this, h2]
-                  exact compressFin_expandFin (2*n) j' hj' q'.1 ▸
-                    compressFin_expandFin (2*n) j' hj' k' ▸ congrArg _ h3
+                  exact expandFin_injective (2*n) h2n_pos j' hj' q'.1 k' (by
+                    rw [h1, expandFin_compressFin])
                 · right
-                  have : expandFin (2*n) j' hj' q'.2 = k := h2
-                  have h2 : expandFin (2*n) j' hj' k' = k :=
-                    expandFin_compressFin (2*n) j' hj' k hk0' hkj'
-                  have h3 : expandFin (2*n) j' hj' q'.2 = expandFin (2*n) j' hj' k' := by
-                    rw [this, h2]
-                  exact compressFin_expandFin (2*n) j' hj' q'.2 ▸
-                    compressFin_expandFin (2*n) j' hj' k' ▸ congrArg _ h3
+                  exact expandFin_injective (2*n) h2n_pos j' hj' q'.2 k' (by
+                    rw [h2, expandFin_compressFin])
               have : q' = q := hq_uniq q' ⟨hq'_mem, hq'_covers_k'⟩
-              simp [expandPair, this]
+              subst this; rfl
     ordered := by
       intro p hp
       rcases Finset.mem_union.mp hp with hp_new | hp_old
-      · -- The new pair (0, j')
-        have := Finset.mem_singleton.mp hp_new
-        subst this
-        show (⟨0, _⟩ : Fin (2*n+2)) < j'
+      · have := Finset.mem_singleton.mp hp_new
+        subst this; show zero < j'
         exact Fin.mk_lt_mk.mpr hj'
-      · -- An expanded pair
-        rcases Finset.mem_image.mp hp_old with ⟨q, hq_mem, hq_eq⟩
-        subst hq_eq
+      · rcases Finset.mem_image.mp hp_old with ⟨q, hq_mem, hq_eq⟩
+        subst hq_eq; simp only [ep]
         show expandFin (2*n) j' hj' q.1 < expandFin (2*n) j' hj' q.2
         have hord := σ.ordered q hq_mem
         unfold expandFin
         split_ifs with h1 h2
-        · exact Fin.mk_lt_mk.mpr (by omega)
-        · exact Fin.mk_lt_mk.mpr (by omega)
-        · exact Fin.mk_lt_mk.mpr (by omega)
-        · exact Fin.mk_lt_mk.mpr (by omega)
+        all_goals exact Fin.mk_lt_mk.mpr (by omega)
   }
+
+/-- The partner index: maps `partner(0)` from `Fin(2n+2)` to `Fin(2n+1)` by subtracting 1.
+    Since `partner(0) ∈ {1,...,2n+1}`, this gives a valid `Fin(2n+1)` index. -/
+noncomputable def partnerIdx (n : ℕ) (π : Pairing (2 * n + 2)) : Fin (2 * n + 1) :=
+  ⟨(π.partner ⟨0, by omega⟩).val - 1, by
+    have h := π.partner_ne_self (⟨0, by omega⟩ : Fin (2 * n + 2))
+    have hlt := (π.partner ⟨0, by omega⟩).isLt
+    have hne : (π.partner ⟨0, by omega⟩).val ≠ 0 := fun heq => h (Fin.ext heq)
+    omega⟩
+
+/-- The forward decomposition map: a pairing on `2(n+1)` labels determines
+    a partner choice for vertex 0 and a pairing on the remaining `2n` labels. -/
+noncomputable def decompPairing (n : ℕ) (π : Pairing (2 * n + 2)) :
+    Fin (2 * n + 1) × Pairing (2 * n) :=
+  (partnerIdx n π, compressedPairing n π)
+
+/-- The forward map is injective: if two pairings decompose identically,
+    they are equal. -/
+private theorem decompPairing_injective (n : ℕ) :
+    Function.Injective (decompPairing n) := by
+  intro π₁ π₂ h
+  have hj : partnerIdx n π₁ = partnerIdx n π₂ := congrArg Prod.fst h
+  have hσ : compressedPairing n π₁ = compressedPairing n π₂ := congrArg Prod.snd h
+  -- Two pairings with the same partner(0) and the same compressed pairing are equal
+  -- This means they have the same pair set
+  -- π.pairs = {incidentPair(0)} ∪ remaining, and remaining determines compressedPairing
+  sorry
+
+/-- The forward map is surjective: every `(j, σ)` arises from some pairing. -/
+private theorem decompPairing_surjective (n : ℕ) :
+    Function.Surjective (decompPairing n) := by
+  intro ⟨j, σ⟩
+  exact ⟨expandedPairing n j σ, by
+    sorry⟩
+
+/-- The cardinality recursion: `|Pairing(2(n+1))| = (2n+1) * |Pairing(2n)|`. -/
+theorem pairing_card_succ (n : ℕ) :
+    Fintype.card (Pairing (2 * (n + 1))) = (2 * n + 1) * Fintype.card (Pairing (2 * n)) := by
+  have h2n2 : 2 * (n + 1) = 2 * n + 2 := by omega
+  rw [h2n2]
+  have hbij : Function.Bijective (decompPairing n) :=
+    ⟨decompPairing_injective n, decompPairing_surjective n⟩
+  have := Fintype.card_congr (Equiv.ofBijective _ hbij)
+  rw [this, Fintype.card_prod, Fintype.card_fin]
 
 /-- The base case: there is exactly one pairing on 0 elements. -/
 theorem pairing_zero_card : Fintype.card (Pairing 0) = 1 := by
@@ -903,3 +938,22 @@ theorem pairing_zero_card : Fintype.card (Pairing 0) = 1 := by
     intro ⟨⟨a, ha⟩, b⟩
     exact (Nat.not_lt_zero a ha).elim
   subst hpairs; rfl
+
+/-- The double factorial formula: `|Pairing(2n)| = (2n-1)!!`. -/
+theorem pairing_card_eq_doubleFactorial (n : ℕ) :
+    Fintype.card (Pairing (2 * n)) = Nat.doubleFactorial (2 * n - 1) := by
+  induction n with
+  | zero => simp [pairing_zero_card]
+  | succ n ih =>
+    rw [pairing_card_succ n, ih]
+    show (2 * n + 1) * Nat.doubleFactorial (2 * n - 1) =
+      Nat.doubleFactorial (2 * (n + 1) - 1)
+    have h : 2 * (n + 1) - 1 = 2 * n + 1 := by omega
+    rw [h]
+    conv_rhs => rw [Nat.doubleFactorial.eq_def]
+    rcases n with _ | n
+    · simp
+    · -- 2*(n+1)+1 = (2*n+1).succ.succ
+      show (2 * (n + 1) + 1) * (2 * (n + 1) - 1).doubleFactorial =
+        (2 * n + 1 + 2) * (2 * n + 1).doubleFactorial
+      congr 1
