@@ -8,7 +8,7 @@ A Lean 4 formalization of constructive 2D φ⁴ Euclidean QFT aimed at the Glimm
 
 ## Current Status (March 6, 2026)
 
-- Core theorem-level `sorry` in `Phi4/**/*.lean` excluding `Phi4/Scratch`: `20`
+- Core theorem-level `sorry` in `Phi4/**/*.lean` excluding `Phi4/Scratch`: `18`
 - Legacy `class/structure .*Model` declarations: `13`
 - Canonical `gap_*` theorem frontiers: `33`
 - `axiom` declarations: `0`
@@ -44,7 +44,14 @@ The correct status framing is:
    Non-critical supporting frontiers (not on the main WP1 path):
    - `gap_interactionCutoff_L2_convergence` (continuous-parameter L²)
    - `gap_interactionCutoff_ae_convergence` (continuous-parameter a.e., stronger than needed)
-   - `gap_interaction_sq_integrable`
+   Recently closed support theorem:
+   - `gap_interaction_sq_integrable` now follows from the discrete UV route
+     (summable `lpNorm` steps + sequence-level a.e. convergence), so it is no
+     longer an active WP1 blocker.
+   Recent shell-branch infrastructure:
+   - `wickPower_four_step_decomposition`
+   - `rawFieldEval_sub_sq_expectation`
+   - `rawFieldEval_sub_fourth_expectation`
 3. `WP2`: close finite-volume monotonicity, comparison, chessboard, and reflection-positivity frontiers.
    Main explicit targets:
    - `gap_hasSchwingerNMonotone`

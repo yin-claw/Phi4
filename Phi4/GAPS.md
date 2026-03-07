@@ -6,7 +6,7 @@ This file records the current proof boundary on `main`.
 
 ## Trust Snapshot
 
-- theorem-level `sorry` in core modules: `20`
+- theorem-level `sorry` in core modules: `18`
 - legacy `class/structure .*Model`: `13`
 - canonical `gap_*` theorem frontiers: `33`
 - `axiom`: `0`
@@ -18,7 +18,11 @@ assumption-free completion. The open mathematics is currently split between:
 1. explicit theorem-level frontier statements, and
 2. a reduced but still substantial legacy `...Model` assumption surface.
 
-## Explicit Theorem-Level Frontiers
+## Canonical `gap_*` Theorem Surface
+
+Not every `gap_*` theorem below is still open. Some are now closed support
+theorems that remain as canonical named endpoints. The active proof boundary is
+tracked by the theorem-level `sorry` count above.
 
 ### WP0: Free/Gaussian combinatorial bridge
 1. `gap_pairing_card`
@@ -28,20 +32,20 @@ assumption-free completion. The open mathematics is currently split between:
 5. `gap_covariance_eq_kernel`
 
 ### WP1: Finite-volume integrability (CRITICAL PATH)
-6. `gap_uvMollifier_continuous` — UV mollifier continuity
-7. `gap_interactionCutoff_sq_integrable` — L² integrability of cutoff interaction
+6. `gap_uvMollifier_continuous` — UV mollifier continuity `[closed]`
+7. `gap_interactionCutoff_sq_integrable` — L² integrability of cutoff interaction `[closed]`
 8. `gap_interactionCutoff_standardSeq_L2_increment_rate` — L² rate bound on UV increments
-9. `gap_interactionCutoff_standardSeq_summable_L1_increments` — summable L¹ increments
-10. `gap_interactionCutoff_standardSeq_ae_convergence` — **sequence-level a.e. convergence (on critical path)**
+9. `gap_interactionCutoff_standardSeq_summable_L1_increments` — summable L¹ increments `[closed modulo 8]`
+10. `gap_interactionCutoff_standardSeq_ae_convergence` — **sequence-level a.e. convergence (on critical path)** `[closed modulo 8]`
 11. `gap_interaction_double_exponential_tail_bound` — Nelson's double-exponential tail
-12. `gap_exp_neg_interaction_uniform_bound` — **Nelson's uniform bound (on critical path)**
+12. `gap_exp_neg_interaction_uniform_bound` — **Nelson's uniform bound (on critical path)** `[closed modulo 11]`
 13. `gap_hasExpInteractionLp` — WP1 endpoint
 
 #### WP1 non-critical (retained for completeness, not on main path)
 14. `gap_interactionCutoff_L2_convergence` — continuous-parameter L² convergence
 15. `gap_interactionCutoff_ae_convergence` — continuous-parameter a.e. convergence
-16. `gap_interaction_aestronglyMeasurable` — measurability of limiting interaction
-17. `gap_interaction_sq_integrable`
+16. `gap_interaction_aestronglyMeasurable` — measurability of limiting interaction `[closed]`
+17. `gap_interaction_sq_integrable` — square-integrability of the limiting interaction `[closed]`
 
 ### WP2: Finite-volume monotonicity, comparison, reflection positivity
 18. `gap_schwingerTwo_le_free`
@@ -83,6 +87,15 @@ gap_interaction_double_exponential_tail_bound
 
 Both → hasExpInteractionLp_of_analytic_inputs  (PROVED modulo above)
 ```
+
+Recent quantitative infrastructure on the shell branch:
+- `wickPower_four_step_decomposition`
+- `rawFieldEval_sub_sq_expectation`
+- `rawFieldEval_sub_fourth_expectation`
+
+These reduce `gap_interactionCutoff_standardSeq_L2_increment_rate` to the
+remaining covariance-shell and polynomial-moment estimates, rather than to
+further algebraic manipulation of the quartic Wick increment.
 
 ## Explicit But Not Yet Named OS Obligations
 

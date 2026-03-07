@@ -595,6 +595,136 @@ theorem wickMonomial_rewick_four (c₁ c₂ x : ℝ) :
       + 3 * (c₁ - c₂) ^ 2 := by
   simp [wickMonomial_four, wickMonomial_two]; ring
 
+/-- Difference factorization for the quartic Wick polynomial at fixed variance.
+    This isolates one factor of `x - y`, which is the useful form for UV shell
+    increment estimates. -/
+theorem wickMonomial_four_diff_factor (c x y : ℝ) :
+    wickMonomial 4 c x - wickMonomial 4 c y =
+      (x - y) * (x ^ 3 + x ^ 2 * y + x * y ^ 2 + y ^ 3 - 6 * c * (x + y)) := by
+  simp [wickMonomial_four]
+  ring
+
+/-- The raw field increment is evaluation on the mollifier difference. -/
+theorem rawFieldEval_sub
+    (mass : ℝ) (κ₁ κ₂ : UVCutoff) (ω : FieldConfig2D) (x : Spacetime2D) :
+    rawFieldEval mass κ₂ ω x - rawFieldEval mass κ₁ ω x =
+      ω (uvMollifier κ₂ x - uvMollifier κ₁ x) := by
+  simp [rawFieldEval]
+
+/-- Covariance of a difference of test functions expanded as a quadratic form. -/
+theorem covariance_sub_self
+    (mass : ℝ) (hmass : 0 < mass) (f g : TestFun2D) :
+    GaussianField.covariance (freeCovarianceCLM mass hmass) (f - g) (f - g) =
+      GaussianField.covariance (freeCovarianceCLM mass hmass) f f
+      - 2 * GaussianField.covariance (freeCovarianceCLM mass hmass) f g
+      + GaussianField.covariance (freeCovarianceCLM mass hmass) g g := by
+  simp [GaussianField.covariance, norm_sub_sq_real]
+
+/-- The second moment of the raw-field increment equals the covariance of the
+    corresponding mollifier difference. This is the basic Gaussian identity
+    behind shellwise `L²` estimates. -/
+theorem rawFieldEval_sub_sq_expectation
+    (mass : ℝ) (hmass : 0 < mass) (κ₁ κ₂ : UVCutoff) (x : Spacetime2D) :
+    ∫ ω : FieldConfig2D,
+      (rawFieldEval mass κ₂ ω x - rawFieldEval mass κ₁ ω x) ^ 2
+        ∂(freeFieldMeasure mass hmass)
+    = GaussianField.covariance (freeCovarianceCLM mass hmass)
+        (uvMollifier κ₂ x - uvMollifier κ₁ x)
+        (uvMollifier κ₂ x - uvMollifier κ₁ x) := by
+  have hfun :
+      (fun ω : FieldConfig2D => (rawFieldEval mass κ₂ ω x - rawFieldEval mass κ₁ ω x) ^ 2) =
+      (fun ω : FieldConfig2D => (ω (uvMollifier κ₂ x - uvMollifier κ₁ x)) ^ 2) := by
+    ext ω
+    rw [rawFieldEval_sub]
+  rw [hfun]
+  have hsq :
+      (fun ω : FieldConfig2D => (ω (uvMollifier κ₂ x - uvMollifier κ₁ x)) ^ 2) =
+      (fun ω : FieldConfig2D =>
+        ω (uvMollifier κ₂ x - uvMollifier κ₁ x) *
+          ω (uvMollifier κ₂ x - uvMollifier κ₁ x)) := by
+    ext ω
+    ring
+  rw [hsq, freeFieldMeasure]
+  simpa [GaussianField.covariance] using
+    (cross_moment_eq_covariance (freeCovarianceCLM mass hmass)
+      (uvMollifier κ₂ x - uvMollifier κ₁ x)
+      (uvMollifier κ₂ x - uvMollifier κ₁ x))
+
+/-- The fourth moment of the raw-field increment is the Gaussian fourth-moment
+    polynomial in the covariance of the mollifier difference. This is the
+    quantitative input behind Hölder/Cauchy-Schwarz bounds for the quartic
+    shell increment. -/
+theorem rawFieldEval_sub_fourth_expectation
+    (mass : ℝ) (hmass : 0 < mass) (κ₁ κ₂ : UVCutoff) (x : Spacetime2D) :
+    ∫ ω : FieldConfig2D,
+      (rawFieldEval mass κ₂ ω x - rawFieldEval mass κ₁ ω x) ^ 4
+        ∂(freeFieldMeasure mass hmass)
+    = 3 * (GaussianField.covariance (freeCovarianceCLM mass hmass)
+        (uvMollifier κ₂ x - uvMollifier κ₁ x)
+        (uvMollifier κ₂ x - uvMollifier κ₁ x)) ^ 2 := by
+  set f : TestFun2D := uvMollifier κ₂ x - uvMollifier κ₁ x
+  have hsub : (fun ω : FieldConfig2D =>
+      (rawFieldEval mass κ₂ ω x - rawFieldEval mass κ₁ ω x) ^ 4) =
+    (fun ω : FieldConfig2D => (ω f) ^ 4) := by
+    ext ω
+    simpa [f] using congrArg (fun t : ℝ => t ^ 4) (rawFieldEval_sub mass κ₁ κ₂ ω x)
+  rw [hsub]
+  have h2 : ∫ ω : FieldConfig2D, (ω f) ^ 2 ∂(freeFieldMeasure mass hmass) =
+      GaussianField.covariance (freeCovarianceCLM mass hmass) f f := by
+    simp_rw [show ∀ ω : FieldConfig2D, (ω f) ^ 2 = ω f * ω f from fun ω => by ring]
+    exact cross_moment_eq_covariance _ f f
+  rw [show (4 : ℕ) = 2 + 2 from rfl, moment_recursion mass hmass f 2, h2]
+  push_cast
+  ring
+
+/-- Exact decomposition of the quartic Wick-power increment between two UV
+    cutoffs. This separates the increment into:
+    1. a field-increment term at fixed variance, and
+    2. a covariance-renormalization correction via re-Wick ordering.
+
+    This is the algebraic entry point for shellwise `L²` estimates. -/
+theorem wickPower_four_step_decomposition
+    (mass : ℝ) (κ₁ κ₂ : UVCutoff) (ω : FieldConfig2D) (x : Spacetime2D) :
+    wickPower 4 mass κ₂ ω x - wickPower 4 mass κ₁ ω x =
+      (rawFieldEval mass κ₂ ω x - rawFieldEval mass κ₁ ω x) *
+        ((rawFieldEval mass κ₂ ω x) ^ 3 +
+         (rawFieldEval mass κ₂ ω x) ^ 2 * rawFieldEval mass κ₁ ω x +
+         rawFieldEval mass κ₂ ω x * (rawFieldEval mass κ₁ ω x) ^ 2 +
+         (rawFieldEval mass κ₁ ω x) ^ 3 -
+         6 * regularizedPointCovariance mass κ₁ *
+           (rawFieldEval mass κ₂ ω x + rawFieldEval mass κ₁ ω x))
+      - 6 * (regularizedPointCovariance mass κ₂ - regularizedPointCovariance mass κ₁) *
+          wickMonomial 2 (regularizedPointCovariance mass κ₁) (rawFieldEval mass κ₂ ω x)
+      + 3 * (regularizedPointCovariance mass κ₂ - regularizedPointCovariance mass κ₁) ^ 2 := by
+  rw [wickPower, wickMonomial_rewick_four]
+  have hdiff := wickMonomial_four_diff_factor
+      (regularizedPointCovariance mass κ₁)
+      (rawFieldEval mass κ₂ ω x)
+      (rawFieldEval mass κ₁ ω x)
+  calc
+    wickMonomial 4 (regularizedPointCovariance mass κ₁) (rawFieldEval mass κ₂ ω x) -
+        6 * (regularizedPointCovariance mass κ₂ - regularizedPointCovariance mass κ₁) *
+          wickMonomial 2 (regularizedPointCovariance mass κ₁) (rawFieldEval mass κ₂ ω x) +
+        3 * (regularizedPointCovariance mass κ₂ - regularizedPointCovariance mass κ₁) ^ 2 -
+      wickMonomial 4 (regularizedPointCovariance mass κ₁) (rawFieldEval mass κ₁ ω x)
+        = (wickMonomial 4 (regularizedPointCovariance mass κ₁) (rawFieldEval mass κ₂ ω x) -
+            wickMonomial 4 (regularizedPointCovariance mass κ₁) (rawFieldEval mass κ₁ ω x)) -
+            6 * (regularizedPointCovariance mass κ₂ - regularizedPointCovariance mass κ₁) *
+              wickMonomial 2 (regularizedPointCovariance mass κ₁) (rawFieldEval mass κ₂ ω x) +
+            3 * (regularizedPointCovariance mass κ₂ - regularizedPointCovariance mass κ₁) ^ 2 := by
+          ring
+    _ = (rawFieldEval mass κ₂ ω x - rawFieldEval mass κ₁ ω x) *
+          ((rawFieldEval mass κ₂ ω x) ^ 3 +
+           (rawFieldEval mass κ₂ ω x) ^ 2 * rawFieldEval mass κ₁ ω x +
+           rawFieldEval mass κ₂ ω x * (rawFieldEval mass κ₁ ω x) ^ 2 +
+           (rawFieldEval mass κ₁ ω x) ^ 3 -
+           6 * regularizedPointCovariance mass κ₁ *
+             (rawFieldEval mass κ₂ ω x + rawFieldEval mass κ₁ ω x)) -
+          6 * (regularizedPointCovariance mass κ₂ - regularizedPointCovariance mass κ₁) *
+            wickMonomial 2 (regularizedPointCovariance mass κ₁) (rawFieldEval mass κ₂ ω x) +
+          3 * (regularizedPointCovariance mass κ₂ - regularizedPointCovariance mass κ₁) ^ 2 := by
+          rw [hdiff]
+
 /-- **Wick monomials are bounded by a polynomial in |x| of the same degree.**
     For any variance parameter c and degree n, there exists C > 0 such that
       |wickMonomial n c x| ≤ C * (1 + |x|)ⁿ  for all x.

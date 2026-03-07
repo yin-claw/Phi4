@@ -27,9 +27,9 @@ for direct merge. In particular:
 
 ## Current Honest Status
 
-- theorem-level `sorry` in core modules: `20`
+- theorem-level `sorry` in core modules: `18`
 - legacy `class/structure .*Model`: `13`
-- canonical `gap_*` theorem frontiers: `29`
+- canonical `gap_*` theorem frontiers: `33`
 - `axiom`: `0`
 - `def/abbrev := by sorry`: `0`
 
@@ -48,6 +48,18 @@ as the explicit frontier `gap_hasChessboardEstimate`. More recently, several
 WP1 analytic-input obligations were surfaced explicitly in
 `Interaction/AnalyticInputs.lean`, which increased the visible frontier count
 without changing the no-axiom / no-`def := by sorry` trust boundary.
+
+The latest proof-focused pass also closed `gap_interaction_sq_integrable` and
+added quantitative shell infrastructure in `WickProduct.lean`, including:
+
+1. `wickPower_four_step_decomposition`,
+2. `rawFieldEval_sub_sq_expectation`,
+3. `rawFieldEval_sub_fourth_expectation`.
+
+This means the main WP1 shell-rate blocker is no longer stuck on quartic-Wick
+algebra or basic Gaussian moment identities. The remaining obstruction is the
+actual covariance-shell analysis needed for
+`gap_interactionCutoff_standardSeq_L2_increment_rate`.
 
 But the repository is still not close to completion:
 

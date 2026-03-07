@@ -4,6 +4,9 @@ Released under Apache 2.0 license.
 -/
 import Phi4.Interaction.Part3
 import Mathlib.Analysis.Convex.Integral
+import Mathlib.MeasureTheory.Function.ConvergenceInMeasure
+import Mathlib.MeasureTheory.Function.LpSeminorm.LpNorm
+import Mathlib.Topology.Algebra.InfiniteSum.Real
 
 /-!
 # Analytic Inputs for the Interaction Integrability
@@ -884,13 +887,105 @@ theorem gap_interaction_aestronglyMeasurable (params : Phi4Params) (Λ : Rectang
   intro n
   exact (interactionCutoff_stronglyMeasurable params Λ (standardUVCutoffSeq n)).measurable
 
+/-- If the successive `L²` norms of `f_{n+1} - f_n` are summable and `f_n → g`
+    a.e., then `g ∈ L²`. This is the structural bridge needed for the discrete
+    UV-cutoff route. -/
+private theorem memLp_two_of_tendsto_ae_of_summable_lpNorm_sub
+    {α : Type*} [MeasurableSpace α] {μ : Measure α} [IsFiniteMeasure μ]
+    {f : ℕ → α → ℝ} {g : α → ℝ}
+    (hf : ∀ n, MemLp (f n) 2 μ)
+    (h_lim : ∀ᵐ x ∂μ, Tendsto (fun n => f n x) atTop (nhds (g x)))
+    {d : ℕ → ℝ} (hd_sum : Summable d)
+    (h_step : ∀ n, lpNorm (fun x => f (n + 1) x - f n x) 2 μ ≤ d n) :
+    MemLp g 2 μ := by
+  let F : ℕ → α →₂[μ] ℝ := fun n => (hf n).toLp (f n)
+  have hdist : ∀ n, dist (F n) (F (n + 1)) ≤ d n := by
+    intro n
+    rw [dist_comm, dist_eq_norm]
+    have hsub_mem : MemLp (fun x => f (n + 1) x - f n x) 2 μ := (hf (n + 1)).sub (hf n)
+    have hsub_eq_toLp : (Lp.memLp (F (n + 1) - F n)).toLp (fun x => (F (n + 1) - F n) x) =
+        hsub_mem.toLp (fun x => f (n + 1) x - f n x) := by
+      apply (MemLp.toLp_eq_toLp_iff (Lp.memLp (F (n + 1) - F n)) hsub_mem).2
+      filter_upwards [Lp.coeFn_sub (F (n + 1)) (F n), (hf (n + 1)).coeFn_toLp,
+        (hf n).coeFn_toLp] with x hx h1 h0
+      calc
+        (F (n + 1) - F n) x = F (n + 1) x - F n x := by simpa using hx
+        _ = f (n + 1) x - f n x := by rw [h1, h0]
+    have hsub_eq : F (n + 1) - F n = hsub_mem.toLp (fun x => f (n + 1) x - f n x) := by
+      simpa using (Lp.toLp_coeFn (F (n + 1) - F n) (Lp.memLp (F (n + 1) - F n))).symm.trans
+        hsub_eq_toLp
+    rw [hsub_eq, Lp.norm_toLp, MeasureTheory.toReal_eLpNorm hsub_mem.aestronglyMeasurable]
+    exact h_step n
+  have h_cauchy : CauchySeq F :=
+    cauchySeq_of_dist_le_of_summable d hdist hd_sum
+  obtain ⟨G, hG⟩ := cauchySeq_tendsto_of_complete h_cauchy
+  have h_meas_in_measure : TendstoInMeasure μ (fun n => F n) atTop G :=
+    tendstoInMeasure_of_tendsto_Lp hG
+  have hFn_in_measure : TendstoInMeasure μ f atTop G := by
+    exact h_meas_in_measure.congr_left (fun n => (hf n).coeFn_toLp)
+  have hg_in_measure : TendstoInMeasure μ f atTop g :=
+    tendstoInMeasure_of_tendsto_ae (fun n => (hf n).aestronglyMeasurable) h_lim
+  have h_ae : (G : α → ℝ) =ᵐ[μ] g := tendstoInMeasure_ae_unique hFn_in_measure hg_in_measure
+  exact MemLp.ae_eq h_ae (Lp.memLp G)
+
+/-- Convert the shellwise `L²` increment rate into a bound on the real-valued
+    `lpNorm` of the successive cutoff differences. -/
+private theorem interactionCutoff_standardSeq_lpNorm_sub_le
+    (params : Phi4Params) (Λ : Rectangle) {D : ℝ}
+    (h_rate : ∀ n : ℕ,
+      ∫ ω : FieldConfig2D,
+        (interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω -
+         interactionCutoff params Λ (standardUVCutoffSeq n) ω) ^ 2
+        ∂(freeFieldMeasure params.mass params.mass_pos)
+      ≤ D ^ 2 * (Real.log (n + 2)) ^ 2 / (n + 1) ^ 3) :
+    ∀ n : ℕ,
+      lpNorm
+        (fun ω : FieldConfig2D =>
+          interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω -
+          interactionCutoff params Λ (standardUVCutoffSeq n) ω)
+        2 (freeFieldMeasure params.mass params.mass_pos)
+      ≤ Real.sqrt (D ^ 2 * (Real.log (n + 2)) ^ 2 / (n + 1) ^ 3) := by
+  intro n
+  have hdiff_mem : MemLp
+      (fun ω : FieldConfig2D =>
+        interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω -
+        interactionCutoff params Λ (standardUVCutoffSeq n) ω)
+      2 (freeFieldMeasure params.mass params.mass_pos) :=
+    ((interactionCutoff_memLp_two params Λ (standardUVCutoffSeq (n + 1))).sub
+      (interactionCutoff_memLp_two params Λ (standardUVCutoffSeq n)))
+  rw [lpNorm_eq_integral_norm_rpow_toReal two_ne_zero ENNReal.ofNat_ne_top
+    hdiff_mem.aestronglyMeasurable]
+  have h_sq :
+      ∫ ω : FieldConfig2D,
+          ‖interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω -
+            interactionCutoff params Λ (standardUVCutoffSeq n) ω‖ ^ (2 : ℝ)
+        ∂(freeFieldMeasure params.mass params.mass_pos)
+      ≤ D ^ 2 * (Real.log (n + 2)) ^ 2 / (n + 1) ^ 3 := by
+    simpa [sq_abs] using h_rate n
+  have h_nonneg : 0 ≤
+      ∫ ω : FieldConfig2D,
+          ‖interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω -
+            interactionCutoff params Λ (standardUVCutoffSeq n) ω‖ ^ (2 : ℝ)
+        ∂(freeFieldMeasure params.mass params.mass_pos) := by
+    exact integral_nonneg (fun _ => by positivity)
+  have := Real.rpow_le_rpow h_nonneg h_sq (by norm_num : 0 ≤ (1 / 2 : ℝ))
+  simpa [Real.sqrt_eq_rpow, one_div] using this
+
 /-- Square integrability of the limiting interaction.
     Strategy: from L² convergence (Vκ → V in L²), the limit V ∈ L² by completeness.
     Concretely: V² ≤ 2(V - Vκ)² + 2Vκ² pointwise, so ∫V² ≤ 2∫(V-Vκ)² + 2∫Vκ² < ∞. -/
 theorem gap_interaction_sq_integrable (params : Phi4Params) (Λ : Rectangle) :
     Integrable (fun ω => (interaction params Λ ω) ^ 2)
       (freeFieldMeasure params.mass params.mass_pos) := by
-  sorry
+  obtain ⟨D, hD, h_rate⟩ := gap_interactionCutoff_standardSeq_L2_increment_rate params Λ
+  have h_mem : MemLp (interaction params Λ) 2 (freeFieldMeasure params.mass params.mass_pos) := by
+    apply memLp_two_of_tendsto_ae_of_summable_lpNorm_sub
+      (hf := fun n => interactionCutoff_memLp_two params Λ (standardUVCutoffSeq n))
+      (h_lim := gap_interactionCutoff_standardSeq_ae_convergence params Λ)
+      (hd_sum := summable_sqrt_log_sq_div_cube D hD)
+    intro n
+    exact interactionCutoff_standardSeq_lpNorm_sub_le params Λ h_rate n
+  exact (memLp_two_iff_integrable_sq (gap_interaction_aestronglyMeasurable params Λ)).1 h_mem
 
 /-! ## Nelson's uniform exponential moment bound (Simon Theorem V.14)
 
