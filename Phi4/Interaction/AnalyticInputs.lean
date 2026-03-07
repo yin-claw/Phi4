@@ -571,6 +571,201 @@ theorem interactionCutoff_memLp_two (params : Phi4Params) (Λ : Rectangle)
 
 /-! ## UV convergence -/
 
+/-- Under a probability measure, ∫|f| ≤ √(∫ f²) (Jensen / Cauchy-Schwarz). -/
+private theorem integral_abs_le_sqrt_integral_sq {Ω : Type*} [MeasurableSpace Ω]
+    {μ : MeasureTheory.Measure Ω} [MeasureTheory.IsProbabilityMeasure μ] {f : Ω → ℝ}
+    (hf : Integrable f μ) (hf2 : Integrable (fun ω => f ω ^ 2) μ) :
+    ∫ ω, |f ω| ∂μ ≤ Real.sqrt (∫ ω, f ω ^ 2 ∂μ) := by
+  have h_abs_int := hf.abs
+  have h_jensen : (∫ ω, |f ω| ∂μ) ^ 2 ≤ ∫ ω, |f ω| ^ 2 ∂μ := by
+    have hconv : ConvexOn ℝ (Set.Ici (0:ℝ)) (fun x : ℝ => x ^ 2) := convexOn_pow 2
+    have hcont : ContinuousOn (fun x : ℝ => x ^ 2) (Set.Ici (0:ℝ)) :=
+      (continuous_pow 2).continuousOn
+    have hclosed : IsClosed (Set.Ici (0:ℝ)) := isClosed_Ici
+    have hae : ∀ᵐ x ∂μ, (fun ω => |f ω|) x ∈ Set.Ici (0:ℝ) := by
+      filter_upwards with x; exact Set.mem_Ici.mpr (abs_nonneg _)
+    have hcomp : Integrable ((fun x : ℝ => x ^ 2) ∘ (fun ω => |f ω|)) μ := by
+      show Integrable (fun ω => |f ω| ^ 2) μ
+      convert hf2 using 1; ext ω; exact sq_abs (f ω)
+    exact hconv.map_integral_le hcont hclosed hae h_abs_int hcomp
+  rw [show ∫ ω, |f ω| ^ 2 ∂μ = ∫ ω, f ω ^ 2 ∂μ from by
+    congr 1; ext ω; exact sq_abs (f ω)] at h_jensen
+  exact Real.le_sqrt_of_sq_le h_jensen
+
+/-- The L² increment rate for the cutoff interaction along the canonical UV
+    cutoff sequence. The Fourier support of C_{κ_{n+1}} - C_{κ_n} lies in the
+    momentum shell {n+1 ≤ |p| ≤ n+2}, giving:
+
+      ‖V_{κ_{n+1}} - V_{κ_n}‖₂ ≤ D / (n + 1)
+
+    for some constant D depending on λ, Λ, m. Since Σ 1/(n+1) diverges but
+    the actual decay is faster (the Wick fourth power involves C⁴ integrals
+    which gain an extra log factor), the summable bound is:
+
+      ‖V_{κ_{n+1}} - V_{κ_n}‖₂ ≤ D * log(n+2) / (n + 1)^{3/2}
+
+    This is summable, hence so are the L¹ increments (by Cauchy-Schwarz).
+
+    Reference: the rate follows from Fourier analysis of the covariance
+    increments C_{κ_{n+1}} - C_{κ_n} which are supported on the momentum
+    shell n+1 ≤ |p| ≤ n+2. -/
+theorem gap_interactionCutoff_standardSeq_L2_increment_rate
+    (params : Phi4Params) (Λ : Rectangle) :
+    ∃ D : ℝ, 0 < D ∧ ∀ n : ℕ,
+      ∫ ω : FieldConfig2D,
+        (interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω -
+         interactionCutoff params Λ (standardUVCutoffSeq n) ω) ^ 2
+        ∂(freeFieldMeasure params.mass params.mass_pos)
+      ≤ D ^ 2 * (Real.log (n + 2)) ^ 2 / (n + 1) ^ 3 := by
+  sorry
+
+/-- The model upper bound `sqrt(D² log²(n+2) / (n+1)^3)` is summable. -/
+private theorem summable_sqrt_log_sq_div_cube (D : ℝ) (hD : 0 < D) :
+    Summable (fun n : ℕ =>
+      Real.sqrt (D ^ 2 * (Real.log (↑n + 2)) ^ 2 / (↑n + 1) ^ 3)) := by
+  have h_rpow_summable : Summable (fun n : ℕ => ((n : ℝ) + 1) ^ (-(5 / 4 : ℝ))) := by
+    have h_key : (fun n : ℕ => ((n : ℝ) + 1) ^ (-(5 / 4 : ℝ))) =
+        (fun n : ℕ => ((n : ℝ) ^ (-((5 : ℝ) / 4)))) ∘ Nat.succ := by
+      ext n
+      simp [Nat.cast_succ]
+    rw [h_key]
+    refine Summable.comp_injective ?_ Nat.succ_injective
+    convert Real.summable_nat_rpow_inv.mpr (by norm_num : (1 : ℝ) < 5 / 4) using 1
+    ext n
+    rw [Real.rpow_neg (Nat.cast_nonneg n)]
+  have h_upper_summable : Summable (fun n : ℕ =>
+      (4 * (2 : ℝ) ^ ((1 : ℝ) / 4) * D) * ((n : ℝ) + 1) ^ (-(5 / 4 : ℝ))) :=
+    h_rpow_summable.mul_left (4 * (2 : ℝ) ^ ((1 : ℝ) / 4) * D)
+  refine Summable.of_nonneg_of_le (fun n => Real.sqrt_nonneg _) ?_ h_upper_summable
+  intro n
+  have hn1 : 0 < (n : ℝ) + 1 := by positivity
+  have hn2 : 0 < (n : ℝ) + 2 := by positivity
+  have hlog1 : Real.log ((n : ℝ) + 2) ≤ 4 * ((n : ℝ) + 2) ^ ((1 : ℝ) / 4) := by
+    have hlog := Real.log_le_rpow_div hn2.le (by norm_num : (0 : ℝ) < 1 / 4)
+    linarith
+  have hlog2 : ((n : ℝ) + 2) ^ ((1 : ℝ) / 4) ≤
+      (2 : ℝ) ^ ((1 : ℝ) / 4) * ((n : ℝ) + 1) ^ ((1 : ℝ) / 4) := by
+    rw [← Real.mul_rpow (by norm_num : (0 : ℝ) ≤ 2) (le_of_lt hn1)]
+    exact Real.rpow_le_rpow hn2.le (by linarith) (by norm_num)
+  have hlog3 : Real.log ((n : ℝ) + 2) ≤
+      4 * (2 : ℝ) ^ ((1 : ℝ) / 4) * ((n : ℝ) + 1) ^ ((1 : ℝ) / 4) := by
+    linarith [mul_le_mul_of_nonneg_left hlog2 (by norm_num : (0 : ℝ) ≤ 4)]
+  have hlog_nonneg : 0 ≤ Real.log ((n : ℝ) + 2) := by
+    exact Real.log_nonneg (by linarith)
+  have hlog3_nonneg : 0 ≤ 4 * (2 : ℝ) ^ ((1 : ℝ) / 4) * ((n : ℝ) + 1) ^ ((1 : ℝ) / 4) := by
+    positivity
+  have hlog4 : Real.log ((n : ℝ) + 2) ^ 2 ≤
+      (4 * (2 : ℝ) ^ ((1 : ℝ) / 4) * ((n : ℝ) + 1) ^ ((1 : ℝ) / 4)) ^ 2 :=
+    by nlinarith
+  have hlog5 : (4 * (2 : ℝ) ^ ((1 : ℝ) / 4) * ((n : ℝ) + 1) ^ ((1 : ℝ) / 4)) ^ 2 =
+      16 * Real.sqrt 2 * ((n : ℝ) + 1) ^ ((1 : ℝ) / 2) := by
+    have h_two : ((2 : ℝ) ^ ((1 : ℝ) / 4)) ^ 2 = Real.sqrt 2 := by
+      rw [Real.sqrt_eq_rpow, sq, ← Real.rpow_add (by norm_num : (0 : ℝ) < 2)]
+      norm_num
+    have h_one : (((n : ℝ) + 1) ^ ((1 : ℝ) / 4)) ^ 2 = ((n : ℝ) + 1) ^ ((1 : ℝ) / 2) := by
+      rw [sq, ← Real.rpow_add hn1]
+      norm_num
+    rw [mul_pow, mul_pow, h_two, h_one]
+    norm_num
+  have hlog_sq_bound : Real.log ((n : ℝ) + 2) ^ 2 ≤
+      16 * Real.sqrt 2 * ((n : ℝ) + 1) ^ ((1 : ℝ) / 2) := by
+    exact hlog4.trans_eq hlog5
+  have htarget_nonneg : 0 ≤
+      (4 * (2 : ℝ) ^ ((1 : ℝ) / 4) * D) * ((n : ℝ) + 1) ^ (-(5 / 4 : ℝ)) := by
+    positivity
+  have hsq : D ^ 2 * (Real.log (↑n + 2)) ^ 2 / (↑n + 1) ^ 3 ≤
+      ((4 * (2 : ℝ) ^ ((1 : ℝ) / 4) * D) * ((n : ℝ) + 1) ^ (-(5 / 4 : ℝ))) ^ 2 := by
+    have h_div : ((n : ℝ) + 1) ^ ((1 : ℝ) / 2) / ((n : ℝ) + 1) ^ 3 =
+        ((n : ℝ) + 1) ^ (-(5 / 2 : ℝ)) := by
+      rw [← Real.rpow_sub_natCast' hn1.le (by norm_num : (1 : ℝ) / 2 - 3 ≠ 0)]
+      norm_num
+    have h_const_sq : (4 * (2 : ℝ) ^ ((1 : ℝ) / 4) * D) ^ 2 =
+        16 * Real.sqrt 2 * D ^ 2 := by
+      rw [mul_pow, mul_pow]
+      have h_two : ((2 : ℝ) ^ ((1 : ℝ) / 4)) ^ 2 = Real.sqrt 2 := by
+        rw [Real.sqrt_eq_rpow, sq, ← Real.rpow_add (by norm_num : (0 : ℝ) < 2)]
+        norm_num
+      rw [h_two]
+      ring
+    have h_rpow_sq : (((n : ℝ) + 1) ^ (-(5 / 4 : ℝ))) ^ 2 =
+        ((n : ℝ) + 1) ^ (-(5 / 2 : ℝ)) := by
+      rw [sq, ← Real.rpow_add hn1]
+      norm_num
+    calc
+      D ^ 2 * (Real.log (↑n + 2)) ^ 2 / (↑n + 1) ^ 3
+          ≤ D ^ 2 * (16 * Real.sqrt 2 * ((n : ℝ) + 1) ^ ((1 : ℝ) / 2)) / (↑n + 1) ^ 3 := by
+              exact div_le_div_of_nonneg_right
+                (mul_le_mul_of_nonneg_left hlog_sq_bound (by positivity))
+                (by positivity)
+      _ = D ^ 2 * (16 * Real.sqrt 2) * (((n : ℝ) + 1) ^ ((1 : ℝ) / 2) / ((n : ℝ) + 1) ^ 3) := by
+            ring
+      _ = D ^ 2 * (16 * Real.sqrt 2) * ((n : ℝ) + 1) ^ (-(5 / 2 : ℝ)) := by
+            rw [h_div]
+      _ = (16 * Real.sqrt 2 * D ^ 2) * ((n : ℝ) + 1) ^ (-(5 / 2 : ℝ)) := by
+            ring
+      _ = (4 * (2 : ℝ) ^ ((1 : ℝ) / 4) * D) ^ 2 * (((n : ℝ) + 1) ^ (-(5 / 4 : ℝ))) ^ 2 := by
+            rw [h_const_sq, h_rpow_sq]
+      _ = ((4 * (2 : ℝ) ^ ((1 : ℝ) / 4) * D) * ((n : ℝ) + 1) ^ (-(5 / 4 : ℝ))) ^ 2 := by
+            ring_nf
+  exact (Real.sqrt_le_iff).2 ⟨htarget_nonneg, hsq⟩
+
+/-- The L¹ increments of the cutoff interaction along the canonical UV cutoff
+    sequence are summable: Σ_n E[|V_{κ_{n+1}} - V_{κ_n}|] < ∞.
+
+    This is the key analytical estimate for a.e. convergence. It follows from
+    the L² increment rate bound (`gap_interactionCutoff_standardSeq_L2_increment_rate`)
+    via Cauchy-Schwarz: E[|X|] ≤ ‖X‖₂ under a probability measure.
+
+    Reference: Simon, "P(φ)₂", Chapter II (Theorem II.11). -/
+theorem gap_interactionCutoff_standardSeq_summable_L1_increments
+    (params : Phi4Params) (Λ : Rectangle) :
+    Summable (fun n : ℕ =>
+      ∫ ω : FieldConfig2D,
+        |interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω -
+         interactionCutoff params Λ (standardUVCutoffSeq n) ω|
+        ∂(freeFieldMeasure params.mass params.mass_pos)) := by
+  set μ := freeFieldMeasure params.mass params.mass_pos
+  -- Get the L² rate bound
+  obtain ⟨D, hD, h_L2_rate⟩ :=
+    gap_interactionCutoff_standardSeq_L2_increment_rate params Λ
+  -- Each cutoff is L², hence differences are integrable
+  have hf_int : ∀ n, Integrable
+      (fun ω => interactionCutoff params Λ (standardUVCutoffSeq n) ω) μ :=
+    fun n => (interactionCutoff_memLp_two params Λ
+      (standardUVCutoffSeq n)).integrable one_le_two
+  have hdiff_int : ∀ n, Integrable (fun ω =>
+      interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω -
+      interactionCutoff params Λ (standardUVCutoffSeq n) ω) μ :=
+    fun n => (hf_int (n + 1)).sub (hf_int n)
+  -- Each L¹ increment ≤ √(L² rate bound)
+  have hdiff_sq_int : ∀ n, Integrable (fun ω =>
+      (interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω -
+       interactionCutoff params Λ (standardUVCutoffSeq n) ω) ^ 2) μ :=
+    fun n => ((interactionCutoff_memLp_two params Λ
+      (standardUVCutoffSeq (n + 1))).sub
+      (interactionCutoff_memLp_two params Λ
+        (standardUVCutoffSeq n))).integrable_norm_rpow
+      (by simp) (by simp) |>.congr
+      (by filter_upwards with ω
+          simp [Real.norm_eq_abs, ENNReal.toReal_ofNat])
+  have h_bound : ∀ n, ∫ ω,
+      |interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω -
+       interactionCutoff params Λ (standardUVCutoffSeq n) ω| ∂μ ≤
+      Real.sqrt (D ^ 2 * (Real.log (↑n + 2)) ^ 2 / (↑n + 1) ^ 3) := by
+    intro n
+    calc ∫ ω, |interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω -
+           interactionCutoff params Λ (standardUVCutoffSeq n) ω| ∂μ
+        ≤ Real.sqrt (∫ ω, (interactionCutoff params Λ (standardUVCutoffSeq (n + 1)) ω -
+            interactionCutoff params Λ (standardUVCutoffSeq n) ω) ^ 2 ∂μ) :=
+          integral_abs_le_sqrt_integral_sq (hdiff_int n) (hdiff_sq_int n)
+      _ ≤ Real.sqrt (D ^ 2 * (Real.log (↑n + 2)) ^ 2 / (↑n + 1) ^ 3) :=
+          Real.sqrt_le_sqrt (h_L2_rate n)
+  -- The bound sequence is summable
+  refine Summable.of_nonneg_of_le
+    (fun n => integral_nonneg (fun ω => abs_nonneg _)) h_bound ?_
+  -- Σ √(D²·log²(n+2)/(n+1)³) = Σ D·log(n+2)/(n+1)^{3/2} is summable
+  exact summable_sqrt_log_sq_div_cube D hD
+
 /-- Sequence-level a.e. convergence: V_{κ_n} → V a.e. along the canonical cutoff
     sequence `standardUVCutoffSeq n = ⟨n+1, ...⟩`.
 
@@ -578,11 +773,12 @@ theorem interactionCutoff_memLp_two (params : Phi4Params) (Λ : Rectangle)
     convergence, and `interaction` is defined as `Filter.limsup` of the sequence,
     so convergence holds whenever the limsup equals the limit.
 
-    Strategy: Since `interaction` = `Filter.limsup` of `interactionCutoff(κ_n)`,
-    convergence of the full sequence holds iff limsup = liminf a.e. The natural
-    route is to show the Wick-ordered cutoff interactions are eventually monotone
-    (after UV renormalization), so limsup = liminf = lim. Note: L² convergence
-    only gives a.e. convergence along a *subsequence*, not the full sequence. -/
+    Strategy: From the summability of L¹ increments
+    (`gap_interactionCutoff_standardSeq_summable_L1_increments`), we get
+    E[Σ_n |V_{n+1} - V_n|] < ∞ by Tonelli/MCT, hence Σ_n |V_{n+1} - V_n| < ∞
+    a.e. This gives absolute convergence of the telescoping series, so V_n
+    converges a.e. The limit equals `interaction` (= limsup) by
+    `Filter.Tendsto.limsup_eq`. -/
 theorem gap_interactionCutoff_standardSeq_ae_convergence
     (params : Phi4Params) (Λ : Rectangle) :
     ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
@@ -590,7 +786,68 @@ theorem gap_interactionCutoff_standardSeq_ae_convergence
         (fun n : ℕ => interactionCutoff params Λ (standardUVCutoffSeq n) ω)
         Filter.atTop
         (nhds (interaction params Λ ω)) := by
-  sorry
+  set μ := freeFieldMeasure params.mass params.mass_pos
+  set f : ℕ → FieldConfig2D → ℝ := fun n ω =>
+    interactionCutoff params Λ (standardUVCutoffSeq n) ω
+  have h_summable := gap_interactionCutoff_standardSeq_summable_L1_increments params Λ
+  -- Step 1: from summable L¹ increments, derive a.e. pointwise absolute summability
+  -- by MCT/Tonelli: E[∑|Δ_n|] = ∑E[|Δ_n|] < ∞ ⟹ ∑|Δ_n(ω)| < ∞ a.e.
+  have hf_meas : ∀ n, Measurable (f n) := fun n =>
+    (interactionCutoff_stronglyMeasurable params Λ (standardUVCutoffSeq n)).measurable
+  have h_ae_abs_summable : ∀ᵐ ω ∂μ,
+      Summable (fun n => |f (n + 1) ω - f n ω|) := by
+    -- Use lintegral_tsum + ae_lt_top
+    have hdiff_meas : ∀ n, Measurable (fun ω => (‖f (n + 1) ω - f n ω‖₊ : ℝ≥0∞)) :=
+      fun n => ((hf_meas (n + 1)).sub (hf_meas n)).nnnorm.coe_nnreal_ennreal
+    have h_lintegral_eq : ∫⁻ ω, ∑' n, (‖f (n + 1) ω - f n ω‖₊ : ℝ≥0∞) ∂μ =
+        ∑' n, ∫⁻ ω, (‖f (n + 1) ω - f n ω‖₊ : ℝ≥0∞) ∂μ :=
+      lintegral_tsum (fun n => (hdiff_meas n).aemeasurable)
+    -- Each f_n is L², hence integrable; differences are integrable
+    have hf_integrable : ∀ n, Integrable (f n) μ :=
+      fun n => (interactionCutoff_memLp_two params Λ (standardUVCutoffSeq n)).integrable one_le_two
+    have hdiff_integrable : ∀ n, Integrable (fun ω => f (n + 1) ω - f n ω) μ :=
+      fun n => (hf_integrable (n + 1)).sub (hf_integrable n)
+    have h_tsum_ne_top : ∑' n, ∫⁻ ω, (‖f (n + 1) ω - f n ω‖₊ : ℝ≥0∞) ∂μ ≠ ⊤ := by
+      -- Convert each lintegral to ENNReal.ofReal (∫ ‖Δ_n‖ dμ) via lintegral_coe_eq_integral
+      have h_eq : ∀ n, ∫⁻ ω, (‖f (n + 1) ω - f n ω‖₊ : ℝ≥0∞) ∂μ =
+          ENNReal.ofReal (∫ ω, ‖f (n + 1) ω - f n ω‖ ∂μ) :=
+        fun n => lintegral_coe_eq_integral _ ((hdiff_integrable n).norm)
+      simp_rw [h_eq]
+      -- ∑' n, ENNReal.ofReal (∫ ‖Δ_n‖ dμ) ≠ ⊤
+      have h_nn : ∀ n, 0 ≤ ∫ ω, ‖f (n + 1) ω - f n ω‖ ∂μ :=
+        fun n => integral_nonneg (fun ω => norm_nonneg _)
+      simp_rw [ENNReal.ofReal_eq_coe_nnreal (h_nn _)]
+      rw [ENNReal.tsum_coe_ne_top_iff_summable]
+      refine NNReal.summable_coe.1 ?_
+      simp only [NNReal.coe_mk]
+      simp_rw [Real.norm_eq_abs]
+      exact h_summable
+    have h_lintegral_ne_top : ∫⁻ ω, ∑' n, (‖f (n + 1) ω - f n ω‖₊ : ℝ≥0∞) ∂μ ≠ ⊤ :=
+      h_lintegral_eq ▸ h_tsum_ne_top
+    have h_ae_lt_top : ∀ᵐ ω ∂μ, ∑' n, (‖f (n + 1) ω - f n ω‖₊ : ℝ≥0∞) < ⊤ :=
+      ae_lt_top (Measurable.ennreal_tsum hdiff_meas) h_lintegral_ne_top
+    filter_upwards [h_ae_lt_top] with ω hω
+    have hω' : ∑' n, (‖f (n + 1) ω - f n ω‖₊ : ℝ≥0∞) ≠ ⊤ := ne_of_lt hω
+    rw [ENNReal.tsum_coe_ne_top_iff_summable] at hω'
+    have h_nnnorm_summable := NNReal.summable_coe.2 hω'
+    simp only [coe_nnnorm, Real.norm_eq_abs] at h_nnnorm_summable
+    exact h_nnnorm_summable
+  -- Step 2: for a.e. ω with absolutely summable differences, the sequence converges
+  filter_upwards [h_ae_abs_summable] with ω h_abs_sum
+  -- Cauchy from summable dist
+  have h_summable_dist : Summable (fun n => dist (f n ω) (f n.succ ω)) := by
+    refine h_abs_sum.congr (fun n => ?_)
+    rw [Real.dist_eq, abs_sub_comm]
+  have h_cauchy : CauchySeq (fun n => f n ω) :=
+    cauchySeq_of_summable_dist h_summable_dist
+  -- Complete → convergent
+  obtain ⟨L, hL⟩ := cauchySeq_tendsto_of_complete h_cauchy
+  -- The limit equals the limsup (= interaction)
+  have hL_eq : interaction params Λ ω = L := by
+    unfold interaction
+    exact hL.limsup_eq
+  rw [hL_eq]
+  exact hL
 
 /-- L² convergence of the cutoff interaction to the limiting interaction. -/
 theorem gap_interactionCutoff_L2_convergence (params : Phi4Params) (Λ : Rectangle) :
@@ -657,12 +914,239 @@ splitting) shows the bound is uniform in κ.
 Reference: Simon, "The P(φ)₂ Euclidean Field Theory", Theorem V.14;
 Glimm-Jaffe, "Quantum Physics", Chapter 8.6. -/
 
-/-- Uniform bound on negative exponential moments of the cutoff interaction:
-    for any p > 0, E[exp(-p V_{Λ,κ})] ≤ C(Λ,p) uniformly in κ.
+/-- **Sub-gap A: Double-exponential tail bound for the cutoff interaction.**
 
-    This is Nelson's bound — the Chapter 8 core analytic input for stability.
-    The proof uses Nelson hypercontractivity + covariance-splitting to show that
-    the right-skewed distribution of V_κ suppresses exp(-pV_κ) uniformly. -/
+    For all t ≥ 0 and all UV cutoffs κ:
+      P(V_{Λ,κ} < -t) ≤ A · exp(-B · exp(C · √t))
+    where A, B, C > 0 depend on λ, |Λ|, m but NOT on κ.
+
+    This is the core of Nelson's argument (Simon Theorem V.14). The proof uses:
+    1. Covariance splitting: split φ_κ = φ_{κ₀} + ψ with κ₀ = exp(K√t)
+    2. Wick lower bound: V_{κ₀} ≥ -6λc_{κ₀}²|Λ| ≥ -t (by choice of κ₀)
+    3. Hence P(V_κ < -t-1) ≤ P(V_κ - V_{κ₀} < -1)
+    4. Moment bound: E[(V_κ - V_{κ₀})^{2j}] ≤ (4j²)^{2j} ‖V_κ - V_{κ₀}‖₂^{2j}
+       (Gaussian polynomial moment equivalence for 4th-chaos elements)
+    5. L² bound: ‖V_κ - V_{κ₀}‖₂ ≤ ε(κ₀) with ε(κ₀) ~ κ₀^{-δ}
+    6. Optimize j to get double-exponential tail decay. -/
+theorem gap_interaction_double_exponential_tail_bound
+    (params : Phi4Params) (Λ : Rectangle) :
+    ∃ A B C : ℝ, 0 < A ∧ 0 < B ∧ 0 < C ∧ ∀ (κ : UVCutoff) (t : ℝ), 0 ≤ t →
+      (freeFieldMeasure params.mass params.mass_pos)
+        {ω : FieldConfig2D | interactionCutoff params Λ κ ω < -t} ≤
+      ENNReal.ofReal (A * Real.exp (-B * Real.exp (C * Real.sqrt t))) := by
+  sorry
+
+/-- The improper integral ∫₀^∞ exp(pt - B·exp(C·√t)) dt is finite for all p, B, C > 0.
+    Proof: for t ≥ T₀, B·exp(C·√t) ≥ (p+1)t, so the integrand ≤ exp(-t). -/
+theorem integral_exp_linear_minus_double_exp_finite
+    {p B C : ℝ} (hB : 0 < B) (hC : 0 < C) :
+    IntegrableOn (fun t => Real.exp (p * t - B * Real.exp (C * Real.sqrt t)))
+      (Set.Ioi 0) volume := by
+  set T₀ := max 1 (24 * (p + 1) / (B * C ^ 4)) with hT₀_def
+  have hT₀_pos : 0 < T₀ := lt_of_lt_of_le one_pos (le_max_left _ _)
+  have hBC4_pos : 0 < B * C ^ 4 := mul_pos hB (pow_pos hC 4)
+  have hexp_quartic : ∀ t : ℝ, 0 ≤ t →
+      C ^ 4 * t ^ 2 / 24 ≤ Real.exp (C * Real.sqrt t) := by
+    intro t ht
+    have hsqrt_nn : 0 ≤ C * Real.sqrt t := mul_nonneg (le_of_lt hC) (Real.sqrt_nonneg t)
+    have h1 := Real.pow_div_factorial_le_exp (C * Real.sqrt t) hsqrt_nn 4
+    have h2 : (C * Real.sqrt t) ^ 4 = C ^ 4 * t ^ 2 := by
+      rw [mul_pow]; congr 1; rw [show (4 : ℕ) = 2 * 2 from rfl, pow_mul, Real.sq_sqrt ht]
+    rw [h2] at h1; norm_num [Nat.factorial] at h1; linarith
+  have h_dom : ∀ t ≥ T₀, p * t - B * Real.exp (C * Real.sqrt t) ≤ -t := by
+    intro t ht
+    have ht_pos : 0 ≤ t := le_of_lt (lt_of_lt_of_le hT₀_pos ht)
+    have ht_T₀ : t ≥ 24 * (p + 1) / (B * C ^ 4) := le_trans (le_max_right _ _) ht
+    have h_coeff : (p + 1) * 24 ≤ B * C ^ 4 * t := by
+      have := div_le_iff₀ hBC4_pos |>.mp ht_T₀; linarith
+    have h_exp := hexp_quartic t ht_pos
+    have h_B_exp : B * (C ^ 4 * t ^ 2 / 24) ≤ B * Real.exp (C * Real.sqrt t) :=
+      mul_le_mul_of_nonneg_left h_exp (le_of_lt hB)
+    nlinarith
+  have hf_cont : Continuous (fun t : ℝ => Real.exp (p * t - B * Real.exp (C * Real.sqrt t))) :=
+    by fun_prop
+  have h_Ioi : IntegrableOn (fun t => Real.exp (p * t - B * Real.exp (C * Real.sqrt t)))
+      (Set.Ioi T₀) volume := by
+    apply Integrable.mono (exp_neg_integrableOn_Ioi T₀ one_pos)
+      (hf_cont.aestronglyMeasurable.restrict)
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
+    simp only [Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
+    exact Real.exp_le_exp.2 (by linarith [h_dom t (Set.mem_Ioi.mp ht).le])
+  have h_Ioc : IntegrableOn (fun t => Real.exp (p * t - B * Real.exp (C * Real.sqrt t)))
+      (Set.Ioc 0 T₀) volume :=
+    (hf_cont.integrableOn_Icc).mono_set Set.Ioc_subset_Icc_self
+  rw [show Set.Ioi (0 : ℝ) = Set.Ioc 0 T₀ ∪ Set.Ioi T₀ from
+    (Set.Ioc_union_Ioi_eq_Ioi (le_of_lt hT₀_pos)).symm]
+  exact h_Ioc.union h_Ioi
+
+/-- FTC: ∫₀^y p·exp(pt) dt = exp(py) - 1. -/
+private theorem interval_integral_p_mul_exp (p y : ℝ) :
+    ∫ t in (0 : ℝ)..y, p * Real.exp (p * t) = Real.exp (p * y) - 1 := by
+  have hderiv : ∀ x ∈ Set.uIcc 0 y,
+      HasDerivAt (fun t => Real.exp (p * t)) (p * Real.exp (p * x)) x := by
+    intro x _
+    exact ((by simpa using (hasDerivAt_id x).const_mul p :
+      HasDerivAt (fun t => p * t) p x).exp.congr_deriv (by ring))
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv
+    ((continuous_const.mul (Real.continuous_exp.comp
+      (continuous_const.mul continuous_id'))).intervalIntegrable _ _)]
+  simp [mul_zero]
+
+/-- Pure-analysis lemma: if a random variable has double-exponential lower tail,
+    then all negative exponential moments are finite.
+
+    From the layer-cake identity:
+      E[exp(-pX)] ≤ 1 + ∫₀^∞ p·exp(pt) · P(X < -t) dt
+    and the double-exponential tail bound P(X < -t) ≤ A·exp(-B·exp(C·√t)):
+      ∫₀^∞ p·exp(pt)·A·exp(-B·exp(C·√t)) dt < ∞
+    because exp(C·√t) dominates pt for large t. -/
+theorem neg_exp_moment_of_double_exponential_tail
+    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
+    {X : Ω → ℝ} (hX : Measurable X)
+    {A B C_tail : ℝ} (hA : 0 < A) (hB : 0 < B) (hC : 0 < C_tail)
+    (htail : ∀ t : ℝ, 0 ≤ t →
+      μ {ω | X ω < -t} ≤ ENNReal.ofReal (A * Real.exp (-B * Real.exp (C_tail * Real.sqrt t))))
+    (p : ℝ) (hp : 0 < p) :
+    Integrable (fun ω => Real.exp (-(p * X ω))) μ ∧
+    ∫ ω, Real.exp (-(p * X ω)) ∂μ ≤
+      1 + p * A * ∫ t in Set.Ioi 0,
+        Real.exp (p * t - B * Real.exp (C_tail * Real.sqrt t)) := by
+  -- Abbreviations
+  set g : ℝ → ℝ := fun t => p * Real.exp (p * t) with hg_def
+  set f_tail : ℝ → ℝ := fun t =>
+    p * A * Real.exp (p * t - B * Real.exp (C_tail * Real.sqrt t)) with hf_def
+  -- FTC: ∫₀^{max(-x,0)} g = exp(p·max(-x,0)) - 1
+  have hftc : ∀ ω : Ω, ∫ t in (0 : ℝ)..max (-X ω) 0, g t =
+      Real.exp (p * max (-X ω) 0) - 1 :=
+    fun ω => interval_integral_p_mul_exp p _
+  have hI_nn : ∀ ω : Ω, 0 ≤ ∫ t in (0 : ℝ)..max (-X ω) 0, g t := fun ω => by
+    rw [hftc]; linarith [Real.one_le_exp (mul_nonneg hp.le (le_max_right (-X ω) 0))]
+  -- Layer-cake formula
+  have hlc : ∫⁻ ω, ENNReal.ofReal (∫ t in (0 : ℝ)..max (-X ω) 0, g t) ∂μ =
+      ∫⁻ t in Set.Ioi (0 : ℝ), μ {a | t < max (-X a) 0} * ENNReal.ofReal (g t) :=
+    lintegral_comp_eq_lintegral_meas_lt_mul μ
+      (by filter_upwards with ω; exact le_max_right _ _)
+      ((hX.neg.max measurable_const).aemeasurable)
+      (fun t _ => (continuous_const.mul (Real.continuous_exp.comp
+        (continuous_const.mul continuous_id'))).intervalIntegrable _ _)
+      (by filter_upwards with t; exact mul_nonneg hp.le (Real.exp_pos _).le)
+  -- {max(-X,0) > t} = {X < -t} for t > 0
+  have hset_eq : ∀ t : ℝ, 0 < t →
+      μ {a : Ω | t < max (-X a) 0} = μ {a | X a < -t} := by
+    intro t ht; congr 1; ext ω; simp only [Set.mem_setOf_eq]
+    constructor
+    · intro h; by_contra h_neg; push_neg at h_neg
+      exact not_lt.mpr (max_le (by linarith) ht.le) h
+    · intro h; exact lt_max_of_lt_left (by linarith)
+  -- Tail integrand is IntegrableOn (Ioi 0)
+  have hf_intOn : IntegrableOn f_tail (Set.Ioi 0) volume := by
+    have := @integral_exp_linear_minus_double_exp_finite p B C_tail hB hC
+    exact this.const_mul (p * A)
+  -- *** Main lintegral bound ***
+  -- ∫⁻ ofReal(exp(-pX)) ≤ 1 + ∫⁻_{t>0} ofReal(f_tail t)
+  have h_lint_bound : ∫⁻ ω, ENNReal.ofReal (Real.exp (-(p * X ω))) ∂μ ≤
+      1 + ∫⁻ t in Set.Ioi (0 : ℝ), ENNReal.ofReal (f_tail t) := by
+    calc ∫⁻ ω, ENNReal.ofReal (Real.exp (-(p * X ω))) ∂μ
+        ≤ ∫⁻ ω, (1 + ENNReal.ofReal (∫ t in (0 : ℝ)..max (-X ω) 0, g t)) ∂μ := by
+          apply lintegral_mono; intro ω; simp only
+          rw [show (1 : ENNReal) = ENNReal.ofReal 1 from ENNReal.ofReal_one.symm,
+              ← ENNReal.ofReal_add one_pos.le (hI_nn ω), hftc]
+          apply ENNReal.ofReal_le_ofReal
+          linarith [Real.exp_le_exp.2 (show -(p * X ω) ≤ p * max (-X ω) 0
+            by nlinarith [le_max_left (-X ω) 0])]
+      _ = 1 + ∫⁻ ω, ENNReal.ofReal (∫ t in (0 : ℝ)..max (-X ω) 0, g t) ∂μ := by
+          rw [lintegral_add_left measurable_const]; simp [lintegral_const, measure_univ]
+      _ = 1 + ∫⁻ t in Set.Ioi (0 : ℝ),
+            μ {a | t < max (-X a) 0} * ENNReal.ofReal (g t) := by rw [hlc]
+      _ = 1 + ∫⁻ t in Set.Ioi (0 : ℝ),
+            μ {a | X a < -t} * ENNReal.ofReal (g t) := by
+          congr 1; apply setLIntegral_congr_fun measurableSet_Ioi
+          intro t ht; simp only [Set.mem_Ioi] at ht
+          show μ {a | t < max (-X a) 0} * _ = μ {a | X a < -t} * _
+          rw [hset_eq t ht]
+      _ ≤ 1 + ∫⁻ t in Set.Ioi (0 : ℝ), ENNReal.ofReal (f_tail t) := by
+          apply add_le_add_right _ 1
+          apply setLIntegral_mono (Measurable.ennreal_ofReal (by fun_prop))
+          intro t ht
+          have ht' := Set.mem_Ioi.mp ht
+          calc μ {a | X a < -t} * ENNReal.ofReal (g t)
+              ≤ ENNReal.ofReal (A * Real.exp (-B * Real.exp (C_tail * Real.sqrt t))) *
+                ENNReal.ofReal (g t) :=
+                mul_le_mul_left (htail t ht'.le) _
+            _ = ENNReal.ofReal (A * Real.exp (-B * Real.exp (C_tail * Real.sqrt t)) * g t) :=
+                (ENNReal.ofReal_mul (mul_nonneg hA.le (Real.exp_pos _).le)).symm
+            _ = ENNReal.ofReal (f_tail t) := by
+                congr 1; simp only [hg_def, hf_def]
+                rw [show p * t - B * Real.exp (C_tail * Real.sqrt t) =
+                  -B * Real.exp (C_tail * Real.sqrt t) + p * t from by ring, Real.exp_add]
+                ring
+  -- *** Convert to real integral ***
+  -- The lintegral of ofReal(f_tail) equals ofReal(∫ f_tail) since f_tail ≥ 0 and integrable
+  have h_lint_eq : ∫⁻ t in Set.Ioi (0 : ℝ), ENNReal.ofReal (f_tail t) =
+      ENNReal.ofReal (∫ t in Set.Ioi 0, f_tail t) := by
+    rw [← ofReal_integral_eq_lintegral_ofReal hf_intOn
+      (by filter_upwards with t; exact mul_nonneg (mul_nonneg hp.le hA.le) (Real.exp_pos _).le)]
+  -- The lintegral is finite
+  have h_lint_ne_top : ∫⁻ ω, ENNReal.ofReal (Real.exp (-(p * X ω))) ∂μ ≠ ⊤ := by
+    have h_rhs_ne_top : 1 + ∫⁻ t in Set.Ioi (0 : ℝ), ENNReal.ofReal (f_tail t) ≠ ⊤ := by
+      rw [h_lint_eq]
+      exact ENNReal.add_ne_top.2 ⟨ENNReal.one_ne_top, ENNReal.ofReal_ne_top⟩
+    exact ne_top_of_le_ne_top h_rhs_ne_top h_lint_bound
+  -- Integrability
+  have h_integrable : Integrable (fun ω => Real.exp (-(p * X ω))) μ := by
+    refine ⟨((hX.const_mul p).neg.exp).aestronglyMeasurable, ?_⟩
+    rw [hasFiniteIntegral_iff_norm]
+    calc ∫⁻ a, ENNReal.ofReal ‖Real.exp (-(p * X a))‖ ∂μ
+        = ∫⁻ a, ENNReal.ofReal (Real.exp (-(p * X a))) ∂μ := by
+          congr 1; ext ω; rw [Real.norm_of_nonneg (Real.exp_pos _).le]
+      _ < ⊤ := h_lint_ne_top.lt_top
+  refine ⟨h_integrable, ?_⟩
+  -- Real integral bound
+  have h_real : (∫ ω, Real.exp (-(p * X ω)) ∂μ : ℝ) =
+      (∫⁻ ω, ENNReal.ofReal (Real.exp (-(p * X ω))) ∂μ).toReal := by
+    rw [integral_eq_lintegral_of_nonneg_ae
+      (by filter_upwards with ω; exact (Real.exp_pos _).le)
+      ((hX.const_mul p).neg.exp).aestronglyMeasurable]
+  rw [h_real]
+  have h_rhs_ne : 1 + ∫⁻ t in Set.Ioi (0 : ℝ), ENNReal.ofReal (f_tail t) ≠ ⊤ := by
+    rw [h_lint_eq]
+    exact ENNReal.add_ne_top.2 ⟨ENNReal.one_ne_top, ENNReal.ofReal_ne_top⟩
+  have h_rhs_val : (1 + ∫⁻ t in Set.Ioi (0 : ℝ), ENNReal.ofReal (f_tail t)).toReal =
+      1 + ∫ t in Set.Ioi 0, f_tail t := by
+    rw [h_lint_eq, ENNReal.toReal_add ENNReal.one_ne_top ENNReal.ofReal_ne_top,
+        ENNReal.toReal_one, ENNReal.toReal_ofReal (setIntegral_nonneg measurableSet_Ioi
+          (fun t _ => mul_nonneg (mul_nonneg hp.le hA.le) (Real.exp_pos _).le))]
+  rw [show 1 + p * A * ∫ t in Set.Ioi 0,
+      Real.exp (p * t - B * Real.exp (C_tail * Real.sqrt t)) =
+    1 + ∫ t in Set.Ioi 0, f_tail t from by
+      simp only [hf_def]; rw [← integral_const_mul]]
+  rw [← h_rhs_val]
+  exact (ENNReal.toReal_le_toReal h_lint_ne_top h_rhs_ne).mpr h_lint_bound
+
+/-- Bounded form of `neg_exp_moment_of_double_exponential_tail`: under a double-exponential
+    lower tail bound, the negative exponential moment E[exp(-pX)] is bounded by some
+    finite constant K. This decouples downstream uses from the specific layer-cake bound. -/
+theorem neg_exp_moment_bounded_of_double_exponential_tail
+    {Ω : Type*} [MeasurableSpace Ω] {μ : MeasureTheory.Measure Ω}
+    [MeasureTheory.IsProbabilityMeasure μ]
+    {X : Ω → ℝ} (hX : Measurable X)
+    {A B C_tail : ℝ} (hA : 0 < A) (hB : 0 < B) (hC : 0 < C_tail)
+    (htail : ∀ t : ℝ, 0 ≤ t →
+      μ {ω | X ω < -t} ≤ ENNReal.ofReal (A * Real.exp (-B * Real.exp (C_tail * Real.sqrt t))))
+    (p : ℝ) (hp : 0 < p) :
+    ∃ K : ℝ, 0 < K ∧
+      Integrable (fun ω => Real.exp (-(p * X ω))) μ ∧
+      ∫ ω, Real.exp (-(p * X ω)) ∂μ ≤ K := by
+  obtain ⟨hint, hbound⟩ := neg_exp_moment_of_double_exponential_tail hX hA hB hC htail p hp
+  refine ⟨1 + p * A * ∫ t in Set.Ioi 0,
+    Real.exp (p * t - B * Real.exp (C_tail * Real.sqrt t)), ?_, hint, hbound⟩
+  have hI := @integral_exp_linear_minus_double_exp_finite p B C_tail hB hC
+  have : 0 ≤ p * A * ∫ t in Set.Ioi 0,
+      Real.exp (p * t - B * Real.exp (C_tail * Real.sqrt t)) :=
+    mul_nonneg (mul_nonneg hp.le hA.le)
+      (setIntegral_nonneg measurableSet_Ioi (fun t _ => (Real.exp_pos _).le))
+  linarith
+
 theorem gap_exp_neg_interaction_uniform_bound (params : Phi4Params) (Λ : Rectangle) :
     ∀ p : ℝ, 0 < p →
       ∃ C : ℝ, 0 < C ∧ ∀ κ : UVCutoff,
@@ -673,22 +1157,44 @@ theorem gap_exp_neg_interaction_uniform_bound (params : Phi4Params) (Λ : Rectan
         ∫ ω : FieldConfig2D,
           Real.exp (-(p * interactionCutoff params Λ κ ω))
           ∂(freeFieldMeasure params.mass params.mass_pos) ≤ C := by
-  sorry
+  intro p hp
+  -- Obtain double-exponential tail bound (uniform in κ)
+  obtain ⟨A, B, C_tail, hA, hB, hC, htail⟩ :=
+    gap_interaction_double_exponential_tail_bound params Λ
+  -- The layer-cake integral is finite
+  have hI := @integral_exp_linear_minus_double_exp_finite p B C_tail hB hC
+  -- Set uniform bound
+  set K := 1 + p * A * ∫ t in Set.Ioi 0,
+    Real.exp (p * t - B * Real.exp (C_tail * Real.sqrt t))
+  refine ⟨K, ?_, fun κ => ?_⟩
+  · -- K > 0: K = 1 + (nonneg) ≥ 1 > 0
+    have : 0 ≤ p * A * ∫ t in Set.Ioi 0,
+        Real.exp (p * t - B * Real.exp (C_tail * Real.sqrt t)) :=
+      mul_nonneg (mul_nonneg (le_of_lt hp) (le_of_lt hA))
+        (setIntegral_nonneg measurableSet_Ioi (fun t _ => le_of_lt (Real.exp_pos _)))
+    linarith
+  · -- Apply neg_exp_moment to each cutoff
+    have hX_meas : Measurable (interactionCutoff params Λ κ) :=
+      (interactionCutoff_stronglyMeasurable params Λ κ).measurable
+    exact neg_exp_moment_of_double_exponential_tail hX_meas hA hB hC
+      (fun t ht => htail κ t ht) p hp
 
 /-! ## Closing gap_hasExpInteractionLp
 
 The WP1 endpoint `HasExpInteractionLp` (i.e., exp(-V_Λ) ∈ Lᵖ for all finite p)
 is proved by Fatou's lemma applied to the cutoff approximations:
 
-1. From `gap_interactionCutoff_ae_convergence`: V_{Λ,κ} → V_Λ a.e., hence
-   exp(-p V_{Λ,κ}) → exp(-p V_Λ) a.e. (continuity of exp).
+1. From `gap_interactionCutoff_standardSeq_ae_convergence`:
+   V_{Λ,κ_n} → V_Λ a.e. along the canonical sequence, hence
+   exp(-p V_{Λ,κ_n}) → exp(-p V_Λ) a.e. (continuity of exp).
 2. From `gap_exp_neg_interaction_uniform_bound`: E[exp(-p V_{Λ,κ})] ≤ C
    uniformly in κ (Nelson's bound).
 3. Fatou: ∫⁻ exp(-pV_Λ) ≤ liminf ∫⁻ exp(-pV_{Λ,κ_n}) ≤ C < ⊤.
 4. AEStronglyMeasurable + finite eLpNorm → MemLp.
 
 This route bypasses Part2/Part3 entirely and needs only two analytic inputs:
-`gap_interactionCutoff_ae_convergence` and `gap_exp_neg_interaction_uniform_bound`. -/
+`gap_interactionCutoff_standardSeq_ae_convergence` and
+`gap_exp_neg_interaction_uniform_bound`. -/
 
 /-- The Chapter 8 interaction integrability core: exp(-V_Λ) ∈ Lᵖ for all p < ∞.
     Proved by Fatou's lemma: Nelson's uniform negative exponential moment bounds

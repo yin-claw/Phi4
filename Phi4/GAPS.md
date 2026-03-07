@@ -8,7 +8,7 @@ This file records the current proof boundary on `main`.
 
 - theorem-level `sorry` in core modules: `20`
 - legacy `class/structure .*Model`: `13`
-- canonical `gap_*` theorem frontiers: `27`
+- canonical `gap_*` theorem frontiers: `33`
 - `axiom`: `0`
 - `def/abbrev := by sorry`: `0`
 
@@ -20,33 +20,69 @@ assumption-free completion. The open mathematics is currently split between:
 
 ## Explicit Theorem-Level Frontiers
 
+### WP0: Free/Gaussian combinatorial bridge
 1. `gap_pairing_card`
 2. `gap_wicks_theorem_even`
 3. `gap_feynman_graph_expansion`
 4. `gap_localized_graph_exponential_decay`
 5. `gap_covariance_eq_kernel`
-6. `gap_interactionCutoff_standardSeq_ae_convergence`
-7. `gap_interactionCutoff_L2_convergence`
-8. `gap_interactionCutoff_ae_convergence`
-9. `gap_interaction_sq_integrable`
-10. `gap_exp_neg_interaction_uniform_bound`
-11. `gap_hasExpInteractionLp`
-12. `gap_schwingerTwo_le_free`
-13. `gap_hasSchwingerNMonotone`
-14. `gap_hasChessboardEstimate`
-15. `gap_hasSchwingerUniformBound`
-16. `gap_free_covariance_reflection_positive`
-17. `gap_dirichlet_covariance_reflection_positive`
-18. `gap_interacting_measure_reflection_positive`
-19. `gap_infiniteVolumeLimit_exists`
-20. `gap_wick_powers_infinite_volume`
-21. `gap_wickCubicSmeared_tendsto_ae`
-22. `gap_euclidean_equation_of_motion`
-23. `gap_generating_functional_bound`
-24. `gap_generating_functional_bound_uniform`
-25. `gap_nonlocal_phi4_bound`
-26. `gap_measure_os3_reflection_positive`
-27. `gap_phi4_linear_growth`
+
+### WP1: Finite-volume integrability (CRITICAL PATH)
+6. `gap_uvMollifier_continuous` — UV mollifier continuity
+7. `gap_interactionCutoff_sq_integrable` — L² integrability of cutoff interaction
+8. `gap_interactionCutoff_standardSeq_L2_increment_rate` — L² rate bound on UV increments
+9. `gap_interactionCutoff_standardSeq_summable_L1_increments` — summable L¹ increments
+10. `gap_interactionCutoff_standardSeq_ae_convergence` — **sequence-level a.e. convergence (on critical path)**
+11. `gap_interaction_double_exponential_tail_bound` — Nelson's double-exponential tail
+12. `gap_exp_neg_interaction_uniform_bound` — **Nelson's uniform bound (on critical path)**
+13. `gap_hasExpInteractionLp` — WP1 endpoint
+
+#### WP1 non-critical (retained for completeness, not on main path)
+14. `gap_interactionCutoff_L2_convergence` — continuous-parameter L² convergence
+15. `gap_interactionCutoff_ae_convergence` — continuous-parameter a.e. convergence
+16. `gap_interaction_aestronglyMeasurable` — measurability of limiting interaction
+17. `gap_interaction_sq_integrable`
+
+### WP2: Finite-volume monotonicity, comparison, reflection positivity
+18. `gap_schwingerTwo_le_free`
+19. `gap_hasSchwingerNMonotone`
+20. `gap_hasChessboardEstimate`
+21. `gap_hasSchwingerUniformBound`
+22. `gap_free_covariance_reflection_positive`
+23. `gap_dirichlet_covariance_reflection_positive`
+24. `gap_interacting_measure_reflection_positive`
+
+### WP3: Infinite-volume limit
+25. `gap_infiniteVolumeLimit_exists`
+
+### WP4: Regularity and equation of motion
+26. `gap_wick_powers_infinite_volume`
+27. `gap_wickCubicSmeared_tendsto_ae`
+28. `gap_euclidean_equation_of_motion`
+29. `gap_generating_functional_bound`
+30. `gap_generating_functional_bound_uniform`
+31. `gap_nonlocal_phi4_bound`
+
+### WP5: OS packaging and reconstruction
+32. `gap_measure_os3_reflection_positive`
+33. `gap_phi4_linear_growth`
+
+## WP1 Critical Path
+
+The WP1 endpoint `hasExpInteractionLp_of_analytic_inputs` needs exactly:
+
+```
+gap_interactionCutoff_standardSeq_L2_increment_rate
+  → gap_interactionCutoff_standardSeq_summable_L1_increments
+    → gap_interactionCutoff_standardSeq_ae_convergence  (PROVED modulo L1 summability)
+
+gap_interaction_double_exponential_tail_bound
+  + neg_exp_moment_of_double_exponential_tail (internal helper, PROVED)
+  + integral_exp_linear_minus_double_exp_finite (internal helper, PROVED)
+    → gap_exp_neg_interaction_uniform_bound  (PROVED modulo sub-lemmas)
+
+Both → hasExpInteractionLp_of_analytic_inputs  (PROVED modulo above)
+```
 
 ## Explicit But Not Yet Named OS Obligations
 

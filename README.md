@@ -10,7 +10,7 @@ A Lean 4 formalization of constructive 2D φ⁴ Euclidean QFT aimed at the Glimm
 
 - Core theorem-level `sorry` in `Phi4/**/*.lean` excluding `Phi4/Scratch`: `20`
 - Legacy `class/structure .*Model` declarations: `13`
-- Canonical `gap_*` theorem frontiers: `27`
+- Canonical `gap_*` theorem frontiers: `33`
 - `axiom` declarations: `0`
 - `def`/`abbrev := by sorry`: `0`
 
@@ -32,13 +32,18 @@ The correct status framing is:
    - `gap_localized_graph_exponential_decay`
 2. `WP1`: prove `gap_hasExpInteractionLp`.
    This is the Chapter 8 finite-volume integrability/normalization core.
-   The WP1 endpoint (`hasExpInteractionLp_of_analytic_inputs`) now uses a
-   Fatou route with only two critical-path inputs:
-   - `gap_interactionCutoff_standardSeq_ae_convergence` (sequence-level a.e. UV convergence)
-   - `gap_exp_neg_interaction_uniform_bound` (Nelson's uniform bound on E[exp(-pV_κ)])
-   Non-critical supporting frontiers:
-   - `gap_interactionCutoff_L2_convergence`
-   - `gap_interactionCutoff_ae_convergence` (continuous-parameter, stronger than needed)
+   The WP1 endpoint (`hasExpInteractionLp_of_analytic_inputs`) uses a
+   Fatou route with two critical-path inputs:
+   - `gap_interactionCutoff_standardSeq_ae_convergence` (sequence-level a.e. UV convergence,
+     proved modulo `gap_interactionCutoff_standardSeq_summable_L1_increments`)
+   - `gap_exp_neg_interaction_uniform_bound` (Nelson's uniform bound on E[exp(-pV_κ)],
+     proved modulo `gap_interaction_double_exponential_tail_bound` + `neg_exp_moment_of_double_exponential_tail`)
+   The deepest unsolved analytical inputs are:
+   - `gap_interactionCutoff_standardSeq_L2_increment_rate` (Fourier analysis of covariance increments)
+   - `gap_interaction_double_exponential_tail_bound` (Nelson's covariance splitting + moment bounds)
+   Non-critical supporting frontiers (not on the main WP1 path):
+   - `gap_interactionCutoff_L2_convergence` (continuous-parameter L²)
+   - `gap_interactionCutoff_ae_convergence` (continuous-parameter a.e., stronger than needed)
    - `gap_interaction_sq_integrable`
 3. `WP2`: close finite-volume monotonicity, comparison, chessboard, and reflection-positivity frontiers.
    Main explicit targets:
