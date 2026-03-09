@@ -3,6 +3,7 @@ Copyright (c) 2026 Phi4 Contributors. All rights reserved.
 Released under Apache 2.0 license.
 -/
 import Phi4.Interaction.UVInfra
+import Phi4.LatticeApproximation
 
 /-!
 # Nelson Bounds for Interaction Analytic Inputs
@@ -16,7 +17,7 @@ statements.
 noncomputable section
 
 open MeasureTheory GaussianField Filter
-open scoped ENNReal NNReal
+open scoped ENNReal NNReal Topology
 
 /-! ## Nelson's uniform exponential moment bound (Simon Theorem V.14)
 
@@ -1059,6 +1060,144 @@ theorem interactionCutoff_double_exponential_tail_of_log_covariance_and_referenc
       _ ≤ ENNReal.ofReal (A * Real.exp (-B * Real.exp (Ctail * Real.sqrt t))) := by
             exact ENNReal.ofReal_le_ofReal htail_cmp
 
+/-- Fatou passage for even-moment comparison along an almost-everywhere
+approximating sequence.
+
+This is the abstract bridge needed if the Nelson moment comparison is first
+proved for finite-dimensional `0/2/4` Wick cylinder approximants and then
+passed to the cutoff interaction difference by approximation. The theorem is
+stated directly in terms of the integrated random variable, matching the actual
+frontier surface in `gap_interactionCutoff_sub_even_moment_comparison`. -/
+private theorem evenMomentComparison_of_tendsto_ae
+    {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)
+    [IsFiniteMeasure μ]
+    (X : Ω → ℝ) (Y : ℕ → Ω → ℝ)
+    (K : ℝ) (j : ℕ)
+    (hK : 0 ≤ K)
+    (h_ae : ∀ᵐ ω ∂μ, Tendsto (fun n => Y n ω) atTop (𝓝 (X ω)))
+    (hY_meas : ∀ n, AEStronglyMeasurable (Y n) μ)
+    (hX_meas : AEStronglyMeasurable X μ)
+    (hY_int : ∀ n, Integrable (fun ω => |Y n ω| ^ (2 * j)) μ)
+    (hbound : ∀ n,
+      ∫ ω, |Y n ω| ^ (2 * j) ∂μ
+        ≤ K * (∫ ω, (Y n ω) ^ 2 ∂μ) ^ j)
+    (hL2 : Tendsto (fun n => ∫ ω, (Y n ω) ^ 2 ∂μ) atTop (𝓝 (∫ ω, (X ω) ^ 2 ∂μ))) :
+    ∫ ω, |X ω| ^ (2 * j) ∂μ
+      ≤ K * (∫ ω, (X ω) ^ 2 ∂μ) ^ j := by
+  let F : ℕ → Ω → ℝ≥0∞ := fun n ω => ENNReal.ofReal (|Y n ω| ^ (2 * j))
+  let FX : Ω → ℝ≥0∞ := fun ω => ENNReal.ofReal (|X ω| ^ (2 * j))
+  have hF_meas : ∀ n, AEMeasurable (F n) μ := by
+    intro n
+    exact ((hY_meas n).norm.pow (2 * j)).aemeasurable.ennreal_ofReal
+  have hliminf_pt : FX =ᵐ[μ] fun ω => liminf (fun n => F n ω) atTop := by
+    filter_upwards [h_ae] with ω hω
+    have hcont : Continuous fun y : ℝ => ENNReal.ofReal (|y| ^ (2 * j : ℕ)) := by
+      exact ENNReal.continuous_ofReal.comp (continuous_abs.pow (2 * j))
+    have hconv : Tendsto (fun n => F n ω) atTop (𝓝 (FX ω)) := by
+      simpa [F, FX] using hcont.continuousAt.tendsto.comp hω
+    simpa using hconv.liminf_eq.symm
+  have hfatou : ∫⁻ ω, FX ω ∂μ ≤ liminf (fun n => ∫⁻ ω, F n ω ∂μ) atTop := by
+    rw [lintegral_congr_ae hliminf_pt]
+    exact MeasureTheory.lintegral_liminf_le' (μ := μ) hF_meas
+  have hF_int_eq : ∀ n, ∫⁻ ω, F n ω ∂μ = ENNReal.ofReal (∫ ω, |Y n ω| ^ (2 * j) ∂μ) := by
+    intro n
+    exact
+      (MeasureTheory.ofReal_integral_eq_lintegral_ofReal (hY_int n)
+        (Filter.Eventually.of_forall fun _ => by positivity)).symm
+  have hcontK : Continuous fun x : ℝ => ENNReal.ofReal (K * x ^ j) := by
+    exact ENNReal.continuous_ofReal.comp (continuous_const.mul (continuous_pow j))
+  have hlimK :
+      liminf (fun n => ENNReal.ofReal (K * (∫ ω, (Y n ω) ^ 2 ∂μ) ^ j)) atTop =
+        ENNReal.ofReal (K * (∫ ω, (X ω) ^ 2 ∂μ) ^ j) := by
+    exact (hcontK.continuousAt.tendsto.comp hL2).liminf_eq
+  have hright :
+      liminf (fun n => ∫⁻ ω, F n ω ∂μ) atTop ≤
+        ENNReal.ofReal (K * (∫ ω, (X ω) ^ 2 ∂μ) ^ j) := by
+    calc
+      liminf (fun n => ∫⁻ ω, F n ω ∂μ) atTop
+          ≤ liminf (fun n => ENNReal.ofReal (K * (∫ ω, (Y n ω) ^ 2 ∂μ) ^ j)) atTop := by
+            apply Filter.liminf_le_liminf (hu := by isBoundedDefault) (hv := by isBoundedDefault)
+            exact Filter.Eventually.of_forall fun n => by
+              rw [hF_int_eq n]
+              exact ENNReal.ofReal_le_ofReal (hbound n)
+      _ = ENNReal.ofReal (K * (∫ ω, (X ω) ^ 2 ∂μ) ^ j) := hlimK
+  have hlintegral_le :
+      ∫⁻ ω, FX ω ∂μ ≤ ENNReal.ofReal (K * (∫ ω, (X ω) ^ 2 ∂μ) ^ j) :=
+    le_trans hfatou hright
+  have hFX_finite : ∫⁻ ω, FX ω ∂μ ≠ ∞ := by
+    exact lt_of_le_of_lt hlintegral_le ENNReal.ofReal_lt_top |>.ne
+  have hX_nonneg : 0 ≤ᵐ[μ] fun ω => |X ω| ^ (2 * j) :=
+    Filter.Eventually.of_forall fun _ => by positivity
+  have hXpow_meas : AEStronglyMeasurable (fun ω => |X ω| ^ (2 * j)) μ :=
+    hX_meas.norm.pow (2 * j)
+  have hX_int : Integrable (fun ω => |X ω| ^ (2 * j)) μ := by
+    rw [← MeasureTheory.lintegral_ofReal_ne_top_iff_integrable hXpow_meas hX_nonneg]
+    simpa [FX] using hFX_finite
+  have hX_eq : ENNReal.ofReal (∫ ω, |X ω| ^ (2 * j) ∂μ) = ∫⁻ ω, FX ω ∂μ := by
+    simpa [FX] using MeasureTheory.ofReal_integral_eq_lintegral_ofReal hX_int hX_nonneg
+  have hfinal_enn :
+      ENNReal.ofReal (∫ ω, |X ω| ^ (2 * j) ∂μ) ≤
+        ENNReal.ofReal (K * (∫ ω, (X ω) ^ 2 ∂μ) ^ j) := by
+    rw [hX_eq]
+    exact hlintegral_le
+  exact ENNReal.ofReal_le_ofReal_iff (by positivity) |>.mp hfinal_enn
+
+/-- Cell-anchor finite-cylinder approximant to the cutoff-interaction
+difference.
+
+This is the natural lattice object for the approximation branch: it samples the
+quartic Wick integrand on each mesh cell anchor and weights by the cell area. -/
+def interactionCutoffSubCellAnchorApprox
+    (params : Phi4Params) (Λ : Rectangle) (L : Phi4.RectLattice Λ)
+    (κ κ₀ : UVCutoff) : FieldConfig2D → ℝ :=
+  finiteWickCylinder
+    (a4 := fun s : (Fin L.Nt × Fin L.Nx) ⊕ (Fin L.Nt × Fin L.Nx) =>
+      match s with
+      | Sum.inl ij => params.coupling * (L.cell ij.1 ij.2).area
+      | Sum.inr ij => -params.coupling * (L.cell ij.1 ij.2).area)
+    (a2 := fun _ : (Fin L.Nt × Fin L.Nx) ⊕ (Fin L.Nt × Fin L.Nx) => 0)
+    (c4 := fun s : (Fin L.Nt × Fin L.Nx) ⊕ (Fin L.Nt × Fin L.Nx) =>
+      match s with
+      | Sum.inl _ => regularizedPointCovariance params.mass κ
+      | Sum.inr _ => regularizedPointCovariance params.mass κ₀)
+    (c2 := fun _ : (Fin L.Nt × Fin L.Nx) ⊕ (Fin L.Nt × Fin L.Nx) => 0)
+    (f4 := fun s : (Fin L.Nt × Fin L.Nx) ⊕ (Fin L.Nt × Fin L.Nx) =>
+      match s with
+      | Sum.inl ij => uvMollifier κ (L.cellAnchor ij.1 ij.2)
+      | Sum.inr ij => uvMollifier κ₀ (L.cellAnchor ij.1 ij.2))
+    (f2 := fun s : (Fin L.Nt × Fin L.Nx) ⊕ (Fin L.Nt × Fin L.Nx) =>
+      match s with
+      | Sum.inl ij => uvMollifier κ (L.cellAnchor ij.1 ij.2)
+      | Sum.inr ij => uvMollifier κ₀ (L.cellAnchor ij.1 ij.2))
+    0
+
+/-- The cell-anchor approximant is a finite Wick cylinder. -/
+theorem interactionCutoffSubCellAnchorApprox_isFiniteWickCylinder
+    (params : Phi4Params) (Λ : Rectangle) (L : Phi4.RectLattice Λ)
+    (κ κ₀ : UVCutoff) :
+    IsFiniteWickCylinder (interactionCutoffSubCellAnchorApprox params Λ L κ κ₀) := by
+  classical
+  unfold interactionCutoffSubCellAnchorApprox
+  exact finiteWickCylinder_isFinite _ _ _ _ _ _ _
+
+/-- Canonical uniform-refinement cell-anchor approximant sequence for the cutoff
+interaction difference. This is the concrete sequence intended for the
+approximation frontier on the Nelson side. -/
+def interactionCutoffSubUniformApprox
+    (params : Phi4Params) (Λ : Rectangle) (κ κ₀ : UVCutoff) :
+    ℕ → FieldConfig2D → ℝ :=
+  fun n => interactionCutoffSubCellAnchorApprox params Λ (Phi4.uniformRectLattice Λ n) κ κ₀
+
+/-- Each term in the canonical uniform-refinement approximant sequence is a
+finite Wick cylinder. -/
+theorem interactionCutoffSubUniformApprox_isFiniteWickCylinder
+    (params : Phi4Params) (Λ : Rectangle) (κ κ₀ : UVCutoff) :
+    ∀ n : ℕ, IsFiniteWickCylinder (interactionCutoffSubUniformApprox params Λ κ κ₀ n) := by
+  intro n
+  simpa [interactionCutoffSubUniformApprox] using
+    interactionCutoffSubCellAnchorApprox_isFiniteWickCylinder
+      params Λ (Phi4.uniformRectLattice Λ n) κ κ₀
+
 /-- Frontier theorem for the logarithmic growth of the regularized point
 covariance.
 
@@ -1074,7 +1213,102 @@ theorem gap_regularizedPointCovariance_log_growth
         regularizedPointCovariance params.mass κ ≤ C₀ + K * Real.log κ.κ := by
   sorry
 
-/-- Frontier theorem for the canonical reference-shell even-moment bound in
+/-- Reduction of the Nelson even-moment comparison to finite Wick cylinder
+approximants.
+
+This theorem does not introduce a new frontier by itself: it shows that the
+current leaf theorem `gap_interactionCutoff_sub_even_moment_comparison` follows
+from an approximation scheme by finite `0/2/4` Wick cylinders together with a
+uniform degree-4 Gaussian polynomial moment comparison constant. -/
+theorem interactionCutoff_sub_even_moment_comparison_of_finiteWickCylinder_approx
+    (params : Phi4Params) (Λ : Rectangle) (C : ℝ)
+    (hC : 0 < C)
+    (happrox :
+      ∀ κ κ₀ : UVCutoff,
+        ∃ Z : ℕ → FieldConfig2D → ℝ,
+          (∀ n : ℕ, IsFiniteWickCylinder (Z n)) ∧
+          (∀ n j : ℕ, 0 < j →
+            ∫ ω, |Z n ω| ^ (2 * j) ∂(freeFieldMeasure params.mass params.mass_pos)
+              ≤ (C * ↑j) ^ (4 * j) *
+                  (∫ ω, (Z n ω) ^ 2 ∂(freeFieldMeasure params.mass params.mass_pos)) ^ j) ∧
+          (∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
+            Tendsto
+              (fun n : ℕ => Z n ω) atTop
+              (𝓝 (interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω))) ∧
+          Tendsto
+            (fun n : ℕ => ∫ ω, (Z n ω) ^ 2 ∂(freeFieldMeasure params.mass params.mass_pos))
+            atTop
+            (𝓝
+              (∫ ω,
+                  (interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω) ^ 2
+                ∂(freeFieldMeasure params.mass params.mass_pos)))) :
+    ∀ (κ κ₀ : UVCutoff) (j : ℕ), 0 < j →
+      ∫ ω,
+          |interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω| ^ (2 * j)
+          ∂(freeFieldMeasure params.mass params.mass_pos)
+        ≤ (C * ↑j) ^ (4 * j) *
+            (∫ ω,
+                (interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω) ^ 2
+                ∂(freeFieldMeasure params.mass params.mass_pos)) ^ j := by
+  intro κ κ₀ j hj
+  rcases happrox κ κ₀ with ⟨Z, hfin, hcmp, h_ae, hL2⟩
+  let μ : Measure FieldConfig2D := freeFieldMeasure params.mass params.mass_pos
+  let X : FieldConfig2D → ℝ :=
+    fun ω => interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω
+  have hY_meas : ∀ n, AEStronglyMeasurable (Z n) μ := by
+    intro n
+    exact ((hfin n).memLp params.mass params.mass_pos (p := (1 : ℝ≥0∞)) (by norm_num)).aestronglyMeasurable
+  have hX_meas : AEStronglyMeasurable X μ := by
+    simpa [X] using
+      ((interactionCutoff_stronglyMeasurable params Λ κ).sub
+        (interactionCutoff_stronglyMeasurable params Λ κ₀)).aestronglyMeasurable
+  have hY_int : ∀ n, Integrable (fun ω => |Z n ω| ^ (2 * j)) μ := by
+    intro n
+    simpa [μ] using (hfin n).even_integrable params.mass params.mass_pos j
+  simpa [μ, X] using
+    evenMomentComparison_of_tendsto_ae μ X Z ((C * ↑j) ^ (4 * j)) j
+      (by positivity) h_ae hY_meas hX_meas hY_int
+      (fun n => hcmp n j hj) hL2
+
+/-- Frontier theorem for degree-4 Gaussian polynomial moment comparison on
+finite Wick cylinders.
+
+This is the finite-dimensional hypercontractive input on the Nelson side. It
+should be proved once for the canonical `0/2/4` Wick-polynomial cylinders and
+then reused through approximation. -/
+theorem gap_finiteWickCylinder_even_moment_comparison
+    (params : Phi4Params) :
+    ∃ C : ℝ, 0 < C ∧
+      ∀ (Z : FieldConfig2D → ℝ), IsFiniteWickCylinder Z →
+        ∀ (j : ℕ), 0 < j →
+          ∫ ω, |Z ω| ^ (2 * j) ∂(freeFieldMeasure params.mass params.mass_pos)
+            ≤ (C * ↑j) ^ (4 * j) *
+                (∫ ω, (Z ω) ^ 2 ∂(freeFieldMeasure params.mass params.mass_pos)) ^ j := by
+  sorry
+
+/-- Frontier theorem for approximating cutoff-interaction differences by finite
+Wick cylinders.
+
+This is the approximation input needed to transfer the finite-dimensional
+moment comparison to the actual integrated cutoff difference by Fatou. -/
+theorem gap_interactionCutoff_sub_finiteWickCylinder_approx
+    (params : Phi4Params) (Λ : Rectangle) (κ κ₀ : UVCutoff) :
+    ∃ Z : ℕ → FieldConfig2D → ℝ,
+      (∀ n : ℕ, IsFiniteWickCylinder (Z n)) ∧
+      (∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
+        Tendsto
+          (fun n : ℕ => Z n ω) atTop
+          (𝓝 (interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω))) ∧
+      Tendsto
+        (fun n : ℕ => ∫ ω, (Z n ω) ^ 2 ∂(freeFieldMeasure params.mass params.mass_pos))
+        atTop
+        (𝓝
+          (∫ ω,
+              (interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω) ^ 2
+            ∂(freeFieldMeasure params.mass params.mass_pos))) := by
+  sorry
+
+/-- Derived theorem for the canonical reference-shell even-moment bound in
 Nelson's argument.
 
 With a logarithmic covariance-growth constant `K` fixed, the remaining missing
@@ -1107,7 +1341,17 @@ theorem gap_interactionCutoff_sub_even_moment_comparison
               (∫ ω,
                   (interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω) ^ 2
                   ∂(freeFieldMeasure params.mass params.mass_pos)) ^ j := by
-  sorry
+  obtain ⟨C, hC, hfinite⟩ := gap_finiteWickCylinder_even_moment_comparison params
+  refine ⟨C, hC, ?_⟩
+  exact
+    interactionCutoff_sub_even_moment_comparison_of_finiteWickCylinder_approx
+      params Λ C hC (by
+        intro κ κ₀
+        rcases gap_interactionCutoff_sub_finiteWickCylinder_approx params Λ κ κ₀ with
+          ⟨Z, hfin, h_ae, hL2⟩
+        refine ⟨Z, hfin, ?_, h_ae, hL2⟩
+        intro n j hj
+        exact hfinite (Z n) (hfin n) j hj)
 
 /-- Frontier theorem for the `L²` size of the canonical reference shell in
 Nelson's argument.

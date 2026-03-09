@@ -534,7 +534,7 @@ instance holderTriple_double (p : ℝ≥0∞) : ENNReal.HolderTriple (2 * p) (2 
 /-- Wick monomials composed with an Lᵖ function are in Lᵖ for all finite p.
     Proof by structural induction matching the wickMonomial recursion,
     using Hölder's inequality at each step. -/
-private theorem wickMonomial_memLp_all
+theorem wickMonomial_memLp_all
     {μ : Measure FieldConfig2D} [IsFiniteMeasure μ]
     (c : ℝ) (g : FieldConfig2D → ℝ)
     (hg : ∀ q : ℝ≥0∞, q ≠ ⊤ → MemLp g q μ) :
@@ -555,6 +555,19 @@ private theorem wickMonomial_memLp_all
     simp only [wickMonomial_succ_succ, hdef, Pi.mul_apply, Pi.sub_apply, Pi.smul_apply,
       smul_eq_mul]
 
+/-- Specialization of `wickMonomial_memLp_all` to a Gaussian pairing `ω(f)`. -/
+theorem wickMonomial_memLp
+    (n : ℕ) (mass : ℝ) (hmass : 0 < mass) (f : TestFun2D) (c : ℝ)
+    {p : ℝ≥0∞} (hp : p ≠ ⊤) :
+    MemLp (fun ω : FieldConfig2D => wickMonomial n c (ω f)) p
+      (freeFieldMeasure mass hmass) := by
+  set T := freeCovarianceCLM mass hmass
+  apply wickMonomial_memLp_all c (fun ω : FieldConfig2D => ω f)
+  · intro q hq
+    have h := pairing_memLp T f q.toNNReal
+    rwa [ENNReal.coe_toNNReal hq] at h
+  · exact hp
+
 /-- Wick products are in Lᵖ for all p < ∞ in d=2.
     This is Theorem 8.5.3 of Glimm-Jaffe.
     The proof uses Hölder's inequality via induction on the wickMonomial recursion,
@@ -564,22 +577,148 @@ theorem wickPower_memLp (n : ℕ) (mass : ℝ) (hmass : 0 < mass) (κ : UVCutoff
     MemLp (fun ω => wickPower n mass κ ω x) p (freeFieldMeasure mass hmass) := by
   set f := uvMollifier κ x
   set c := regularizedPointCovariance mass κ
-  set T := freeCovarianceCLM mass hmass
   show MemLp (fun ω => wickMonomial n c (ω f)) p (freeFieldMeasure mass hmass)
-  apply wickMonomial_memLp_all c (fun ω => ω f)
-  · intro q hq
-    have h := pairing_memLp T f q.toNNReal
-    rwa [ENNReal.coe_toNNReal hq] at h
-  · exact hp
+  simpa [f, c] using wickMonomial_memLp n mass hmass f c hp
+
+/-- Finite `0/2/4` Wick cylinder polynomial. This is the natural algebraic shape
+of the finite-dimensional approximants expected in the Nelson branch. -/
+def finiteWickCylinder
+    {ι : Type*} [Fintype ι]
+    (a4 a2 : ι → ℝ) (c4 c2 : ι → ℝ) (f4 f2 : ι → TestFun2D)
+    (a0 : ℝ) (ω : FieldConfig2D) : ℝ :=
+  (∑ i, a4 i * wickMonomial 4 (c4 i) (ω (f4 i))) +
+    (∑ i, a2 i * wickMonomial 2 (c2 i) (ω (f2 i))) + a0
+
+/-- A real-valued random variable is a finite Wick cylinder if it is given by a
+finite `0/2/4` Wick polynomial. This is the natural algebraic class expected in
+finite-dimensional approximants to the Nelson branch. -/
+def IsFiniteWickCylinder (Z : FieldConfig2D → ℝ) : Prop :=
+  ∃ n : ℕ, ∃
+      (a4 a2 c4 c2 : Fin n → ℝ) (f4 f2 : Fin n → TestFun2D) (a0 : ℝ),
+    Z = finiteWickCylinder a4 a2 c4 c2 f4 f2 a0
+
+/-- Finite Wick cylinder polynomials built from quartic and quadratic Wick
+monomials, plus a constant term, are in `L^p` for every finite `p`.
+
+This is the natural algebraic shape of Riemann-sum approximants to the
+cutoff-interaction differences that appear in Nelson's argument. -/
+theorem finiteWickCylinder_memLp
+    {ι : Type*} [Fintype ι]
+    (mass : ℝ) (hmass : 0 < mass)
+    (a4 a2 : ι → ℝ) (c4 c2 : ι → ℝ) (f4 f2 : ι → TestFun2D)
+    (a0 : ℝ) {p : ℝ≥0∞} (hp : p ≠ ⊤) :
+    MemLp (finiteWickCylinder a4 a2 c4 c2 f4 f2 a0) p (freeFieldMeasure mass hmass) := by
+  classical
+  let μ := freeFieldMeasure mass hmass
+  have h4 : MemLp
+      (fun ω : FieldConfig2D => ∑ i, a4 i * wickMonomial 4 (c4 i) (ω (f4 i))) p μ := by
+    simpa using
+      (memLp_finset_sum (μ := μ) (p := p) (s := (Finset.univ : Finset ι))
+        (f := fun i ω => a4 i * wickMonomial 4 (c4 i) (ω (f4 i)))
+        (fun i _ => by
+          simpa [Pi.smul_apply, smul_eq_mul] using
+            (wickMonomial_memLp 4 mass hmass (f4 i) (c4 i) hp).const_smul (a4 i)))
+  have h2 : MemLp
+      (fun ω : FieldConfig2D => ∑ i, a2 i * wickMonomial 2 (c2 i) (ω (f2 i))) p μ := by
+    simpa using
+      (memLp_finset_sum (μ := μ) (p := p) (s := (Finset.univ : Finset ι))
+        (f := fun i ω => a2 i * wickMonomial 2 (c2 i) (ω (f2 i)))
+        (fun i _ => by
+          simpa [Pi.smul_apply, smul_eq_mul] using
+            (wickMonomial_memLp 2 mass hmass (f2 i) (c2 i) hp).const_smul (a2 i)))
+  simpa only [finiteWickCylinder] using (h4.add h2).add (memLp_const (μ := μ) (p := p) a0)
+
+/-- Hence every finite Wick cylinder polynomial of the `0/2/4` type has all
+even moments. -/
+theorem finiteWickCylinder_even_integrable
+    {ι : Type*} [Fintype ι]
+    (mass : ℝ) (hmass : 0 < mass)
+    (a4 a2 : ι → ℝ) (c4 c2 : ι → ℝ) (f4 f2 : ι → TestFun2D)
+    (a0 : ℝ) (j : ℕ) :
+    Integrable
+      (fun ω : FieldConfig2D => |finiteWickCylinder a4 a2 c4 c2 f4 f2 a0 ω| ^ (2 * j))
+      (freeFieldMeasure mass hmass) := by
+  let μ := freeFieldMeasure mass hmass
+  by_cases hj : j = 0
+  · subst hj
+    simp
+  · have hmem : MemLp
+        (finiteWickCylinder a4 a2 c4 c2 f4 f2 a0)
+        ((2 * j : ℕ) : ℝ≥0∞) μ :=
+      finiteWickCylinder_memLp mass hmass a4 a2 c4 c2 f4 f2 a0 ENNReal.coe_ne_top
+    have hint : Integrable
+        (fun ω : FieldConfig2D =>
+          ‖finiteWickCylinder a4 a2 c4 c2 f4 f2 a0 ω‖ ^
+            (((2 * j : ℕ) : ℝ≥0∞).toReal)) μ := by
+      simpa using hmem.integrable_norm_rpow'
+    convert hint using 1
+    ext ω
+    rw [show ((↑(2 * j) : ℝ≥0∞).toReal) = (2 * j : ℝ) by simp, Real.norm_eq_abs]
+    have hcast : (2 * ↑j : ℝ) = ↑(2 * j) := by
+      exact_mod_cast (show 2 * j = 2 * j by rfl)
+    rw [hcast, Real.rpow_natCast]
+
+/-- Every finite Wick cylinder polynomial is in `L^p` for finite `p`. -/
+theorem IsFiniteWickCylinder.memLp
+    {Z : FieldConfig2D → ℝ} (hZ : IsFiniteWickCylinder Z)
+    (mass : ℝ) (hmass : 0 < mass) {p : ℝ≥0∞} (hp : p ≠ ⊤) :
+    MemLp Z p (freeFieldMeasure mass hmass) := by
+  rcases hZ with ⟨n, a4, a2, c4, c2, f4, f2, a0, rfl⟩
+  exact finiteWickCylinder_memLp mass hmass a4 a2 c4 c2 f4 f2 a0 hp
+
+/-- Every finite Wick cylinder polynomial has all even moments. -/
+theorem IsFiniteWickCylinder.even_integrable
+    {Z : FieldConfig2D → ℝ} (hZ : IsFiniteWickCylinder Z)
+    (mass : ℝ) (hmass : 0 < mass) (j : ℕ) :
+    Integrable (fun ω : FieldConfig2D => |Z ω| ^ (2 * j)) (freeFieldMeasure mass hmass) := by
+  rcases hZ with ⟨n, a4, a2, c4, c2, f4, f2, a0, rfl⟩
+  exact finiteWickCylinder_even_integrable mass hmass a4 a2 c4 c2 f4 f2 a0 j
+
+/-- A `finiteWickCylinder` built on any finite index type is, tautologically, a
+finite Wick cylinder in the `Fin n`-encoded sense. This bridge lets later
+infrastructure work with natural finite index types (for example lattice cells)
+without re-encoding them by hand. -/
+theorem finiteWickCylinder_isFinite
+    {ι : Type*} [Fintype ι]
+    (a4 a2 : ι → ℝ) (c4 c2 : ι → ℝ) (f4 f2 : ι → TestFun2D) (a0 : ℝ) :
+    IsFiniteWickCylinder (finiteWickCylinder a4 a2 c4 c2 f4 f2 a0) := by
+  classical
+  let e : ι ≃ Fin (Fintype.card ι) := Fintype.equivFin ι
+  refine ⟨Fintype.card ι,
+    (fun i => a4 (e.symm i)),
+    (fun i => a2 (e.symm i)),
+    (fun i => c4 (e.symm i)),
+    (fun i => c2 (e.symm i)),
+    (fun i => f4 (e.symm i)),
+    (fun i => f2 (e.symm i)),
+    a0, ?_⟩
+  ext ω
+  have h4 :
+      (∑ x, a4 (e.symm x) * wickMonomial 4 (c4 (e.symm x)) (ω (f4 (e.symm x)))) =
+        ∑ i, a4 i * wickMonomial 4 (c4 i) (ω (f4 i)) :=
+    (Fintype.sum_equiv e
+      (fun i => a4 i * wickMonomial 4 (c4 i) (ω (f4 i)))
+      (fun i => a4 (e.symm i) * wickMonomial 4 (c4 (e.symm i)) (ω (f4 (e.symm i))))
+      (fun i => by simp)).symm
+  have h2 :
+      (∑ x, a2 (e.symm x) * wickMonomial 2 (c2 (e.symm x)) (ω (f2 (e.symm x)))) =
+        ∑ i, a2 i * wickMonomial 2 (c2 i) (ω (f2 i)) :=
+    (Fintype.sum_equiv e
+      (fun i => a2 i * wickMonomial 2 (c2 i) (ω (f2 i)))
+      (fun i => a2 (e.symm i) * wickMonomial 2 (c2 (e.symm i)) (ω (f2 (e.symm i))))
+      (fun i => by simp)).symm
+  simp only [finiteWickCylinder]
+  rw [h4, h2]
 
 /-! ## Re-Wick-ordering under change of covariance
 
-When the covariance changes from c₁ to c₂, the Wick monomials transform via:
-  :xⁿ:_{c₁} = Σₖ C(n,2k)(2k-1)!!(-1)ᵏ(c₁-c₂)ᵏ :x^{n-2k}:_{c₂}
+When the covariance changes from `c₁` to `c₂`, the Wick monomials transform via:
+
+  `:xⁿ:_{c₁} = Σₖ C(n,2k)(2k-1)!!(-1)ᵏ(c₁-c₂)ᵏ :x^{n-2k}:_{c₂}`
 
 This is the Hermite polynomial addition theorem. For the cases we need:
-  :x²:_{c₁} = :x²:_{c₂} - (c₁ - c₂)
-  :x⁴:_{c₁} = :x⁴:_{c₂} - 6(c₁-c₂):x²:_{c₂} + 3(c₁-c₂)²
+  `:x²:_{c₁} = :x²:_{c₂} - (c₁ - c₂)`
+  `:x⁴:_{c₁} = :x⁴:_{c₂} - 6(c₁-c₂):x²:_{c₂} + 3(c₁-c₂)²`
 
 These are pure algebraic identities, proved by expanding and using `ring`.
 -/

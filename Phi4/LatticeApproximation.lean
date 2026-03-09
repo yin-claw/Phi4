@@ -38,6 +38,13 @@ structure RectLattice (Λ : Rectangle) where
   hNt : 0 < Nt
   hNx : 0 < Nx
 
+/-- Canonical square refinement lattice on `Λ` with `(n+1) × (n+1)` cells. -/
+def uniformRectLattice (Λ : Rectangle) (n : ℕ) : RectLattice Λ where
+  Nt := n + 1
+  Nx := n + 1
+  hNt := Nat.succ_pos n
+  hNx := Nat.succ_pos n
+
 namespace RectLattice
 
 variable {Λ : Rectangle}
@@ -163,6 +170,41 @@ def cell (L : RectLattice Λ) (i : Fin L.Nt) (j : Fin L.Nx) : Rectangle where
 /-- Anchor point of cell `(i,j)`, chosen as its lower-left corner node. -/
 def cellAnchor (L : RectLattice Λ) (i : Fin L.Nt) (j : Fin L.Nx) : Spacetime2D :=
   L.node ⟨i.1, Nat.lt_succ_of_lt i.2⟩ ⟨j.1, Nat.lt_succ_of_lt j.2⟩
+
+/-- Every cell has width `Δt`. -/
+theorem cell_width_eq_timeStep
+    (L : RectLattice Λ) (i : Fin L.Nt) (j : Fin L.Nx) :
+    (L.cell i j).width = L.timeStep := by
+  unfold Rectangle.width cell
+  calc
+    (Λ.x_min + ((i.1 + 1 : ℕ) : ℝ) * L.timeStep) - (Λ.x_min + (i.1 : ℝ) * L.timeStep)
+      = ((((i.1 + 1 : ℕ) : ℝ) - (i.1 : ℝ)) * L.timeStep) := by ring
+    _ = (1 : ℝ) * L.timeStep := by norm_num
+    _ = L.timeStep := by ring
+
+/-- Every cell has height `Δx`. -/
+theorem cell_height_eq_spaceStep
+    (L : RectLattice Λ) (i : Fin L.Nt) (j : Fin L.Nx) :
+    (L.cell i j).height = L.spaceStep := by
+  unfold Rectangle.height cell
+  calc
+    (Λ.y_min + ((j.1 + 1 : ℕ) : ℝ) * L.spaceStep) - (Λ.y_min + (j.1 : ℝ) * L.spaceStep)
+      = ((((j.1 + 1 : ℕ) : ℝ) - (j.1 : ℝ)) * L.spaceStep) := by ring
+    _ = (1 : ℝ) * L.spaceStep := by norm_num
+    _ = L.spaceStep := by ring
+
+/-- Every cell has area `Δt * Δx`. -/
+theorem cell_area_eq_timeStep_mul_spaceStep
+    (L : RectLattice Λ) (i : Fin L.Nt) (j : Fin L.Nx) :
+    (L.cell i j).area = L.timeStep * L.spaceStep := by
+  unfold Rectangle.area
+  rw [cell_width_eq_timeStep, cell_height_eq_spaceStep]
+
+/-- Cell areas are positive. -/
+theorem cell_area_pos (L : RectLattice Λ) (i : Fin L.Nt) (j : Fin L.Nx) :
+    0 < (L.cell i j).area := by
+  rw [cell_area_eq_timeStep_mul_spaceStep]
+  exact mul_pos L.timeStep_pos L.spaceStep_pos
 
 /-- Node-sampling discretization of a test function on lattice nodes. -/
 def discretizeByNode (L : RectLattice Λ) (f : TestFun2D) :
@@ -291,5 +333,25 @@ def riemannSumCellAverageLM (L : RectLattice Λ) : TestFun2D →ₗ[ℝ] ℝ whe
     L.riemannSumCellAverageLM f = L.riemannSumCellAverage f := rfl
 
 end RectLattice
+
+@[simp] theorem uniformRectLattice_Nt (Λ : Rectangle) (n : ℕ) :
+    (uniformRectLattice Λ n).Nt = n + 1 := rfl
+
+@[simp] theorem uniformRectLattice_Nx (Λ : Rectangle) (n : ℕ) :
+    (uniformRectLattice Λ n).Nx = n + 1 := rfl
+
+@[simp] theorem uniformRectLattice_timeStep (Λ : Rectangle) (n : ℕ) :
+    (uniformRectLattice Λ n).timeStep = Λ.width / (n + 1 : ℕ) := rfl
+
+@[simp] theorem uniformRectLattice_spaceStep (Λ : Rectangle) (n : ℕ) :
+    (uniformRectLattice Λ n).spaceStep = Λ.height / (n + 1 : ℕ) := rfl
+
+theorem tendsto_uniformRectLattice_timeStep (Λ : Rectangle) :
+    Filter.Tendsto (fun n : ℕ => (uniformRectLattice Λ n).timeStep) Filter.atTop (nhds 0) := by
+  convert (tendsto_const_div_atTop_nhds_zero_nat Λ.width).comp (Filter.tendsto_add_atTop_nat 1) using 1
+
+theorem tendsto_uniformRectLattice_spaceStep (Λ : Rectangle) :
+    Filter.Tendsto (fun n : ℕ => (uniformRectLattice Λ n).spaceStep) Filter.atTop (nhds 0) := by
+  convert (tendsto_const_div_atTop_nhds_zero_nat Λ.height).comp (Filter.tendsto_add_atTop_nat 1) using 1
 
 end Phi4
