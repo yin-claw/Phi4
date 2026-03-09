@@ -677,6 +677,545 @@ theorem rawFieldEval_sub_fourth_expectation
   push_cast
   ring
 
+/-- Mixed fourth moment `E[X²Y²]` for Gaussian linear observables. -/
+theorem mixed_fourth_moment_two_two
+    (mass : ℝ) (hmass : 0 < mass) (f g : TestFun2D) :
+    ∫ ω : FieldConfig2D, (ω f) ^ 2 * (ω g) ^ 2 ∂(freeFieldMeasure mass hmass) =
+      GaussianField.covariance (freeCovarianceCLM mass hmass) f f *
+        GaussianField.covariance (freeCovarianceCLM mass hmass) g g
+      + 2 * (GaussianField.covariance (freeCovarianceCLM mass hmass) f g) ^ 2 := by
+  let T := freeCovarianceCLM mass hmass
+  let cff := GaussianField.covariance T f f
+  let cgg := GaussianField.covariance T g g
+  let cfg := GaussianField.covariance T f g
+  have hsplit : ∀ ω : FieldConfig2D,
+      (ω f) ^ 2 * (ω g) ^ 2 = ω f * ∏ i : Fin 3, ω (![f, g, g] i) := by
+    intro ω
+    simp [Fin.prod_univ_three]
+    ring
+  simp_rw [hsplit]
+  change ∫ ω : Configuration TestFun2D, ω f * ∏ i : Fin 3, ω (![f, g, g] i) ∂(measure T) =
+      cff * cgg + 2 * cfg ^ 2
+  rw [wick_recursive T 2 f (fun i => (![f, g, g] : Fin 3 → TestFun2D) i)]
+  have hff : ∫ ω : Configuration TestFun2D, ω f * ω f ∂(measure T) = cff := by
+    simpa [GaussianField.covariance, cff] using cross_moment_eq_covariance T f f
+  have hgg : ∫ ω : Configuration TestFun2D, ω g * ω g ∂(measure T) = cgg := by
+    simpa [GaussianField.covariance, cgg] using cross_moment_eq_covariance T g g
+  have hfg' : ∫ ω : Configuration TestFun2D, ω f * ω g ∂(measure T) = cfg := by
+    simpa [GaussianField.covariance, cfg] using cross_moment_eq_covariance T f g
+  have hlast :
+      ∫ ω : Configuration TestFun2D, ω f * ω (![f, g, g] (Fin.succAbove 2 1)) ∂(measure T) = cfg := by
+    simpa [GaussianField.covariance, cfg] using cross_moment_eq_covariance T f g
+  rw [Fin.sum_univ_three]
+  simp [cff, cgg, cfg, hgg, hfg', hlast, GaussianField.covariance]
+  ring
+
+/-- Mixed fourth moment `E[X^3 Y]` for Gaussian linear observables. -/
+theorem mixed_fourth_moment_three_one
+    (mass : ℝ) (hmass : 0 < mass) (f g : TestFun2D) :
+    ∫ ω : FieldConfig2D, (ω f) ^ 3 * (ω g) ∂(freeFieldMeasure mass hmass) =
+      3 * GaussianField.covariance (freeCovarianceCLM mass hmass) f f *
+        GaussianField.covariance (freeCovarianceCLM mass hmass) f g := by
+  let T := freeCovarianceCLM mass hmass
+  let cff := GaussianField.covariance T f f
+  let cfg := GaussianField.covariance T f g
+  have hsplit : ∀ ω : FieldConfig2D,
+      (ω f) ^ 3 * (ω g) = ω f * ∏ i : Fin 3, ω (![f, f, g] i) := by
+    intro ω
+    simp [Fin.prod_univ_three]
+    ring
+  simp_rw [hsplit]
+  change ∫ ω : Configuration TestFun2D, ω f * ∏ i : Fin 3, ω (![f, f, g] i) ∂(measure T) =
+      3 * cff * cfg
+  rw [wick_recursive T 2 f (fun i => (![f, f, g] : Fin 3 → TestFun2D) i)]
+  have hff : ∫ ω : Configuration TestFun2D, ω f * ω f ∂(measure T) = cff := by
+    simpa [GaussianField.covariance, cff] using cross_moment_eq_covariance T f f
+  have hfg : ∫ ω : Configuration TestFun2D, ω f * ω g ∂(measure T) = cfg := by
+    simpa [GaussianField.covariance, cfg] using cross_moment_eq_covariance T f g
+  have hlast :
+      ∫ ω : Configuration TestFun2D, ω f * ω (![f, f, g] (Fin.succAbove 2 1)) ∂(measure T) = cff := by
+    simpa [GaussianField.covariance, cff] using cross_moment_eq_covariance T f f
+  rw [Fin.sum_univ_three]
+  simp [cff, cfg, hfg, hlast, GaussianField.covariance]
+  ring
+
+/-- Mixed sixth moment `E[X^4 Y^2]` for Gaussian linear observables. -/
+theorem mixed_sixth_moment_four_two
+    (mass : ℝ) (hmass : 0 < mass) (f g : TestFun2D) :
+    ∫ ω : FieldConfig2D, (ω f) ^ 4 * (ω g) ^ 2 ∂(freeFieldMeasure mass hmass) =
+      3 * (GaussianField.covariance (freeCovarianceCLM mass hmass) f f) ^ 2 *
+          GaussianField.covariance (freeCovarianceCLM mass hmass) g g
+      + 12 * GaussianField.covariance (freeCovarianceCLM mass hmass) f f *
+          (GaussianField.covariance (freeCovarianceCLM mass hmass) f g) ^ 2 := by
+  let T := freeCovarianceCLM mass hmass
+  let cff := GaussianField.covariance T f f
+  let cgg := GaussianField.covariance T g g
+  let cfg := GaussianField.covariance T f g
+  have hsplit : ∀ ω : FieldConfig2D,
+      (ω f) ^ 4 * (ω g) ^ 2 = ω f * ∏ i : Fin 5, ω (![f, f, f, g, g] i) := by
+    intro ω
+    simp [Fin.prod_univ_five]
+    ring
+  simp_rw [hsplit]
+  change ∫ ω : Configuration TestFun2D, ω f * ∏ i : Fin 5, ω (![f, f, f, g, g] i) ∂(measure T) =
+      3 * cff ^ 2 * cgg + 12 * cff * cfg ^ 2
+  rw [wick_recursive T 4 f (fun i => (![f, f, f, g, g] : Fin 5 → TestFun2D) i)]
+  rw [Fin.sum_univ_five]
+  have hdrop0 (i : Fin 4) :
+      (![f, f, f, g, g] : Fin 5 → TestFun2D) (Fin.succAbove 0 i) =
+        (![f, f, g, g] : Fin 4 → TestFun2D) i := by
+    fin_cases i <;> rfl
+  have hdrop1 (i : Fin 4) :
+      (![f, f, f, g, g] : Fin 5 → TestFun2D) (Fin.succAbove 1 i) =
+        (![f, f, g, g] : Fin 4 → TestFun2D) i := by
+    fin_cases i <;> rfl
+  have hdrop2 (i : Fin 4) :
+      (![f, f, f, g, g] : Fin 5 → TestFun2D) (Fin.succAbove 2 i) =
+        (![f, f, g, g] : Fin 4 → TestFun2D) i := by
+    fin_cases i <;> rfl
+  have hdrop3 (i : Fin 4) :
+      (![f, f, f, g, g] : Fin 5 → TestFun2D) (Fin.succAbove 3 i) =
+        (![f, f, f, g] : Fin 4 → TestFun2D) i := by
+    fin_cases i <;> rfl
+  have hdrop4 (i : Fin 4) :
+      (![f, f, f, g, g] : Fin 5 → TestFun2D) (Fin.succAbove 4 i) =
+        (![f, f, f, g] : Fin 4 → TestFun2D) i := by
+    fin_cases i <;> rfl
+  have hprod_ffgg :
+      ∀ ω : FieldConfig2D, ∏ i : Fin 4, ω ((![f, f, g, g] : Fin 4 → TestFun2D) i) =
+        (ω f) ^ 2 * (ω g) ^ 2 := by
+    intro ω
+    simp [Fin.prod_univ_four]
+    ring
+  have hprod_fffg :
+      ∀ ω : FieldConfig2D, ∏ i : Fin 4, ω ((![f, f, f, g] : Fin 4 → TestFun2D) i) =
+        (ω f) ^ 3 * (ω g) := by
+    intro ω
+    simp [Fin.prod_univ_four, pow_succ, mul_left_comm, mul_comm]
+  have h42 :
+      ∫ ω : Configuration TestFun2D, (ω f) ^ 2 * (ω g) ^ 2 ∂(measure T) =
+        cff * cgg + 2 * cfg ^ 2 := by
+    simpa [T, cff, cgg, cfg] using mixed_fourth_moment_two_two mass hmass f g
+  have h31 :
+      ∫ ω : Configuration TestFun2D, (ω f) ^ 3 * (ω g) ∂(measure T) =
+        3 * cff * cfg := by
+    simpa [T, cff, cfg] using mixed_fourth_moment_three_one mass hmass f g
+  simp_rw [hdrop0, hdrop1, hdrop2, hdrop3, hdrop4]
+  simp_rw [hprod_ffgg, hprod_fffg]
+  simp [GaussianField.covariance, cff, cgg, cfg, h42, h31]
+  ring
+
+/-- Mixed sixth moment `E[X^3 Y^3]` for Gaussian linear observables. -/
+theorem mixed_sixth_moment_three_three
+    (mass : ℝ) (hmass : 0 < mass) (f g : TestFun2D) :
+    ∫ ω : FieldConfig2D, (ω f) ^ 3 * (ω g) ^ 3 ∂(freeFieldMeasure mass hmass) =
+      9 * GaussianField.covariance (freeCovarianceCLM mass hmass) f f *
+          GaussianField.covariance (freeCovarianceCLM mass hmass) g g *
+          GaussianField.covariance (freeCovarianceCLM mass hmass) f g
+      + 6 * (GaussianField.covariance (freeCovarianceCLM mass hmass) f g) ^ 3 := by
+  let T := freeCovarianceCLM mass hmass
+  let cff := GaussianField.covariance T f f
+  let cgg := GaussianField.covariance T g g
+  let cfg := GaussianField.covariance T f g
+  have hsplit : ∀ ω : FieldConfig2D,
+      (ω f) ^ 3 * (ω g) ^ 3 = ω f * ∏ i : Fin 5, ω (![f, f, g, g, g] i) := by
+    intro ω
+    simp [Fin.prod_univ_five]
+    ring
+  simp_rw [hsplit]
+  change ∫ ω : Configuration TestFun2D, ω f * ∏ i : Fin 5, ω (![f, f, g, g, g] i) ∂(measure T) =
+      9 * cff * cgg * cfg + 6 * cfg ^ 3
+  rw [wick_recursive T 4 f (fun i => (![f, f, g, g, g] : Fin 5 → TestFun2D) i)]
+  rw [Fin.sum_univ_five]
+  have hdrop0 (i : Fin 4) :
+      (![f, f, g, g, g] : Fin 5 → TestFun2D) (Fin.succAbove 0 i) =
+        (![f, g, g, g] : Fin 4 → TestFun2D) i := by
+    fin_cases i <;> rfl
+  have hdrop1 (i : Fin 4) :
+      (![f, f, g, g, g] : Fin 5 → TestFun2D) (Fin.succAbove 1 i) =
+        (![f, g, g, g] : Fin 4 → TestFun2D) i := by
+    fin_cases i <;> rfl
+  have hdrop2 (i : Fin 4) :
+      (![f, f, g, g, g] : Fin 5 → TestFun2D) (Fin.succAbove 2 i) =
+        (![f, f, g, g] : Fin 4 → TestFun2D) i := by
+    fin_cases i <;> rfl
+  have hdrop3 (i : Fin 4) :
+      (![f, f, g, g, g] : Fin 5 → TestFun2D) (Fin.succAbove 3 i) =
+        (![f, f, g, g] : Fin 4 → TestFun2D) i := by
+    fin_cases i <;> rfl
+  have hdrop4 (i : Fin 4) :
+      (![f, f, g, g, g] : Fin 5 → TestFun2D) (Fin.succAbove 4 i) =
+        (![f, f, g, g] : Fin 4 → TestFun2D) i := by
+    fin_cases i <;> rfl
+  have hprod_fggg :
+      ∀ ω : FieldConfig2D, ∏ i : Fin 4, ω ((![f, g, g, g] : Fin 4 → TestFun2D) i) =
+        (ω f) * (ω g) ^ 3 := by
+    intro ω
+    simp [Fin.prod_univ_four]
+    ring
+  have hprod_ffgg :
+      ∀ ω : FieldConfig2D, ∏ i : Fin 4, ω ((![f, f, g, g] : Fin 4 → TestFun2D) i) =
+        (ω f) ^ 2 * (ω g) ^ 2 := by
+    intro ω
+    simp [Fin.prod_univ_four]
+    ring
+  have h22 :
+      ∫ ω : Configuration TestFun2D, (ω f) ^ 2 * (ω g) ^ 2 ∂(measure T) =
+        cff * cgg + 2 * cfg ^ 2 := by
+    simpa [T, cff, cgg, cfg] using mixed_fourth_moment_two_two mass hmass f g
+  have h13 :
+      ∫ ω : Configuration TestFun2D, (ω f) * (ω g) ^ 3 ∂(measure T) =
+        3 * cgg * cfg := by
+    calc
+      ∫ ω : Configuration TestFun2D, (ω f) * (ω g) ^ 3 ∂(measure T)
+          = 3 * cgg * GaussianField.covariance T g f := by
+              simpa [T, cgg, mul_comm] using mixed_fourth_moment_three_one mass hmass g f
+      _ = 3 * cgg * cfg := by
+            simp [cfg, GaussianField.covariance, real_inner_comm]
+  simp_rw [hdrop0, hdrop1, hdrop2, hdrop3, hdrop4]
+  simp_rw [hprod_fggg, hprod_ffgg]
+  simp [GaussianField.covariance, cff, cgg, cfg, h22, h13]
+  ring
+
+/-- Mixed eighth moment `E[X^4 Y^4]` for Gaussian linear observables. -/
+theorem mixed_eighth_moment_four_four
+    (mass : ℝ) (hmass : 0 < mass) (f g : TestFun2D) :
+    ∫ ω : FieldConfig2D, (ω f) ^ 4 * (ω g) ^ 4 ∂(freeFieldMeasure mass hmass) =
+      9 * (GaussianField.covariance (freeCovarianceCLM mass hmass) f f) ^ 2 *
+          (GaussianField.covariance (freeCovarianceCLM mass hmass) g g) ^ 2
+      + 72 * GaussianField.covariance (freeCovarianceCLM mass hmass) f f *
+          GaussianField.covariance (freeCovarianceCLM mass hmass) g g *
+          (GaussianField.covariance (freeCovarianceCLM mass hmass) f g) ^ 2
+      + 24 * (GaussianField.covariance (freeCovarianceCLM mass hmass) f g) ^ 4 := by
+  let T := freeCovarianceCLM mass hmass
+  let cff := GaussianField.covariance T f f
+  let cgg := GaussianField.covariance T g g
+  let cfg := GaussianField.covariance T f g
+  have hsplit : ∀ ω : FieldConfig2D,
+      (ω f) ^ 4 * (ω g) ^ 4 = ω f * ∏ i : Fin 7, ω (![f, f, f, g, g, g, g] i) := by
+    intro ω
+    simp [Fin.prod_univ_seven]
+    ring
+  simp_rw [hsplit]
+  change ∫ ω : Configuration TestFun2D, ω f * ∏ i : Fin 7, ω (![f, f, f, g, g, g, g] i) ∂(measure T) =
+      9 * cff ^ 2 * cgg ^ 2 + 72 * cff * cgg * cfg ^ 2 + 24 * cfg ^ 4
+  rw [wick_recursive T 6 f (fun i => (![f, f, f, g, g, g, g] : Fin 7 → TestFun2D) i)]
+  rw [Fin.sum_univ_seven]
+  have h24 :
+      ∫ ω : Configuration TestFun2D, (ω f) ^ 2 * (ω g) ^ 4 ∂(measure T) =
+        3 * cff * cgg ^ 2 + 12 * cgg * cfg ^ 2 := by
+    calc
+      ∫ ω : Configuration TestFun2D, (ω f) ^ 2 * (ω g) ^ 4 ∂(measure T)
+          = ∫ ω : Configuration TestFun2D, (ω g) ^ 4 * (ω f) ^ 2 ∂(measure T) := by
+              congr with ω
+              ring
+      _ = 3 * cgg ^ 2 * cff + 12 * cgg * (GaussianField.covariance T g f) ^ 2 := by
+            simpa [T, cff, cgg, mul_comm, mul_left_comm, mul_assoc] using
+              mixed_sixth_moment_four_two mass hmass g f
+      _ = 3 * cgg ^ 2 * cff + 12 * cgg * cfg ^ 2 := by
+            simp [cfg, GaussianField.covariance, real_inner_comm]
+      _ = 3 * cff * cgg ^ 2 + 12 * cgg * cfg ^ 2 := by ring
+  have h33 :
+      ∫ ω : Configuration TestFun2D, (ω f) ^ 3 * (ω g) ^ 3 ∂(measure T) =
+        9 * cff * cgg * cfg + 6 * cfg ^ 3 := by
+    simpa [T, cff, cgg, cfg] using mixed_sixth_moment_three_three mass hmass f g
+  have hdrop0 (i : Fin 6) :
+      (![f, f, f, g, g, g, g] : Fin 7 → TestFun2D) (Fin.succAbove 0 i) =
+        (![f, f, g, g, g, g] : Fin 6 → TestFun2D) i := by
+    fin_cases i <;> rfl
+  have hdrop1 (i : Fin 6) :
+      (![f, f, f, g, g, g, g] : Fin 7 → TestFun2D) (Fin.succAbove 1 i) =
+        (![f, f, g, g, g, g] : Fin 6 → TestFun2D) i := by
+    fin_cases i <;> rfl
+  have hdrop2 (i : Fin 6) :
+      (![f, f, f, g, g, g, g] : Fin 7 → TestFun2D) (Fin.succAbove 2 i) =
+        (![f, f, g, g, g, g] : Fin 6 → TestFun2D) i := by
+    fin_cases i <;> rfl
+  have hdrop3 (i : Fin 6) :
+      (![f, f, f, g, g, g, g] : Fin 7 → TestFun2D) (Fin.succAbove 3 i) =
+        (![f, f, f, g, g, g] : Fin 6 → TestFun2D) i := by
+    fin_cases i <;> rfl
+  have hdrop4 (i : Fin 6) :
+      (![f, f, f, g, g, g, g] : Fin 7 → TestFun2D) (Fin.succAbove 4 i) =
+        (![f, f, f, g, g, g] : Fin 6 → TestFun2D) i := by
+    fin_cases i <;> rfl
+  have hdrop5 (i : Fin 6) :
+      (![f, f, f, g, g, g, g] : Fin 7 → TestFun2D) (Fin.succAbove 5 i) =
+        (![f, f, f, g, g, g] : Fin 6 → TestFun2D) i := by
+    fin_cases i <;> rfl
+  have hdrop6 (i : Fin 6) :
+      (![f, f, f, g, g, g, g] : Fin 7 → TestFun2D) (Fin.succAbove 6 i) =
+        (![f, f, f, g, g, g] : Fin 6 → TestFun2D) i := by
+    fin_cases i <;> rfl
+  have hprod_ffgggg :
+      ∀ ω : FieldConfig2D, ∏ i : Fin 6, ω ((![f, f, g, g, g, g] : Fin 6 → TestFun2D) i) =
+        (ω f) ^ 2 * (ω g) ^ 4 := by
+    intro ω
+    simp [Fin.prod_univ_six]
+    ring
+  have hprod_fffggg :
+      ∀ ω : FieldConfig2D, ∏ i : Fin 6, ω ((![f, f, f, g, g, g] : Fin 6 → TestFun2D) i) =
+        (ω f) ^ 3 * (ω g) ^ 3 := by
+    intro ω
+    simp [Fin.prod_univ_six]
+    ring
+  simp_rw [hdrop0, hdrop1, hdrop2, hdrop3, hdrop4, hdrop5, hdrop6]
+  simp_rw [hprod_ffgggg, hprod_fffggg]
+  simp [GaussianField.covariance, cff, cgg, cfg, h24, h33]
+  ring
+
+/-- Exact second moment of the quartic fixed-variance re-Wick difference.
+
+This is the sharp Gaussian input for the nonlinear `A`-term in the quartic shell
+estimate. The quadratic coefficient is `108`, not `126`, because the constant
+`3 c^2` term cancels in the difference before squaring. -/
+theorem wickMonomial_four_diff_sq_expectation
+    (mass : ℝ) (hmass : 0 < mass) (f g : TestFun2D) (c : ℝ) :
+    ∫ ω : FieldConfig2D,
+      (wickMonomial 4 c (ω g) - wickMonomial 4 c (ω f)) ^ 2 ∂(freeFieldMeasure mass hmass) =
+      105 * (GaussianField.covariance (freeCovarianceCLM mass hmass) g g) ^ 4
+        - 180 * c * (GaussianField.covariance (freeCovarianceCLM mass hmass) g g) ^ 3
+        + 108 * c ^ 2 * (GaussianField.covariance (freeCovarianceCLM mass hmass) g g) ^ 2
+        + 105 * (GaussianField.covariance (freeCovarianceCLM mass hmass) f f) ^ 4
+        - 180 * c * (GaussianField.covariance (freeCovarianceCLM mass hmass) f f) ^ 3
+        + 108 * c ^ 2 * (GaussianField.covariance (freeCovarianceCLM mass hmass) f f) ^ 2
+        - 18 * (GaussianField.covariance (freeCovarianceCLM mass hmass) f f) ^ 2 *
+            (GaussianField.covariance (freeCovarianceCLM mass hmass) g g) ^ 2
+        - 144 * GaussianField.covariance (freeCovarianceCLM mass hmass) f f *
+            GaussianField.covariance (freeCovarianceCLM mass hmass) g g *
+            (GaussianField.covariance (freeCovarianceCLM mass hmass) f g) ^ 2
+        - 48 * (GaussianField.covariance (freeCovarianceCLM mass hmass) f g) ^ 4
+        + 36 * c * GaussianField.covariance (freeCovarianceCLM mass hmass) f f *
+            (GaussianField.covariance (freeCovarianceCLM mass hmass) g g) ^ 2
+        + 36 * c * (GaussianField.covariance (freeCovarianceCLM mass hmass) f f) ^ 2 *
+            GaussianField.covariance (freeCovarianceCLM mass hmass) g g
+        + 144 * c * GaussianField.covariance (freeCovarianceCLM mass hmass) g g *
+            (GaussianField.covariance (freeCovarianceCLM mass hmass) f g) ^ 2
+        + 144 * c * GaussianField.covariance (freeCovarianceCLM mass hmass) f f *
+            (GaussianField.covariance (freeCovarianceCLM mass hmass) f g) ^ 2
+        - 72 * c ^ 2 * GaussianField.covariance (freeCovarianceCLM mass hmass) f f *
+            GaussianField.covariance (freeCovarianceCLM mass hmass) g g
+        - 144 * c ^ 2 * (GaussianField.covariance (freeCovarianceCLM mass hmass) f g) ^ 2 := by
+  let T := freeCovarianceCLM mass hmass
+  let cff := GaussianField.covariance T f f
+  let cgg := GaussianField.covariance T g g
+  let cfg := GaussianField.covariance T f g
+  have h4f :
+      ∫ ω : FieldConfig2D, (ω f) ^ 4 ∂(freeFieldMeasure mass hmass) = 3 * cff ^ 2 := by
+    rw [show (4 : ℕ) = 2 + 2 from rfl, moment_recursion mass hmass f 2]
+    have h2f :
+        ∫ ω : FieldConfig2D, (ω f) ^ 2 ∂(freeFieldMeasure mass hmass) = cff := by
+      have hcross : ∫ ω : Configuration TestFun2D, ω f * ω f ∂(measure T) = cff := by
+        simpa [GaussianField.covariance, cff] using cross_moment_eq_covariance T f f
+      simpa [pow_two, T] using hcross
+    rw [h2f]
+    ring
+  have h4g :
+      ∫ ω : FieldConfig2D, (ω g) ^ 4 ∂(freeFieldMeasure mass hmass) = 3 * cgg ^ 2 := by
+    rw [show (4 : ℕ) = 2 + 2 from rfl, moment_recursion mass hmass g 2]
+    have h2g :
+        ∫ ω : FieldConfig2D, (ω g) ^ 2 ∂(freeFieldMeasure mass hmass) = cgg := by
+      have hcross : ∫ ω : Configuration TestFun2D, ω g * ω g ∂(measure T) = cgg := by
+        simpa [GaussianField.covariance, cgg] using cross_moment_eq_covariance T g g
+      simpa [pow_two, T] using hcross
+    rw [h2g]
+    ring
+  have h6f :
+      ∫ ω : FieldConfig2D, (ω f) ^ 6 ∂(freeFieldMeasure mass hmass) = 15 * cff ^ 3 := by
+    rw [show (6 : ℕ) = 4 + 2 from rfl, moment_recursion mass hmass f 4, h4f]
+    ring
+  have h6g :
+      ∫ ω : FieldConfig2D, (ω g) ^ 6 ∂(freeFieldMeasure mass hmass) = 15 * cgg ^ 3 := by
+    rw [show (6 : ℕ) = 4 + 2 from rfl, moment_recursion mass hmass g 4, h4g]
+    ring
+  have h8f :
+      ∫ ω : FieldConfig2D, (ω f) ^ 8 ∂(freeFieldMeasure mass hmass) = 105 * cff ^ 4 := by
+    rw [show (8 : ℕ) = 6 + 2 from rfl, moment_recursion mass hmass f 6, h6f]
+    ring
+  have h8g :
+      ∫ ω : FieldConfig2D, (ω g) ^ 8 ∂(freeFieldMeasure mass hmass) = 105 * cgg ^ 4 := by
+    rw [show (8 : ℕ) = 6 + 2 from rfl, moment_recursion mass hmass g 6, h6g]
+    ring
+  have h22 :
+      ∫ ω : FieldConfig2D, (ω f) ^ 2 * (ω g) ^ 2 ∂(freeFieldMeasure mass hmass) =
+        cff * cgg + 2 * cfg ^ 2 := by
+    simpa [T, cff, cgg, cfg] using mixed_fourth_moment_two_two mass hmass f g
+  have h42 :
+      ∫ ω : FieldConfig2D, (ω f) ^ 4 * (ω g) ^ 2 ∂(freeFieldMeasure mass hmass) =
+        3 * cff ^ 2 * cgg + 12 * cff * cfg ^ 2 := by
+    simpa [T, cff, cgg, cfg] using mixed_sixth_moment_four_two mass hmass f g
+  have h24 :
+      ∫ ω : FieldConfig2D, (ω f) ^ 2 * (ω g) ^ 4 ∂(freeFieldMeasure mass hmass) =
+        3 * cff * cgg ^ 2 + 12 * cgg * cfg ^ 2 := by
+    calc
+      ∫ ω : FieldConfig2D, (ω f) ^ 2 * (ω g) ^ 4 ∂(freeFieldMeasure mass hmass)
+          = ∫ ω : FieldConfig2D, (ω g) ^ 4 * (ω f) ^ 2 ∂(freeFieldMeasure mass hmass) := by
+              congr with ω
+              ring
+      _ = 3 * cgg ^ 2 * cff + 12 * cgg * (GaussianField.covariance T g f) ^ 2 := by
+            simpa [T, cff, cgg, mul_comm, mul_left_comm, mul_assoc] using
+              mixed_sixth_moment_four_two mass hmass g f
+      _ = 3 * cff * cgg ^ 2 + 12 * cgg * cfg ^ 2 := by
+            simp [cfg, GaussianField.covariance, real_inner_comm]
+            ring
+  have h44 :
+      ∫ ω : FieldConfig2D, (ω f) ^ 4 * (ω g) ^ 4 ∂(freeFieldMeasure mass hmass) =
+        9 * cff ^ 2 * cgg ^ 2 + 72 * cff * cgg * cfg ^ 2 + 24 * cfg ^ 4 := by
+    simpa [T, cff, cgg, cfg] using mixed_eighth_moment_four_four mass hmass f g
+  have hexpand :
+      (fun ω : FieldConfig2D =>
+        (wickMonomial 4 c (ω g) - wickMonomial 4 c (ω f)) ^ 2) =
+      (fun ω : FieldConfig2D =>
+        (ω g) ^ 8 - 12 * c * (ω g) ^ 6 + 36 * c ^ 2 * (ω g) ^ 4 +
+        (ω f) ^ 8 - 12 * c * (ω f) ^ 6 + 36 * c ^ 2 * (ω f) ^ 4 -
+        2 * ((ω f) ^ 4 * (ω g) ^ 4) + 12 * c * ((ω f) ^ 4 * (ω g) ^ 2) +
+        12 * c * ((ω f) ^ 2 * (ω g) ^ 4) - 72 * c ^ 2 * ((ω f) ^ 2 * (ω g) ^ 2)) := by
+    ext ω
+    simp [wickMonomial_four]
+    ring
+  let μ := freeFieldMeasure mass hmass
+  have hi8g : Integrable (fun ω : FieldConfig2D => (ω g) ^ 8) μ := power_integrable mass hmass g 8
+  have hi6g : Integrable (fun ω : FieldConfig2D => (ω g) ^ 6) μ := power_integrable mass hmass g 6
+  have hi4g : Integrable (fun ω : FieldConfig2D => (ω g) ^ 4) μ := power_integrable mass hmass g 4
+  have hi8f : Integrable (fun ω : FieldConfig2D => (ω f) ^ 8) μ := power_integrable mass hmass f 8
+  have hi6f : Integrable (fun ω : FieldConfig2D => (ω f) ^ 6) μ := power_integrable mass hmass f 6
+  have hi4f : Integrable (fun ω : FieldConfig2D => (ω f) ^ 4) μ := power_integrable mass hmass f 4
+  have hi44 : Integrable (fun ω : FieldConfig2D => (ω f) ^ 4 * (ω g) ^ 4) μ := by
+    have hrew :
+        (fun ω : FieldConfig2D => (ω f) ^ 4 * (ω g) ^ 4) =
+        (fun ω : Configuration TestFun2D =>
+          ∏ i : Fin 8, ω ((![f, f, f, f, g, g, g, g] : Fin 8 → TestFun2D) i)) := by
+      funext ω
+      simp [Fin.prod_univ_eight]
+      ring
+    rw [hrew]
+    exact product_integrable (freeCovarianceCLM mass hmass) 8
+      (fun i => (![f, f, f, f, g, g, g, g] : Fin 8 → TestFun2D) i)
+  have hi42 : Integrable (fun ω : FieldConfig2D => (ω f) ^ 4 * (ω g) ^ 2) μ := by
+    have hrew :
+        (fun ω : FieldConfig2D => (ω f) ^ 4 * (ω g) ^ 2) =
+        (fun ω : Configuration TestFun2D =>
+          ∏ i : Fin 6, ω ((![f, f, f, f, g, g] : Fin 6 → TestFun2D) i)) := by
+      funext ω
+      simp [Fin.prod_univ_six]
+      ring
+    rw [hrew]
+    exact product_integrable (freeCovarianceCLM mass hmass) 6
+      (fun i => (![f, f, f, f, g, g] : Fin 6 → TestFun2D) i)
+  have hi24 : Integrable (fun ω : FieldConfig2D => (ω f) ^ 2 * (ω g) ^ 4) μ := by
+    have hrew :
+        (fun ω : FieldConfig2D => (ω f) ^ 2 * (ω g) ^ 4) =
+        (fun ω : Configuration TestFun2D =>
+          ∏ i : Fin 6, ω ((![f, f, g, g, g, g] : Fin 6 → TestFun2D) i)) := by
+      funext ω
+      simp [Fin.prod_univ_six]
+      ring
+    rw [hrew]
+    exact product_integrable (freeCovarianceCLM mass hmass) 6
+      (fun i => (![f, f, g, g, g, g] : Fin 6 → TestFun2D) i)
+  have hi22 : Integrable (fun ω : FieldConfig2D => (ω f) ^ 2 * (ω g) ^ 2) μ := by
+    have hrew :
+        (fun ω : FieldConfig2D => (ω f) ^ 2 * (ω g) ^ 2) =
+        (fun ω : Configuration TestFun2D =>
+          ∏ i : Fin 4, ω ((![f, f, g, g] : Fin 4 → TestFun2D) i)) := by
+      funext ω
+      simp [Fin.prod_univ_four]
+      ring
+    rw [hrew]
+    exact product_integrable (freeCovarianceCLM mass hmass) 4
+      (fun i => (![f, f, g, g] : Fin 4 → TestFun2D) i)
+  let G8 : FieldConfig2D → ℝ := fun ω => (ω g) ^ 8
+  let G6 : FieldConfig2D → ℝ := fun ω => -12 * c * (ω g) ^ 6
+  let G4 : FieldConfig2D → ℝ := fun ω => 36 * c ^ 2 * (ω g) ^ 4
+  let F8 : FieldConfig2D → ℝ := fun ω => (ω f) ^ 8
+  let F6 : FieldConfig2D → ℝ := fun ω => -12 * c * (ω f) ^ 6
+  let F4 : FieldConfig2D → ℝ := fun ω => 36 * c ^ 2 * (ω f) ^ 4
+  let M44 : FieldConfig2D → ℝ := fun ω => -2 * ((ω f) ^ 4 * (ω g) ^ 4)
+  let M42 : FieldConfig2D → ℝ := fun ω => 12 * c * ((ω f) ^ 4 * (ω g) ^ 2)
+  let M24 : FieldConfig2D → ℝ := fun ω => 12 * c * ((ω f) ^ 2 * (ω g) ^ 4)
+  let M22 : FieldConfig2D → ℝ := fun ω => -72 * c ^ 2 * ((ω f) ^ 2 * (ω g) ^ 2)
+  have hsum :
+      (fun ω : FieldConfig2D =>
+        (ω g) ^ 8 - 12 * c * (ω g) ^ 6 + 36 * c ^ 2 * (ω g) ^ 4 +
+        (ω f) ^ 8 - 12 * c * (ω f) ^ 6 + 36 * c ^ 2 * (ω f) ^ 4 -
+        2 * ((ω f) ^ 4 * (ω g) ^ 4) + 12 * c * ((ω f) ^ 4 * (ω g) ^ 2) +
+        12 * c * ((ω f) ^ 2 * (ω g) ^ 4) - 72 * c ^ 2 * ((ω f) ^ 2 * (ω g) ^ 2)) =
+      fun ω => G8 ω + (G6 ω + (G4 ω + (F8 ω + (F6 ω + (F4 ω + (M44 ω + (M42 ω + (M24 ω + M22 ω)))))))) := by
+    funext ω
+    simp [G8, G6, G4, F8, F6, F4, M44, M42, M24, M22]
+    ring
+  let T22 : FieldConfig2D → ℝ := fun ω => M24 ω + M22 ω
+  let T42 : FieldConfig2D → ℝ := fun ω => M42 ω + T22 ω
+  let T44 : FieldConfig2D → ℝ := fun ω => M44 ω + T42 ω
+  let TF4 : FieldConfig2D → ℝ := fun ω => F4 ω + T44 ω
+  let TF6 : FieldConfig2D → ℝ := fun ω => F6 ω + TF4 ω
+  let TF8 : FieldConfig2D → ℝ := fun ω => F8 ω + TF6 ω
+  let TG4 : FieldConfig2D → ℝ := fun ω => G4 ω + TF8 ω
+  let TG6 : FieldConfig2D → ℝ := fun ω => G6 ω + TG4 ω
+  have htail22 : Integrable T22 μ := (hi24.const_mul _).add (hi22.const_mul _)
+  have htail42 : Integrable T42 μ := (hi42.const_mul _).add htail22
+  have htail44 : Integrable T44 μ := (hi44.const_mul _).add htail42
+  have htailF4 : Integrable TF4 μ := (hi4f.const_mul _).add htail44
+  have htailF6 : Integrable TF6 μ := (hi6f.const_mul _).add htailF4
+  have htailF8 : Integrable TF8 μ := hi8f.add htailF6
+  have htailG4 : Integrable TG4 μ := (hi4g.const_mul _).add htailF8
+  have htailG6 : Integrable TG6 μ := (hi6g.const_mul _).add htailG4
+  have s1 :
+      ∫ ω, G8 ω + TG6 ω ∂μ = ∫ ω, G8 ω ∂μ + ∫ ω, TG6 ω ∂μ := by
+    exact integral_add hi8g htailG6
+  have s2 :
+      ∫ ω, G6 ω + TG4 ω ∂μ = ∫ ω, G6 ω ∂μ + ∫ ω, TG4 ω ∂μ := by
+    exact integral_add (hi6g.const_mul _) htailG4
+  have s3 :
+      ∫ ω, G4 ω + TF8 ω ∂μ = ∫ ω, G4 ω ∂μ + ∫ ω, TF8 ω ∂μ := by
+    exact integral_add (hi4g.const_mul _) htailF8
+  have s4 :
+      ∫ ω, F8 ω + TF6 ω ∂μ = ∫ ω, F8 ω ∂μ + ∫ ω, TF6 ω ∂μ := by
+    exact integral_add hi8f htailF6
+  have s5 :
+      ∫ ω, F6 ω + TF4 ω ∂μ = ∫ ω, F6 ω ∂μ + ∫ ω, TF4 ω ∂μ := by
+    exact integral_add (hi6f.const_mul _) htailF4
+  have s6 :
+      ∫ ω, F4 ω + T44 ω ∂μ = ∫ ω, F4 ω ∂μ + ∫ ω, T44 ω ∂μ := by
+    exact integral_add (hi4f.const_mul _) htail44
+  have s7 :
+      ∫ ω, M44 ω + T42 ω ∂μ = ∫ ω, M44 ω ∂μ + ∫ ω, T42 ω ∂μ := by
+    exact integral_add (hi44.const_mul _) htail42
+  have s8 :
+      ∫ ω, M42 ω + T22 ω ∂μ = ∫ ω, M42 ω ∂μ + ∫ ω, T22 ω ∂μ := by
+    exact integral_add (hi42.const_mul _) htail22
+  have s9 :
+      ∫ ω, T22 ω ∂μ = ∫ ω, M24 ω ∂μ + ∫ ω, M22 ω ∂μ := by
+    exact integral_add (hi24.const_mul _) (hi22.const_mul _)
+  have hTG6 : (fun ω => G8 ω + TG6 ω) =
+      (fun ω => G8 ω + (G6 ω + (G4 ω + (F8 ω + (F6 ω + (F4 ω + (M44 ω + (M42 ω + (M24 ω + M22 ω))))))))) := by
+    funext ω
+    simp [TG6, TG4, TF8, TF6, TF4, T44, T42, T22]
+  have hM44 :
+      (-2 : ℝ) * (∫ ω, ω f ^ 4 * ω g ^ 4 ∂μ) =
+        -2 * (9 * cff ^ 2 * cgg ^ 2 + 72 * cff * cgg * cfg ^ 2 + 24 * cfg ^ 4) := by
+    rw [h44]
+  have hM42 :
+      12 * c * (∫ ω, ω f ^ 4 * ω g ^ 2 ∂μ) =
+        12 * c * (3 * cff ^ 2 * cgg + 12 * cff * cfg ^ 2) := by
+    rw [h42]
+  have hM24 :
+      12 * c * (∫ ω, ω f ^ 2 * ω g ^ 4 ∂μ) =
+        12 * c * (3 * cff * cgg ^ 2 + 12 * cgg * cfg ^ 2) := by
+    rw [h24]
+  have hM22' :
+      ∫ ω, M22 ω ∂μ = -72 * c ^ 2 * (cff * cgg + 2 * cfg ^ 2) := by
+    change ∫ ω, (-72 * c ^ 2) * (ω f ^ 2 * ω g ^ 2) ∂μ =
+      -72 * c ^ 2 * (cff * cgg + 2 * cfg ^ 2)
+    rw [integral_const_mul, h22]
+  rw [hexpand, hsum, ← hTG6, s1, s2, s3, s4, s5, s6, s7, s8, s9,
+    integral_const_mul, integral_const_mul, integral_const_mul,
+    integral_const_mul, integral_const_mul, integral_const_mul,
+    integral_const_mul]
+  rw [h8g, h6g, h4g, h8f, h6f, h4f, hM24, hM22', hM42, hM44]
+  simp only [T, cff, cgg, cfg]
+  ring_nf
+
 /-- Exact decomposition of the quartic Wick-power increment between two UV
     cutoffs. This separates the increment into:
     1. a field-increment term at fixed variance, and

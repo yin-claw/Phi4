@@ -6,6 +6,7 @@ import Phi4.Defs
 import Phi4.Bessel.BesselK0
 import HeatKernel
 import Mathlib.Analysis.Calculus.BumpFunction.InnerProduct
+import Mathlib.Analysis.Calculus.BumpFunction.Normed
 
 /-!
 # Free Euclidean Field in 2D
@@ -228,17 +229,26 @@ def freeCovKernel (mass : ℝ) (x y : Spacetime2D) : ℝ :=
   ∫ t in Set.Ioi (0 : ℝ),
     (4 * Real.pi * t)⁻¹ * Real.exp (-(mass ^ 2 * t + ‖x - y‖ ^ 2 / (4 * t)))
 
-/-- Honest theorem-level frontier: bridge between the Hilbert-space covariance
-    (harmonic oscillator resolvent) and the flat-space Green's function kernel.
+/-- Honest theorem-level frontier for the flat-space free covariance:
+    there exists a Gaussian CLM whose covariance pairing is the flat-space
+    Green's function kernel.
 
-    **Status**: This bridge requires either (a) a non-diagonal CLM representing
-    (-Δ+m²)⁻¹ in the Hermite basis, or (b) treating the harmonic trap as an
-    IR regulator and taking ω → 0 in (-Δ + ω²|x|² + m²)⁻¹.
-    See ProofIdeas/CovarianceMismatch.md. -/
+    This is the mathematically correct replacement for the false statement that
+    the already-defined `freeCovarianceCLM` (harmonic oscillator resolvent)
+    equals the flat-space kernel. The missing work is to build a CLM
+    representation of `(-Δ + m²)⁻¹`, or equivalently to construct the flat
+    Gaussian free field directly on Schwartz test functions.
+
+    **Status**: This requires either
+    1. a non-diagonal CLM realizing the flat covariance, or
+    2. a separate construction followed by an isometric identification with `ℓ²`.
+
+    See `ProofIdeas/CovarianceMismatch.md`. -/
 theorem gap_covariance_eq_kernel (mass : ℝ) (hmass : 0 < mass) :
-    ∀ (f g : TestFun2D),
-      GaussianField.covariance (freeCovarianceCLM mass hmass) f g =
-        ∫ x, ∫ y, f x * freeCovKernel mass x y * g y := by
+    ∃ T : TestFun2D →L[ℝ] ↥ell2',
+      ∀ (f g : TestFun2D),
+        GaussianField.covariance T f g =
+          ∫ x, ∫ y, f x * freeCovKernel mass x y * g y := by
   sorry
 
 /-- Rewrite the free covariance kernel using the 2D Schwinger integral identity. -/
@@ -312,7 +322,7 @@ theorem freeCovKernel_pos_def (mass : ℝ) (hmass : 0 < mass) :
 /-- UV mollifier: a smooth bump function centered at x with support of radius ~1/κ.
     This is the approximate delta function δ_{κ,x} used for UV regularization.
     The function is C^∞, compactly supported in a ball of radius κ⁻¹ around x,
-    and equals 1 on a ball of radius (2κ)⁻¹ around x.
+    and is normalized to have total mass `1`.
 
     The exact choice of mollifier does not affect the UV limit (κ → ∞),
     only the intermediate regularized quantities. -/
@@ -321,7 +331,106 @@ def uvMollifier (κ : UVCutoff) (x : Spacetime2D) : TestFun2D :=
     ⟨(2 * κ.κ)⁻¹, κ.κ⁻¹,
      inv_pos.mpr (mul_pos two_pos κ.hκ),
      by rw [inv_lt_inv₀ (mul_pos two_pos κ.hκ) κ.hκ]; linarith [κ.hκ]⟩
-  bump.hasCompactSupport.toSchwartzMap bump.contDiff
+  (bump.hasCompactSupport_normed (μ := MeasureTheory.volume)).toSchwartzMap
+    (bump.contDiff_normed (μ := MeasureTheory.volume))
+
+/-- The normalized UV mollifier has unit total mass. -/
+theorem integral_uvMollifier (κ : UVCutoff) (x : Spacetime2D) :
+    ∫ y, uvMollifier κ x y = 1 := by
+  let bump : ContDiffBump x :=
+    ⟨(2 * κ.κ)⁻¹, κ.κ⁻¹,
+     inv_pos.mpr (mul_pos two_pos κ.hκ),
+     by rw [inv_lt_inv₀ (mul_pos two_pos κ.hκ) κ.hκ]; linarith [κ.hκ]⟩
+  have huv :
+      (uvMollifier κ x : Spacetime2D → ℝ) = bump.normed MeasureTheory.volume := by
+    ext y
+    simp [uvMollifier, bump]
+  rw [huv]
+  exact bump.integral_normed (μ := MeasureTheory.volume)
+
+/-- The support of the normalized UV mollifier is the outer bump ball. -/
+theorem support_uvMollifier_eq (κ : UVCutoff) (x : Spacetime2D) :
+    Function.support (uvMollifier κ x) = Metric.ball x κ.κ⁻¹ := by
+  let bump : ContDiffBump x :=
+    ⟨(2 * κ.κ)⁻¹, κ.κ⁻¹,
+     inv_pos.mpr (mul_pos two_pos κ.hκ),
+     by rw [inv_lt_inv₀ (mul_pos two_pos κ.hκ) κ.hκ]; linarith [κ.hκ]⟩
+  have huv :
+      (uvMollifier κ x : Spacetime2D → ℝ) = bump.normed MeasureTheory.volume := by
+    ext y
+    simp [uvMollifier, bump]
+  rw [huv]
+  simpa [bump] using (bump.support_normed_eq (μ := MeasureTheory.volume))
+
+/-- The topological support of the normalized UV mollifier is the closed outer
+support ball. -/
+theorem tsupport_uvMollifier_eq (κ : UVCutoff) (x : Spacetime2D) :
+    tsupport (uvMollifier κ x : Spacetime2D → ℝ) = Metric.closedBall x κ.κ⁻¹ := by
+  rw [tsupport, support_uvMollifier_eq, closure_ball _ (inv_pos.mpr κ.hκ).ne']
+
+/-- Pointwise size bound for the normalized UV mollifier. This is the natural
+`κ²`-scale amplitude estimate for a unit-mass bump in two dimensions, expressed
+in a coordinate-free volume form. -/
+theorem uvMollifier_le_four_div_volume_closedBall
+    (κ : UVCutoff) (x y : Spacetime2D) :
+    uvMollifier κ x y ≤ 4 / MeasureTheory.volume.real (Metric.closedBall x κ.κ⁻¹) := by
+  let bump : ContDiffBump x :=
+    ⟨(2 * κ.κ)⁻¹, κ.κ⁻¹,
+     inv_pos.mpr (mul_pos two_pos κ.hκ),
+     by rw [inv_lt_inv₀ (mul_pos two_pos κ.hκ) κ.hκ]; linarith [κ.hκ]⟩
+  have huv :
+      (uvMollifier κ x : Spacetime2D → ℝ) = bump.normed MeasureTheory.volume := by
+    ext z
+    simp [uvMollifier, bump]
+  rw [huv]
+  have hrad : bump.rOut ≤ 2 * bump.rIn := by
+    dsimp [bump]
+    rw [inv_eq_one_div, inv_eq_one_div]
+    field_simp [κ.hκ.ne']
+    exact le_rfl
+  calc
+    bump.normed MeasureTheory.volume y
+      ≤ 2 ^ 2 / MeasureTheory.volume.real (Metric.closedBall x κ.κ⁻¹) := by
+        simpa [bump, div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc] using
+          (bump.normed_le_div_measure_closedBall_rOut (μ := MeasureTheory.volume) 2 hrad y)
+    _ = 4 / MeasureTheory.volume.real (Metric.closedBall x κ.κ⁻¹) := by norm_num
+
+/-- Translation identity for the normalized UV mollifier. -/
+theorem uvMollifier_apply_sub (κ : UVCutoff) (a y : Spacetime2D) :
+    uvMollifier κ a y = uvMollifier κ 0 (y - a) := by
+  let ba : ContDiffBump a :=
+    ⟨(2 * κ.κ)⁻¹, κ.κ⁻¹,
+     inv_pos.mpr (mul_pos two_pos κ.hκ),
+     by rw [inv_lt_inv₀ (mul_pos two_pos κ.hκ) κ.hκ]; linarith [κ.hκ]⟩
+  let b0 : ContDiffBump (0 : Spacetime2D) :=
+    ⟨(2 * κ.κ)⁻¹, κ.κ⁻¹,
+     inv_pos.mpr (mul_pos two_pos κ.hκ),
+     by rw [inv_lt_inv₀ (mul_pos two_pos κ.hκ) κ.hκ]; linarith [κ.hκ]⟩
+  have huvA : (uvMollifier κ a : Spacetime2D → ℝ) = ba.normed MeasureTheory.volume := by
+    ext z
+    simp [uvMollifier, ba]
+  have huv0 : (uvMollifier κ (0 : Spacetime2D) : Spacetime2D → ℝ) = b0.normed MeasureTheory.volume := by
+    ext z
+    simp [uvMollifier, b0]
+  have hraw : ∀ z : Spacetime2D, ba z = b0 (z - a) := by
+    intro z
+    rw [show ba z =
+        (someContDiffBumpBase Spacetime2D).toFun (κ.κ⁻¹ / ((2 * κ.κ)⁻¹))
+          (((2 * κ.κ)⁻¹)⁻¹ • (z - a)) by rfl]
+    rw [show b0 (z - a) =
+        (someContDiffBumpBase Spacetime2D).toFun (κ.κ⁻¹ / ((2 * κ.κ)⁻¹))
+          (((2 * κ.κ)⁻¹)⁻¹ • ((z - a) - 0)) by rfl]
+    simp [sub_eq_add_neg]
+  have hint : ∫ z, ba z = ∫ z, b0 z := by
+    calc
+      ∫ z, ba z = ∫ z, b0 (z - a) := by
+        refine integral_congr_ae ?_
+        exact Filter.Eventually.of_forall hraw
+      _ = ∫ z, b0 z := by
+        simpa using
+          (integral_sub_right_eq_self (f := fun z : Spacetime2D => b0 z) a
+            (μ := MeasureTheory.volume))
+  rw [huvA, huv0, ContDiffBump.normed_def, ContDiffBump.normed_def, hraw y, hint]
 
 /-- The UV-regularized covariance c_κ = Cov(δ_{κ,0}, δ_{κ,0}), where δ_{κ,0} is
     the UV mollifier centered at the origin.

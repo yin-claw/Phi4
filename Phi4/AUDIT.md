@@ -1,6 +1,6 @@
 # Phi4 Audit Notes
 
-Date: 2026-03-06
+Date: 2026-03-09
 
 ## Main vs Simplified Branch Review
 
@@ -27,9 +27,9 @@ for direct merge. In particular:
 
 ## Current Honest Status
 
-- theorem-level `sorry` in core modules: `18`
+- theorem-level `sorry` in core modules: `20`
 - legacy `class/structure .*Model`: `13`
-- canonical `gap_*` theorem frontiers: `33`
+- canonical `gap_*` theorem frontiers: `39`
 - `axiom`: `0`
 - `def/abbrev := by sorry`: `0`
 
@@ -58,8 +58,29 @@ added quantitative shell infrastructure in `WickProduct.lean`, including:
 
 This means the main WP1 shell-rate blocker is no longer stuck on quartic-Wick
 algebra or basic Gaussian moment identities. The remaining obstruction is the
-actual covariance-shell analysis needed for
-`gap_interactionCutoff_standardSeq_L2_increment_rate`.
+actual covariance-shell analysis behind
+`gap_wickPowerStandardSeqShellUpper_spatial_sq_rate`, together with the
+Nelson-side leaf frontiers in `Interaction/NelsonBound.lean`.
+
+## Refactor Update
+
+The old monolithic `Interaction/AnalyticInputs.lean` has now been split into:
+
+1. `Interaction/UVInfra.lean`
+2. `Interaction/ShellEstimates.lean`
+3. `Interaction/NelsonBound.lean`
+4. `Interaction/AnalyticInputs.lean` as the thin endpoint orchestrator
+
+This split is build-verified and follows actual proof-program boundaries rather
+than arbitrary file size reduction.
+
+The refactor also surfaced two definition-level corrections:
+
+1. `uvMollifier` is now normalized to unit mass in `FreeField.lean`, which is
+   necessary for an honest delta-approximation interpretation,
+2. `gap_covariance_eq_kernel` now states existence of a flat-space CLM witness
+   instead of the false statement that the already-defined harmonic-oscillator
+   `freeCovarianceCLM` equals the flat kernel.
 
 But the repository is still not close to completion:
 

@@ -6,11 +6,11 @@ A Lean 4 formalization of constructive 2D φ⁴ Euclidean QFT aimed at the Glimm
 2. prove the Osterwalder-Schrader axioms,
 3. reconstruct the corresponding Wightman theory.
 
-## Current Status (March 6, 2026)
+## Current Status (March 9, 2026)
 
-- Core theorem-level `sorry` in `Phi4/**/*.lean` excluding `Phi4/Scratch`: `18`
+- Core theorem-level `sorry` in `Phi4/**/*.lean` excluding `Phi4/Scratch`: `20`
 - Legacy `class/structure .*Model` declarations: `13`
-- Canonical `gap_*` theorem frontiers: `33`
+- Canonical `gap_*` theorem frontiers: `39`
 - `axiom` declarations: `0`
 - `def`/`abbrev := by sorry`: `0`
 
@@ -25,30 +25,47 @@ The correct status framing is:
 
 1. `WP0`: complete the free/Gaussian combinatorial bridge needed by WP1.
    Main explicit targets:
-   - `gap_covariance_eq_kernel`
+   - `gap_covariance_eq_kernel` (honest flat-space CLM existence frontier, not an
+     equality statement for the harmonic-oscillator `freeCovarianceCLM`)
    - `gap_pairing_card`
    - `gap_wicks_theorem_even`
    - `gap_feynman_graph_expansion`
    - `gap_localized_graph_exponential_decay`
 2. `WP1`: prove `gap_hasExpInteractionLp`.
    This is the Chapter 8 finite-volume integrability/normalization core.
-   The WP1 endpoint (`hasExpInteractionLp_of_analytic_inputs`) uses a
-   Fatou route with two critical-path inputs:
-   - `gap_interactionCutoff_standardSeq_ae_convergence` (sequence-level a.e. UV convergence,
-     proved modulo `gap_interactionCutoff_standardSeq_summable_L1_increments`)
-   - `gap_exp_neg_interaction_uniform_bound` (Nelson's uniform bound on E[exp(-pV_κ)],
-     proved modulo `gap_interaction_double_exponential_tail_bound` + `neg_exp_moment_of_double_exponential_tail`)
-   The deepest unsolved analytical inputs are:
-   - `gap_interactionCutoff_standardSeq_L2_increment_rate` (Fourier analysis of covariance increments)
-   - `gap_interaction_double_exponential_tail_bound` (Nelson's covariance splitting + moment bounds)
-   Non-critical supporting frontiers (not on the main WP1 path):
-   - `gap_interactionCutoff_L2_convergence` (continuous-parameter L²)
-   - `gap_interactionCutoff_ae_convergence` (continuous-parameter a.e., stronger than needed)
-   Recently closed support theorem:
-   - `gap_interaction_sq_integrable` now follows from the discrete UV route
-     (summable `lpNorm` steps + sequence-level a.e. convergence), so it is no
-     longer an active WP1 blocker.
-   Recent shell-branch infrastructure:
+   The analytic input layer is now split by mathematics:
+   - `Interaction/UVInfra.lean`
+   - `Interaction/ShellEstimates.lean`
+   - `Interaction/NelsonBound.lean`
+   - `Interaction/AnalyticInputs.lean` as the thin endpoint orchestrator
+
+   The current shell branch is reduced to one honest leaf theorem:
+   - `gap_wickPowerStandardSeqShellUpper_spatial_sq_rate`
+   and derived closures:
+   - `gap_wickPower_standardSeq_spatial_sq_rate`
+   - `gap_interactionCutoff_standardSeq_L2_increment_rate`
+   - `gap_interactionCutoff_standardSeq_summable_L1_increments`
+   - `gap_interactionCutoff_standardSeq_ae_convergence`
+
+   The current Nelson branch is reduced to three honest leaf theorems:
+   - `gap_regularizedPointCovariance_log_growth`
+   - `gap_interactionCutoff_sub_even_moment_comparison`
+   - `gap_interactionCutoff_reference_shell_L2_bound`
+   and derived closures:
+   - `gap_interactionCutoff_reference_shell_even_moment_bound`
+   - `gap_interaction_double_exponential_tail_bound`
+   - `gap_exp_neg_interaction_uniform_bound`
+
+   Non-critical supporting frontiers retained off the main path:
+   - `gap_interactionCutoff_L2_convergence`
+   - `gap_interactionCutoff_ae_convergence`
+
+   Recently closed support endpoints:
+   - `gap_interaction_aestronglyMeasurable`
+   - `gap_interaction_sq_integrable`
+
+   Recent infrastructure that made the shell split possible:
+   - normalized `uvMollifier` with unit mass and exact support in `FreeField.lean`
    - `wickPower_four_step_decomposition`
    - `rawFieldEval_sub_sq_expectation`
    - `rawFieldEval_sub_fourth_expectation`
@@ -96,3 +113,9 @@ Recent progress on that front:
 4. the multiple-reflection bundle was removed from the infinite-volume convergence layer in favor of explicit monotonicity and uniform-bound assumptions.
 
 The `simplified` branch was not merged wholesale because it mixed useful theorem-surface cleanup with deletion of substantive proved mathematics.
+
+Recent structural progress:
+
+1. the monolithic `Interaction/AnalyticInputs.lean` was split along actual proof-program boundaries into shared UV infrastructure, shell estimates, and Nelson bounds,
+2. the shell and Nelson branches now expose their genuine leaf frontiers explicitly instead of hiding them inside one oversized file,
+3. the flat-space covariance frontier in `FreeField.lean` now states existence of a flat CLM witness, rather than the false equality of the harmonic-oscillator CLM with the flat kernel.

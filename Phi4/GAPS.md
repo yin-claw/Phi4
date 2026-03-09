@@ -1,14 +1,14 @@
 # Phi4 Proof-Gap Ledger
 
-Date: 2026-03-06
+Date: 2026-03-09
 
 This file records the current proof boundary on `main`.
 
 ## Trust Snapshot
 
-- theorem-level `sorry` in core modules: `18`
+- theorem-level `sorry` in core modules: `20`
 - legacy `class/structure .*Model`: `13`
-- canonical `gap_*` theorem frontiers: `33`
+- canonical `gap_*` theorem frontiers: `39`
 - `axiom`: `0`
 - `def/abbrev := by sorry`: `0`
 
@@ -29,73 +29,79 @@ tracked by the theorem-level `sorry` count above.
 2. `gap_wicks_theorem_even`
 3. `gap_feynman_graph_expansion`
 4. `gap_localized_graph_exponential_decay`
-5. `gap_covariance_eq_kernel`
+5. `gap_covariance_eq_kernel` — existence of a flat-space CLM realizing `freeCovKernel`
 
 ### WP1: Finite-volume integrability (CRITICAL PATH)
 6. `gap_uvMollifier_continuous` — UV mollifier continuity `[closed]`
 7. `gap_interactionCutoff_sq_integrable` — L² integrability of cutoff interaction `[closed]`
-8. `gap_interactionCutoff_standardSeq_L2_increment_rate` — L² rate bound on UV increments
-9. `gap_interactionCutoff_standardSeq_summable_L1_increments` — summable L¹ increments `[closed modulo 8]`
-10. `gap_interactionCutoff_standardSeq_ae_convergence` — **sequence-level a.e. convergence (on critical path)** `[closed modulo 8]`
-11. `gap_interaction_double_exponential_tail_bound` — Nelson's double-exponential tail
-12. `gap_exp_neg_interaction_uniform_bound` — **Nelson's uniform bound (on critical path)** `[closed modulo 11]`
-13. `gap_hasExpInteractionLp` — WP1 endpoint
-
-#### WP1 non-critical (retained for completeness, not on main path)
-14. `gap_interactionCutoff_L2_convergence` — continuous-parameter L² convergence
-15. `gap_interactionCutoff_ae_convergence` — continuous-parameter a.e. convergence
-16. `gap_interaction_aestronglyMeasurable` — measurability of limiting interaction `[closed]`
-17. `gap_interaction_sq_integrable` — square-integrability of the limiting interaction `[closed]`
+8. `gap_wickPowerStandardSeqShellUpper_spatial_sq_rate` — shell-side spatial square rate for the reduced upper envelope
+9. `gap_wickPower_standardSeq_spatial_sq_rate` — quartic shell rate `[closed modulo 8]`
+10. `gap_interactionCutoff_standardSeq_L2_increment_rate` — discrete cutoff L² increment rate `[closed modulo 8]`
+11. `gap_interactionCutoff_standardSeq_summable_L1_increments` — summable L¹ increments `[closed modulo 10]`
+12. `gap_interactionCutoff_standardSeq_ae_convergence` — sequence-level a.e. convergence `[closed modulo 11]`
+13. `gap_interactionCutoff_L2_convergence` — continuous-parameter L² convergence
+14. `gap_interactionCutoff_ae_convergence` — continuous-parameter a.e. convergence
+15. `gap_interaction_aestronglyMeasurable` — measurability of limiting interaction `[closed]`
+16. `gap_interaction_sq_integrable` — square-integrability of the limiting interaction `[closed]`
+17. `gap_regularizedPointCovariance_log_growth` — additive-constant logarithmic covariance growth for normalized UV cutoff
+18. `gap_interactionCutoff_sub_even_moment_comparison` — direct even-moment comparison for the integrated cutoff difference
+19. `gap_interactionCutoff_reference_shell_L2_bound` — canonical reference-shell L² decay
+20. `gap_interactionCutoff_reference_shell_even_moment_bound` — Nelson reference-shell even-moment bound `[closed modulo 18,19]`
+21. `gap_interaction_double_exponential_tail_bound` — Nelson double-exponential tail `[closed modulo 17,18,19]`
+22. `gap_exp_neg_interaction_uniform_bound` — uniform negative exponential moment bound `[closed modulo 21]`
+23. `gap_hasExpInteractionLp` — WP1 endpoint
 
 ### WP2: Finite-volume monotonicity, comparison, reflection positivity
-18. `gap_schwingerTwo_le_free`
-19. `gap_hasSchwingerNMonotone`
-20. `gap_hasChessboardEstimate`
-21. `gap_hasSchwingerUniformBound`
-22. `gap_free_covariance_reflection_positive`
-23. `gap_dirichlet_covariance_reflection_positive`
-24. `gap_interacting_measure_reflection_positive`
+24. `gap_schwingerTwo_le_free`
+25. `gap_hasSchwingerNMonotone`
+26. `gap_hasChessboardEstimate`
+27. `gap_hasSchwingerUniformBound`
+28. `gap_free_covariance_reflection_positive`
+29. `gap_dirichlet_covariance_reflection_positive`
+30. `gap_interacting_measure_reflection_positive`
 
 ### WP3: Infinite-volume limit
-25. `gap_infiniteVolumeLimit_exists`
+31. `gap_infiniteVolumeLimit_exists`
 
 ### WP4: Regularity and equation of motion
-26. `gap_wick_powers_infinite_volume`
-27. `gap_wickCubicSmeared_tendsto_ae`
-28. `gap_euclidean_equation_of_motion`
-29. `gap_generating_functional_bound`
-30. `gap_generating_functional_bound_uniform`
-31. `gap_nonlocal_phi4_bound`
+32. `gap_wick_powers_infinite_volume`
+33. `gap_wickCubicSmeared_tendsto_ae`
+34. `gap_euclidean_equation_of_motion`
+35. `gap_generating_functional_bound`
+36. `gap_generating_functional_bound_uniform`
+37. `gap_nonlocal_phi4_bound`
 
 ### WP5: OS packaging and reconstruction
-32. `gap_measure_os3_reflection_positive`
-33. `gap_phi4_linear_growth`
+38. `gap_measure_os3_reflection_positive`
+39. `gap_phi4_linear_growth`
 
 ## WP1 Critical Path
 
-The WP1 endpoint `hasExpInteractionLp_of_analytic_inputs` needs exactly:
+The WP1 endpoint `hasExpInteractionLp_of_analytic_inputs` now sits on two
+separated branches:
 
 ```
-gap_interactionCutoff_standardSeq_L2_increment_rate
-  → gap_interactionCutoff_standardSeq_summable_L1_increments
-    → gap_interactionCutoff_standardSeq_ae_convergence  (PROVED modulo L1 summability)
+gap_wickPowerStandardSeqShellUpper_spatial_sq_rate
+  → gap_wickPower_standardSeq_spatial_sq_rate
+    → gap_interactionCutoff_standardSeq_L2_increment_rate
+      → gap_interactionCutoff_standardSeq_summable_L1_increments
+        → gap_interactionCutoff_standardSeq_ae_convergence
 
-gap_interaction_double_exponential_tail_bound
-  + neg_exp_moment_of_double_exponential_tail (internal helper, PROVED)
-  + integral_exp_linear_minus_double_exp_finite (internal helper, PROVED)
-    → gap_exp_neg_interaction_uniform_bound  (PROVED modulo sub-lemmas)
+gap_regularizedPointCovariance_log_growth
+  + gap_interactionCutoff_sub_even_moment_comparison
+  + gap_interactionCutoff_reference_shell_L2_bound
+    → gap_interactionCutoff_reference_shell_even_moment_bound
+      → gap_interaction_double_exponential_tail_bound
+        → gap_exp_neg_interaction_uniform_bound
 
 Both → hasExpInteractionLp_of_analytic_inputs  (PROVED modulo above)
 ```
 
-Recent quantitative infrastructure on the shell branch:
-- `wickPower_four_step_decomposition`
-- `rawFieldEval_sub_sq_expectation`
-- `rawFieldEval_sub_fourth_expectation`
-
-These reduce `gap_interactionCutoff_standardSeq_L2_increment_rate` to the
-remaining covariance-shell and polynomial-moment estimates, rather than to
-further algebraic manipulation of the quartic Wick increment.
+The shell/Nelson split is now reflected in the source tree itself:
+- `Interaction/UVInfra.lean`
+- `Interaction/ShellEstimates.lean`
+- `Interaction/NelsonBound.lean`
+- `Interaction/AnalyticInputs.lean` as the thin endpoint file
 
 ## Explicit But Not Yet Named OS Obligations
 
@@ -127,6 +133,7 @@ not yet cover the full mathematical debt of the repository.
 WP1 remains the primary blocker:
 - proving the finite-volume Boltzmann-weight integrability and normalization
   needed for the interacting measure, together with the newly surfaced
-  analytic-input obligations in `Interaction/AnalyticInputs.lean`.
+  shell and Nelson leaf theorems in `Interaction/ShellEstimates.lean` and
+  `Interaction/NelsonBound.lean`.
 
 Everything downstream depends on that analytic core.
