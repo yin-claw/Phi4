@@ -6,6 +6,9 @@ import Phi4.CovarianceOperators
 import Mathlib.Algebra.MvPolynomial.Degrees
 import Mathlib.Algebra.MvPolynomial.Eval
 import Mathlib.Algebra.Module.LinearMap.Polynomial
+import Mathlib.MeasureTheory.SpecificCodomains.WithLp
+import Mathlib.Probability.Distributions.Gaussian.Fernique
+import Mathlib.Probability.Moments.CovarianceBilin
 
 /-!
 # Wick Products (Normal Ordering)
@@ -983,6 +986,70 @@ theorem continuous_mvPolynomial_eval {σ : Type*} [Fintype σ] [DecidableEq σ]
       simpa [MvPolynomial.eval_add] using hP.add hQ
   | mul_X P i hP =>
       simpa [MvPolynomial.eval_mul, MvPolynomial.eval_X] using hP.mul (continuous_apply i)
+
+/-- Coordinate covariances of the standard product Gaussian on a finite real
+coordinate space are Kronecker deltas. This is the basic covariance input for
+the finite-dimensional centered-Gaussian reduction on the Nelson branch. -/
+private theorem standardGaussian_coordinate_cov
+    {n : ℕ} (i j : Fin n ⊕ Fin n) :
+    let γraw : Measure ((Fin n ⊕ Fin n) → ℝ) :=
+      Measure.pi (fun _ : Fin n ⊕ Fin n => gaussianReal 0 1)
+    cov[(fun x : (Fin n ⊕ Fin n) → ℝ => x i), (fun x => x j); γraw] =
+      if i = j then 1 else 0 := by
+  intro γraw
+  have hX : ∀ k : Fin n ⊕ Fin n, MemLp (fun ω : (Fin n ⊕ Fin n) → ℝ => ω k) 2 γraw := by
+    intro k
+    simpa [Function.comp] using
+      (memLp_id_gaussianReal' (μ := 0) (v := 1) 2 (by norm_num)).comp_measurePreserving
+        (measurePreserving_eval (fun _ : Fin n ⊕ Fin n => gaussianReal 0 1) k)
+  by_cases hij : i = j
+  · subst hij
+    rw [covariance_self (hX i).aemeasurable, ← variance_id_map]
+    · rw [(measurePreserving_eval (fun _ : Fin n ⊕ Fin n => gaussianReal 0 1) i).map_eq]
+      simp
+    · simpa using
+        (((measurePreserving_eval (fun _ : Fin n ⊕ Fin n => gaussianReal 0 1) i).measurable :
+          Measurable (fun ω : (Fin n ⊕ Fin n) → ℝ => ω i)).aemeasurable)
+  · have hi : iIndepFun (fun k (ω : (Fin n ⊕ Fin n) → ℝ) => ω k) γraw := by
+      exact iIndepFun_pi (fun k => measurable_id.aemeasurable)
+    simpa [hij] using (hi.indepFun hij).covariance_eq_zero (hX i) (hX j)
+
+/-- The standard product Gaussian on finite Euclidean space has covariance
+bilinear form equal to the ambient inner product. This is the concrete
+finite-dimensional covariance identity needed for the centered Gaussian
+reduction theorem on the Nelson branch. -/
+private theorem standardGaussian_covarianceBilin_euclidean_id
+    {n : ℕ} (x y : EuclideanSpace ℝ (Fin n ⊕ Fin n)) :
+    let γraw : Measure ((Fin n ⊕ Fin n) → ℝ) :=
+      Measure.pi (fun _ : Fin n ⊕ Fin n => gaussianReal 0 1)
+    let γ : Measure (EuclideanSpace ℝ (Fin n ⊕ Fin n)) :=
+      γraw.map (fun ω ↦ WithLp.toLp 2 (fun k => ω k))
+    ProbabilityTheory.covarianceBilin γ x y = inner ℝ x y := by
+  intro γraw γ
+  have hX : ∀ k : Fin n ⊕ Fin n, MemLp (fun ω : (Fin n ⊕ Fin n) → ℝ => ω k) 2 γraw := by
+    intro k
+    simpa [Function.comp] using
+      (memLp_id_gaussianReal' (μ := 0) (v := 1) 2 (by norm_num)).comp_measurePreserving
+        (measurePreserving_eval (fun _ : Fin n ⊕ Fin n => gaussianReal 0 1) k)
+  rw [show γ = γraw.map (fun ω ↦ WithLp.toLp 2 (fun k => ω k)) by rfl]
+  rw [ProbabilityTheory.covarianceBilin_apply_pi hX x y]
+  have hcov : ∀ i j : Fin n ⊕ Fin n,
+      cov[(fun x : (Fin n ⊕ Fin n) → ℝ => x i), (fun x => x j); γraw] = if i = j then 1 else 0 := by
+    intro i j
+    simpa [γraw] using (standardGaussian_coordinate_cov (n := n) i j)
+  simp_rw [hcov]
+  have hsum : ∑ i, ∑ j, x i * y j * (if i = j then 1 else 0) = ∑ i, x i * y i := by
+    refine Finset.sum_congr rfl ?_
+    intro i hi
+    refine (Finset.sum_eq_single i ?_ ?_).trans ?_
+    · intro j hj hji
+      have hij : i ≠ j := by exact fun h => hji h.symm
+      simp [hij]
+    · intro hi_not_mem
+      simp at hi_not_mem
+    · simp
+  rw [hsum, PiLp.inner_apply]
+  simpa [RCLike.inner_apply, mul_comm]
 
 /-- Standard-Gaussian hypercontractive frontier behind the Nelson step.
 
