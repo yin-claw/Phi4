@@ -1358,80 +1358,17 @@ theorem gap_regularizedPointCovariance_log_growth
     ∃ K C₀ : ℝ, 0 < K ∧ 0 ≤ C₀ ∧
       ∀ κ : UVCutoff,
         regularizedPointCovariance params.mass κ ≤ C₀ + K * Real.log κ.κ := by
-  sorry
-
-/-- Reduction of the Nelson even-moment comparison to finite Wick cylinder
-approximants.
-
-This theorem does not introduce a new frontier by itself: it shows that the
-current leaf theorem `gap_interactionCutoff_sub_even_moment_comparison` follows
-from an approximation scheme by finite `0/2/4` Wick cylinders together with a
-uniform degree-4 Gaussian polynomial moment comparison constant. -/
-theorem interactionCutoff_sub_even_moment_comparison_of_finiteWickCylinder_approx
-    (params : Phi4Params) (Λ : Rectangle) (C : ℝ)
-    (hC : 0 < C)
-    (happrox :
-      ∀ κ κ₀ : UVCutoff,
-        ∃ Z : ℕ → FieldConfig2D → ℝ,
-          (∀ n : ℕ, IsFiniteWickCylinder (Z n)) ∧
-          (∀ n j : ℕ, 0 < j →
-            ∫ ω, |Z n ω| ^ (2 * j) ∂(freeFieldMeasure params.mass params.mass_pos)
-              ≤ (C * ↑j) ^ (4 * j) *
-                  (∫ ω, (Z n ω) ^ 2 ∂(freeFieldMeasure params.mass params.mass_pos)) ^ j) ∧
-          (∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
-            Tendsto
-              (fun n : ℕ => Z n ω) atTop
-              (𝓝 (interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω))) ∧
-          Tendsto
-            (fun n : ℕ => ∫ ω, (Z n ω) ^ 2 ∂(freeFieldMeasure params.mass params.mass_pos))
-            atTop
-            (𝓝
-              (∫ ω,
-                  (interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω) ^ 2
-                ∂(freeFieldMeasure params.mass params.mass_pos)))) :
-    ∀ (κ κ₀ : UVCutoff) (j : ℕ), 0 < j →
-      ∫ ω,
-          |interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω| ^ (2 * j)
-          ∂(freeFieldMeasure params.mass params.mass_pos)
-        ≤ (C * ↑j) ^ (4 * j) *
-            (∫ ω,
-                (interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω) ^ 2
-                ∂(freeFieldMeasure params.mass params.mass_pos)) ^ j := by
-  intro κ κ₀ j hj
-  rcases happrox κ κ₀ with ⟨Z, hfin, hcmp, h_ae, hL2⟩
-  let μ : Measure FieldConfig2D := freeFieldMeasure params.mass params.mass_pos
-  let X : FieldConfig2D → ℝ :=
-    fun ω => interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω
-  have hY_meas : ∀ n, AEStronglyMeasurable (Z n) μ := by
-    intro n
-    exact ((hfin n).memLp params.mass params.mass_pos (p := (1 : ℝ≥0∞)) (by norm_num)).aestronglyMeasurable
-  have hX_meas : AEStronglyMeasurable X μ := by
-    simpa [X] using
-      ((interactionCutoff_stronglyMeasurable params Λ κ).sub
-        (interactionCutoff_stronglyMeasurable params Λ κ₀)).aestronglyMeasurable
-  have hY_int : ∀ n, Integrable (fun ω => |Z n ω| ^ (2 * j)) μ := by
-    intro n
-    simpa [μ] using (hfin n).even_integrable params.mass params.mass_pos j
-  simpa [μ, X] using
-    evenMomentComparison_of_tendsto_ae μ X Z ((C * ↑j) ^ (4 * j)) j
-      (by positivity) h_ae hY_meas hX_meas hY_int
-      (fun n => hcmp n j hj) hL2
-
-/-- Frontier theorem for degree-4 Gaussian polynomial moment comparison on
-finite Wick cylinders.
-
-This is the finite-dimensional hypercontractive input on the Nelson side. It
-should be proved once for the canonical `0/2/4` Wick-polynomial cylinders and
-then reused through approximation. -/
-theorem gap_finiteWickCylinder_even_moment_comparison
-    (params : Phi4Params) :
-    ∃ C : ℝ, 0 < C ∧
-      ∀ (Z : FieldConfig2D → ℝ), IsFiniteWickCylinder Z →
-        ∀ (j : ℕ), 0 < j →
-          ∫ ω, |Z ω| ^ (2 * j) ∂(freeFieldMeasure params.mass params.mass_pos)
-            ≤ (C * ↑j) ^ (4 * j) *
-                (∫ ω, (Z ω) ^ 2 ∂(freeFieldMeasure params.mass params.mass_pos)) ^ j := by
-  sorry
+  obtain ⟨K, C₀, hK, hC₀, hkernel⟩ :=
+    gap_uvMollifier_freeCovKernel_log_growth params.mass params.mass_pos
+  refine ⟨K, C₀, hK, hC₀, ?_⟩
+  intro κ
+  have hrepr :
+      regularizedPointCovariance params.mass κ =
+        ∫ x, ∫ y, uvMollifier κ 0 x * freeCovKernel params.mass x y * uvMollifier κ 0 y := by
+    rw [regularizedPointCovariance_eq_covariance params.mass params.mass_pos κ]
+    simpa using gap_uvMollifier_covariance_eq_freeCovKernel params.mass params.mass_pos κ κ 0 0
+  rw [hrepr]
+  exact hkernel κ
 
 /-- Frontier theorem for approximating cutoff-interaction differences by finite
 Wick cylinders.
@@ -1698,6 +1635,125 @@ private theorem eventually_uniform_wickPowerSub_sq_expectation_lt
           unfold η
           ring
 
+/-- Spatial bridge from the pointwise uniform-approximant error to the `L²`
+error of the cutoff-interaction difference. This is the Nelson-side analogue of
+the shell bridge in `ShellEstimates`: all Cauchy-Schwarz/Fubini bookkeeping is
+handled here, leaving only the genuinely small pointwise second-moment error as
+input. -/
+private theorem interactionCutoffSubUniformApprox_sub_sq_le_spatialIntegral
+    (params : Phi4Params) (Λ : Rectangle) (κ κ₀ : UVCutoff) (n : ℕ)
+    (hprod :
+      Integrable
+        (fun p : FieldConfig2D × Spacetime2D =>
+          (((Phi4.uniformRectLattice Λ n).cellAnchorApproxFun
+                (fun z => wickPower 4 params.mass κ p.1 z -
+                  wickPower 4 params.mass κ₀ p.1 z) p.2) -
+            (wickPower 4 params.mass κ p.1 p.2 -
+              wickPower 4 params.mass κ₀ p.1 p.2)) ^ 2)
+        ((freeFieldMeasure params.mass params.mass_pos).prod
+          (MeasureTheory.volume.restrict Λ.toSet))) :
+    ∫ ω,
+        (interactionCutoffSubUniformApprox params Λ κ κ₀ n ω -
+          (interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω)) ^ 2
+        ∂(freeFieldMeasure params.mass params.mass_pos)
+      ≤
+        params.coupling ^ 2 * (MeasureTheory.volume Λ.toSet).toReal *
+          ∫ x in Λ.toSet,
+            ∫ ω : FieldConfig2D,
+              (((Phi4.uniformRectLattice Λ n).cellAnchorApproxFun
+                  (fun z => wickPower 4 params.mass κ ω z -
+                    wickPower 4 params.mass κ₀ ω z) x) -
+                (wickPower 4 params.mass κ ω x -
+                  wickPower 4 params.mass κ₀ ω x)) ^ 2
+              ∂(freeFieldMeasure params.mass params.mass_pos) := by
+  let μ : Measure FieldConfig2D := freeFieldMeasure params.mass params.mass_pos
+  let ν : Measure Spacetime2D := MeasureTheory.volume.restrict Λ.toSet
+  let L := Phi4.uniformRectLattice Λ n
+  let X : FieldConfig2D → ℝ :=
+    fun ω => interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω
+  let d : FieldConfig2D → Spacetime2D → ℝ :=
+    fun ω x => wickPower 4 params.mass κ ω x - wickPower 4 params.mass κ₀ ω x
+  let e : FieldConfig2D → Spacetime2D → ℝ :=
+    fun ω x => L.cellAnchorApproxFun (d ω) x - d ω x
+  have houter : Integrable (fun ω => ∫ x, (e ω x) ^ 2 ∂ν) μ := by
+    simpa [μ, ν, e, d, L] using hprod.integral_prod_left
+  have hnonneg :
+      0 ≤ᵐ[μ] fun ω : FieldConfig2D => (interactionCutoffSubUniformApprox params Λ κ κ₀ n ω - X ω) ^ 2 :=
+    Filter.Eventually.of_forall fun _ => sq_nonneg _
+  have hpoint :
+      ∀ᵐ ω ∂μ,
+        (interactionCutoffSubUniformApprox params Λ κ κ₀ n ω - X ω) ^ 2 ≤
+          (params.coupling ^ 2 * (MeasureTheory.volume Λ.toSet).toReal) *
+            ∫ x, (e ω x) ^ 2 ∂ν := by
+    refine Filter.Eventually.of_forall ?_
+    intro ω
+    have happ_int : Integrable (fun x => L.cellAnchorApproxFun (d ω) x) ν := by
+      simpa [ν, d, L] using L.integrable_cellAnchorApproxFun (d ω)
+    have hd_int : Integrable (fun x => d ω x) ν := by
+      exact
+        ((wickPower_continuous_in_x 4 params.mass κ ω).sub
+          (wickPower_continuous_in_x 4 params.mass κ₀ ω)).continuousOn.integrableOn_compact
+          Λ.toSet_isCompact
+    have happ_sq_int : Integrable (fun x => (L.cellAnchorApproxFun (d ω) x) ^ 2) ν := by
+      simpa [ν, d, L, Phi4.RectLattice.sq_cellAnchorApproxFun] using
+        L.integrable_cellAnchorApproxFun (fun z => (d ω z) ^ 2)
+    have hd_sq_int : Integrable (fun x => (d ω x) ^ 2) ν := by
+      exact
+        (((wickPower_continuous_in_x 4 params.mass κ ω).sub
+          (wickPower_continuous_in_x 4 params.mass κ₀ ω)).pow 2).continuousOn.integrableOn_compact
+          Λ.toSet_isCompact
+    have he_int : Integrable (fun x => e ω x) ν := happ_int.sub hd_int
+    have he_sq_int : Integrable (fun x => (e ω x) ^ 2) ν := by
+      have hsum :
+          Integrable
+            (fun x => 2 * ((L.cellAnchorApproxFun (d ω) x) ^ 2 + (d ω x) ^ 2)) ν := by
+        exact (happ_sq_int.add hd_sq_int).const_mul 2
+      have he_meas : AEStronglyMeasurable (fun x => (e ω x) ^ 2) ν := by
+        exact (he_int.aestronglyMeasurable.pow 2)
+      refine hsum.mono he_meas ?_
+      filter_upwards with x
+      rw [Real.norm_of_nonneg (sq_nonneg _), Real.norm_of_nonneg (by positivity)]
+      nlinarith [sq_nonneg (L.cellAnchorApproxFun (d ω) x + d ω x)]
+    have hsub :
+        interactionCutoffSubUniformApprox params Λ κ κ₀ n ω - X ω =
+          params.coupling * ∫ x in Λ.toSet, e ω x := by
+      simpa [X, d, e, L] using
+        interactionCutoffSubUniformApprox_sub_eq_setIntegral_error params Λ κ κ₀ n ω
+    calc
+      (interactionCutoffSubUniformApprox params Λ κ κ₀ n ω - X ω) ^ 2
+          = params.coupling ^ 2 * (∫ x in Λ.toSet, e ω x) ^ 2 := by
+              rw [hsub, mul_pow]
+      _ ≤ params.coupling ^ 2 *
+            ((MeasureTheory.volume Λ.toSet).toReal * ∫ x in Λ.toSet, (e ω x) ^ 2) := by
+              gcongr
+              exact sq_setIntegral_le_volume_mul_setIntegral_sq
+                Λ.toSet Λ.toSet_measurableSet he_int he_sq_int Λ.toSet_volume_ne_top
+      _ = (params.coupling ^ 2 * (MeasureTheory.volume Λ.toSet).toReal) *
+            ∫ x, (e ω x) ^ 2 ∂ν := by
+              rw [mul_assoc]
+  have hle :=
+    integral_mono_of_nonneg hnonneg (houter.const_mul _) hpoint
+  calc
+    ∫ ω,
+        (interactionCutoffSubUniformApprox params Λ κ κ₀ n ω - X ω) ^ 2 ∂μ
+      ≤ ∫ ω,
+          (params.coupling ^ 2 * (MeasureTheory.volume Λ.toSet).toReal) *
+            ∫ x, (e ω x) ^ 2 ∂ν ∂μ := hle
+    _ = (params.coupling ^ 2 * (MeasureTheory.volume Λ.toSet).toReal) *
+          ∫ ω, ∫ x, (e ω x) ^ 2 ∂ν ∂μ := by
+            rw [integral_const_mul]
+    _ = (params.coupling ^ 2 * (MeasureTheory.volume Λ.toSet).toReal) *
+          ∫ x, ∫ ω, (e ω x) ^ 2 ∂μ ∂ν := by
+            congr 1
+            rw [← MeasureTheory.integral_prod_symm
+              (f := fun p : FieldConfig2D × Spacetime2D => (e p.1 p.2) ^ 2) hprod]
+            rw [MeasureTheory.integral_prod
+              (f := fun p : FieldConfig2D × Spacetime2D => (e p.1 p.2) ^ 2) hprod]
+    _ = params.coupling ^ 2 * (MeasureTheory.volume Λ.toSet).toReal *
+          ∫ x in Λ.toSet,
+            ∫ ω, (e ω x) ^ 2 ∂μ := by
+            rfl
+
 /-- Frontier theorem for `L²` convergence of the canonical uniform-refinement
 cell-anchor approximants to the cutoff-interaction difference. -/
 theorem gap_interactionCutoffSubUniformApprox_L2
@@ -1711,29 +1767,320 @@ theorem gap_interactionCutoffSubUniformApprox_L2
         (∫ ω,
             (interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω) ^ 2
           ∂(freeFieldMeasure params.mass params.mass_pos))) := by
-  sorry
+  let μ : Measure FieldConfig2D := freeFieldMeasure params.mass params.mass_pos
+  let ν : Measure Spacetime2D := MeasureTheory.volume.restrict Λ.toSet
+  let X : FieldConfig2D → ℝ :=
+    fun ω => interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω
+  let Z : ℕ → FieldConfig2D → ℝ := interactionCutoffSubUniformApprox params Λ κ κ₀
+  let D : ℕ → FieldConfig2D → ℝ := fun n ω => Z n ω - X ω
+  have hX_mem : MemLp X 2 μ := by
+    simpa [X, μ] using
+      (interactionCutoff_memLp_two params Λ κ).sub
+        (interactionCutoff_memLp_two params Λ κ₀)
+  have hZ_mem : ∀ n : ℕ, MemLp (Z n) 2 μ := by
+    intro n
+    simpa [Z, μ] using
+      (interactionCutoffSubUniformApprox_isFiniteWickCylinder params Λ κ κ₀ n).memLp
+        params.mass params.mass_pos (p := (2 : ℝ≥0∞)) (by norm_num)
+  have hD_mem : ∀ n : ℕ, MemLp (D n) 2 μ := by
+    intro n
+    exact (hZ_mem n).sub hX_mem
+  have hD_meas : ∀ n : ℕ, AEStronglyMeasurable (D n) μ := by
+    intro n
+    exact (hD_mem n).aestronglyMeasurable
+  have hD_sq_tendsto_zero :
+      Tendsto (fun n : ℕ => ∫ ω, (D n ω) ^ 2 ∂μ) atTop (𝓝 0) := by
+    refine Metric.tendsto_atTop.2 ?_
+    intro ε hε
+    let V : ℝ := (MeasureTheory.volume Λ.toSet).toReal
+    let A : ℝ := params.coupling ^ 2 * V ^ 2
+    let η : ℝ := ε / (A + 1)
+    have hη : 0 < η := by
+      unfold η A
+      positivity
+    rcases eventually_uniform_wickPowerSub_sq_expectation_lt params Λ κ κ₀ hη with ⟨N, hN⟩
+    refine ⟨N, ?_⟩
+    intro n hn
+    let L := Phi4.uniformRectLattice Λ n
+    let d : FieldConfig2D → Spacetime2D → ℝ :=
+      fun ω x => wickPower 4 params.mass κ ω x - wickPower 4 params.mass κ₀ ω x
+    let e : FieldConfig2D → Spacetime2D → ℝ :=
+      fun ω x => L.cellAnchorApproxFun (d ω) x - d ω x
+    have hd_sm : StronglyMeasurable (Function.uncurry d) := by
+      simpa [d] using
+        (wickPower_stronglyMeasurable_uncurry 4 params.mass κ).sub
+          (wickPower_stronglyMeasurable_uncurry 4 params.mass κ₀)
+    have he_sq_meas : AEStronglyMeasurable
+        (fun p : FieldConfig2D × Spacetime2D => (e p.1 p.2) ^ 2) (μ.prod ν) := by
+      have happ_sm :
+          StronglyMeasurable
+            (fun p : FieldConfig2D × Spacetime2D => L.cellAnchorApproxFun (d p.1) p.2) := by
+        simpa [L, d] using
+          (Phi4.RectLattice.stronglyMeasurable_cellAnchorApproxFun_uncurry
+            (L := L) (f := d) hd_sm)
+      exact ((happ_sm.sub hd_sm).pow 2).aestronglyMeasurable
+    have hioc_ae : ∀ᵐ x ∂ν, x ∈ Phi4.Rectangle.iocSet Λ := by
+      change ∀ᵐ x ∂(MeasureTheory.volume.restrict Λ.toSet),
+        x ∈ Phi4.Rectangle.iocSet Λ
+      rw [MeasureTheory.ae_restrict_iff' Λ.toSet_measurableSet]
+      filter_upwards [Phi4.Rectangle.iocSet_ae_eq_toSet Λ] with x hx hxΛ
+      exact hx.mpr hxΛ
+    have hpartial_lt : ∀ᵐ x ∂ν, ∫ ω, (e ω x) ^ 2 ∂μ < η := by
+      filter_upwards [hioc_ae] with x hx_ioc
+      have hx_union : x ∈ ⋃ p : Fin L.Nt × Fin L.Nx, L.cellIocSet p.1 p.2 := by
+        simpa [L.iUnion_cellIocSet_eq_iocSet] using hx_ioc
+      rcases Set.mem_iUnion.mp hx_union with p
+      rcases p with ⟨⟨i, j⟩, hx_cell_ioc⟩
+      have hx_cell : x ∈ (L.cell i j).toSet := by
+        rcases hx_cell_ioc with ⟨htmin, htmax, hsmin, hsmax⟩
+        exact ⟨le_of_lt htmin, htmax, le_of_lt hsmin, hsmax⟩
+      let a : Spacetime2D := L.cellAnchor i j
+      have hcell_eq :
+          ∀ ω : FieldConfig2D,
+            e ω x =
+              ((wickPower 4 params.mass κ ω a - wickPower 4 params.mass κ₀ ω a) -
+                (wickPower 4 params.mass κ ω x - wickPower 4 params.mass κ₀ ω x)) := by
+        intro ω
+        have hanchor :
+            L.cellAnchorApproxFun (d ω) x = d ω a := by
+          simpa [d, a] using
+            (Phi4.RectLattice.cellAnchorApproxFun_eq_of_mem_cellIocSet
+              (L := L) (f := d ω) hx_cell_ioc)
+        calc
+          e ω x = L.cellAnchorApproxFun (d ω) x - d ω x := by rfl
+          _ = d ω a - d ω x := by rw [hanchor]
+          _ = ((wickPower 4 params.mass κ ω a - wickPower 4 params.mass κ₀ ω a) -
+                (wickPower 4 params.mass κ ω x - wickPower 4 params.mass κ₀ ω x)) := by
+                rfl
+      have hint_eq :
+          ∫ ω, (e ω x) ^ 2 ∂μ =
+            ∫ ω,
+              (((wickPower 4 params.mass κ ω a - wickPower 4 params.mass κ₀ ω a) -
+                (wickPower 4 params.mass κ ω x - wickPower 4 params.mass κ₀ ω x)) ^ 2) ∂μ := by
+        refine integral_congr_ae ?_
+        exact Filter.Eventually.of_forall (fun ω => by simp [hcell_eq ω])
+      simpa [hint_eq, a] using hN n hn i j hx_cell
+    have hprod : Integrable (fun p : FieldConfig2D × Spacetime2D => (e p.1 p.2) ^ 2) (μ.prod ν) := by
+      rw [MeasureTheory.integrable_prod_iff' he_sq_meas]
+      constructor
+      · filter_upwards [hioc_ae] with x hx_ioc
+        have hx_union : x ∈ ⋃ p : Fin L.Nt × Fin L.Nx, L.cellIocSet p.1 p.2 := by
+          simpa [L.iUnion_cellIocSet_eq_iocSet] using hx_ioc
+        rcases Set.mem_iUnion.mp hx_union with p
+        rcases p with ⟨⟨i, j⟩, hx_cell_ioc⟩
+        let a : Spacetime2D := L.cellAnchor i j
+        have hcell_eq : ∀ ω : FieldConfig2D, e ω x =
+            ((wickPower 4 params.mass κ ω a - wickPower 4 params.mass κ₀ ω a) -
+              (wickPower 4 params.mass κ ω x - wickPower 4 params.mass κ₀ ω x)) := by
+          intro ω
+          have hanchor :
+              L.cellAnchorApproxFun (d ω) x = d ω a := by
+            simpa [d, a] using
+              (Phi4.RectLattice.cellAnchorApproxFun_eq_of_mem_cellIocSet
+                (L := L) (f := d ω) hx_cell_ioc)
+          calc
+            e ω x = L.cellAnchorApproxFun (d ω) x - d ω x := by rfl
+            _ = d ω a - d ω x := by rw [hanchor]
+            _ = ((wickPower 4 params.mass κ ω a - wickPower 4 params.mass κ₀ ω a) -
+                  (wickPower 4 params.mass κ ω x - wickPower 4 params.mass κ₀ ω x)) := by
+                    rfl
+        have hA_mem :
+            MemLp (fun ω : FieldConfig2D =>
+                wickPower 4 params.mass κ ω a - wickPower 4 params.mass κ₀ ω a) 2 μ := by
+          simpa [μ, a] using
+            (wickPower_memLp 4 params.mass params.mass_pos κ a
+              (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)).sub
+            (wickPower_memLp 4 params.mass params.mass_pos κ₀ a
+              (by norm_num : (2 : ℝ≥0∞) ≠ ⊤))
+        have hB_mem :
+            MemLp (fun ω : FieldConfig2D =>
+                wickPower 4 params.mass κ ω x - wickPower 4 params.mass κ₀ ω x) 2 μ := by
+          simpa [μ] using
+            (wickPower_memLp 4 params.mass params.mass_pos κ x
+              (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)).sub
+            (wickPower_memLp 4 params.mass params.mass_pos κ₀ x
+              (by norm_num : (2 : ℝ≥0∞) ≠ ⊤))
+        have he_mem : MemLp (fun ω : FieldConfig2D => e ω x) 2 μ := by
+          rw [show (fun ω : FieldConfig2D => e ω x) =
+              (fun ω : FieldConfig2D =>
+                (wickPower 4 params.mass κ ω a - wickPower 4 params.mass κ₀ ω a) -
+                  (wickPower 4 params.mass κ ω x - wickPower 4 params.mass κ₀ ω x)) from
+              funext hcell_eq]
+          exact hA_mem.sub hB_mem
+        simpa using he_mem.integrable_sq
+      · have hpartial_sm :
+            AEStronglyMeasurable (fun x => ∫ ω, ‖(e ω x) ^ 2‖ ∂μ) ν := by
+          simpa using (he_sq_meas.norm.prod_swap.integral_prod_right' :
+            AEStronglyMeasurable (fun x => ∫ ω, ‖(e ω x) ^ 2‖ ∂μ) ν)
+        haveI : IsFiniteMeasure ν := ⟨by
+          rw [MeasureTheory.Measure.restrict_apply_univ]
+          exact Λ.toSet_isCompact.measure_lt_top⟩
+        have hconst : Integrable (fun _ : Spacetime2D => η) ν := integrable_const η
+        refine hconst.mono hpartial_sm ?_
+        filter_upwards [hpartial_lt] with x hx
+        have hnorm_eq : ∫ ω, ‖(e ω x) ^ 2‖ ∂μ = ∫ ω, (e ω x) ^ 2 ∂μ := by
+          refine integral_congr_ae ?_
+          exact Filter.Eventually.of_forall (fun ω => by simp [Real.norm_of_nonneg (sq_nonneg _)])
+        rw [hnorm_eq, Real.norm_of_nonneg (integral_nonneg fun _ => sq_nonneg _),
+          Real.norm_of_nonneg (le_of_lt hη)]
+        exact hx.le
+    have hsq_le :=
+      interactionCutoffSubUniformApprox_sub_sq_le_spatialIntegral params Λ κ κ₀ n hprod
+    have hpartial_int : Integrable (fun x => ∫ ω, (e ω x) ^ 2 ∂μ) ν := by
+      simpa [μ, ν, e] using hprod.integral_prod_right
+    have hpartial_le : ∀ᵐ x ∂ν, ∫ ω, (e ω x) ^ 2 ∂μ ≤ η := by
+      filter_upwards [hpartial_lt] with x hx
+      exact hx.le
+    have hspatial_le :
+        ∫ x in Λ.toSet, ∫ ω, (e ω x) ^ 2 ∂μ ≤ η * V := by
+      have hconst_int : Integrable (fun _ : Spacetime2D => η) ν := by
+        haveI : IsFiniteMeasure ν := ⟨by
+          rw [MeasureTheory.Measure.restrict_apply_univ]
+          exact Λ.toSet_isCompact.measure_lt_top⟩
+        exact integrable_const η
+      have hnonneg_inner :
+          0 ≤ᵐ[ν] fun x => ∫ ω, (e ω x) ^ 2 ∂μ := by
+        filter_upwards with x
+        exact integral_nonneg (fun _ => sq_nonneg _)
+      calc
+        ∫ x in Λ.toSet, ∫ ω, (e ω x) ^ 2 ∂μ
+          ≤ ∫ x, η ∂ν := integral_mono_of_nonneg hnonneg_inner hconst_int hpartial_le
+        _ = η * V := by
+          have hν_real : ν.real Set.univ = V := by
+            simp [ν, V, Measure.real]
+          rw [MeasureTheory.integral_const, hν_real, smul_eq_mul]
+          ring
+    have hbound :
+        ∫ ω, (D n ω) ^ 2 ∂μ < ε := by
+      calc
+      ∫ ω, (D n ω) ^ 2 ∂μ
+          = ∫ ω,
+              (interactionCutoffSubUniformApprox params Λ κ κ₀ n ω - X ω) ^ 2 ∂μ := by
+                rfl
+      _ ≤ params.coupling ^ 2 * V *
+            ∫ x in Λ.toSet, ∫ ω, (e ω x) ^ 2 ∂μ := by
+              simpa [μ, ν, X, Z, D, V] using hsq_le
+      _ ≤ params.coupling ^ 2 * V * (η * V) := by
+              gcongr
+      _ < ε := by
+              have hA_nonneg : 0 ≤ A := by
+                unfold A V
+                positivity
+              have hA1_pos : 0 < A + 1 := by
+                linarith
+              have hA_lt : A * η < ε := by
+                have hfrac : A / (A + 1) < (1 : ℝ) := by
+                  rw [div_lt_iff₀ hA1_pos]
+                  linarith
+                have hEq : A * η = ε * (A / (A + 1)) := by
+                  unfold η
+                  field_simp [hA1_pos.ne']
+                rw [hEq]
+                nlinarith
+              have hAV_eq : params.coupling ^ 2 * V * (η * V) = A * η := by
+                unfold A
+                ring
+              rw [hAV_eq]
+              exact hA_lt
+    have hdist : dist (∫ ω, (D n ω) ^ 2 ∂μ) 0 < ε := by
+      have hnonneg_int : 0 ≤ ∫ ω, (D n ω) ^ 2 ∂μ := by
+        exact integral_nonneg (fun _ => sq_nonneg _)
+      rw [Real.dist_eq]
+      rw [sub_zero]
+      rw [abs_of_nonneg hnonneg_int]
+      exact hbound
+    exact hdist
+  have hD_lp_zero : Tendsto (fun n : ℕ => lpNorm (D n) 2 μ) atTop (𝓝 0) := by
+    have hEq : ∀ n : ℕ, lpNorm (D n) 2 μ = Real.sqrt (∫ ω, (D n ω) ^ 2 ∂μ) := by
+      intro n
+      simpa [Real.sqrt_eq_rpow, Real.norm_eq_abs, sq_abs] using
+        (lpNorm_eq_integral_norm_rpow_toReal
+          (by norm_num : (2 : ℝ≥0∞) ≠ 0)
+          (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)
+          (hD_meas n))
+    have hsqrt : Tendsto (fun s : ℝ => Real.sqrt s) (𝓝 0) (𝓝 0) := by
+      simpa using
+        ((Real.continuous_sqrt.continuousAt : ContinuousAt (fun s : ℝ => Real.sqrt s) 0).tendsto)
+    simpa [hEq] using hsqrt.comp hD_sq_tendsto_zero
+  have hnorm :
+      Tendsto (fun n : ℕ => lpNorm (Z n) 2 μ) atTop (𝓝 (lpNorm X 2 μ)) := by
+    refine Metric.tendsto_atTop.2 ?_
+    intro ε hε
+    rcases Metric.tendsto_atTop.1 hD_lp_zero ε hε with ⟨N, hN⟩
+    refine ⟨N, ?_⟩
+    intro n hn
+    have hD_triangle :
+        |lpNorm (Z n) 2 μ - lpNorm X 2 μ| ≤ lpNorm (D n) 2 μ := by
+      have hZ_eq : Z n = fun ω => X ω + D n ω := by
+        funext ω
+        unfold Z D X
+        ring
+      have hX_eq : X = fun ω => Z n ω + -(D n ω) := by
+        funext ω
+        unfold Z D X
+        ring
+      have h1 : lpNorm (Z n) 2 μ ≤ lpNorm X 2 μ + lpNorm (D n) 2 μ := by
+        rw [hZ_eq]
+        exact lpNorm_add_le hX_mem (g := D n) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
+      have h2 : lpNorm X 2 μ ≤ lpNorm (Z n) 2 μ + lpNorm (D n) 2 μ := by
+        rw [hX_eq]
+        simpa using
+          (lpNorm_add_le (hZ_mem n) (g := fun ω => -(D n ω)) (by norm_num : (1 : ℝ≥0∞) ≤ 2))
+      exact abs_sub_le_iff.2 ⟨by linarith, by linarith⟩
+    have hsmall : lpNorm (D n) 2 μ < ε := by
+      simpa [Real.dist_eq, abs_of_nonneg MeasureTheory.lpNorm_nonneg] using hN n hn
+    exact lt_of_le_of_lt hD_triangle hsmall
+  have hZ_sq_eq : ∀ n : ℕ, (lpNorm (Z n) 2 μ) ^ 2 = ∫ ω, (Z n ω) ^ 2 ∂μ := by
+    intro n
+    have hroot : lpNorm (Z n) 2 μ = Real.sqrt (∫ ω, (Z n ω) ^ 2 ∂μ) := by
+      simpa [Real.sqrt_eq_rpow, Real.norm_eq_abs, sq_abs] using
+        (lpNorm_eq_integral_norm_rpow_toReal
+          (by norm_num : (2 : ℝ≥0∞) ≠ 0)
+          (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)
+          ((hZ_mem n).aestronglyMeasurable))
+    rw [hroot, Real.sq_sqrt (integral_nonneg (fun _ => sq_nonneg _))]
+  have hX_sq_eq : (lpNorm X 2 μ) ^ 2 = ∫ ω, (X ω) ^ 2 ∂μ := by
+    have hroot : lpNorm X 2 μ = Real.sqrt (∫ ω, (X ω) ^ 2 ∂μ) := by
+      simpa [Real.sqrt_eq_rpow, Real.norm_eq_abs, sq_abs] using
+        (lpNorm_eq_integral_norm_rpow_toReal
+          (by norm_num : (2 : ℝ≥0∞) ≠ 0)
+          (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)
+          hX_mem.aestronglyMeasurable)
+    rw [hroot, Real.sq_sqrt (integral_nonneg (fun _ => sq_nonneg _))]
+  have hnorm_sq :
+      Tendsto (fun n : ℕ => (lpNorm (Z n) 2 μ) ^ 2) atTop (𝓝 ((lpNorm X 2 μ) ^ 2)) := by
+    simpa using (continuous_pow 2).continuousAt.tendsto.comp hnorm
+  have hrew : (fun n : ℕ => (lpNorm (Z n) 2 μ) ^ 2) =
+      (fun n : ℕ => ∫ ω, (Z n ω) ^ 2 ∂μ) := by
+    funext n
+    exact hZ_sq_eq n
+  rw [hrew] at hnorm_sq
+  simpa [Z, X, μ, hX_sq_eq] using hnorm_sq
 
-/-- Derived finite-cylinder approximation theorem for cutoff-interaction
-differences. -/
-theorem gap_interactionCutoff_sub_finiteWickCylinder_approx
-    (params : Phi4Params) (Λ : Rectangle) (κ κ₀ : UVCutoff) :
-    ∃ Z : ℕ → FieldConfig2D → ℝ,
-      (∀ n : ℕ, IsFiniteWickCylinder (Z n)) ∧
-      (∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
-        Tendsto
-          (fun n : ℕ => Z n ω) atTop
-          (𝓝 (interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω))) ∧
-      Tendsto
-        (fun n : ℕ => ∫ ω, (Z n ω) ^ 2 ∂(freeFieldMeasure params.mass params.mass_pos))
-        atTop
-        (𝓝
-          (∫ ω,
-              (interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω) ^ 2
-            ∂(freeFieldMeasure params.mass params.mass_pos))) := by
-  refine ⟨interactionCutoffSubUniformApprox params Λ κ κ₀,
-    interactionCutoffSubUniformApprox_isFiniteWickCylinder params Λ κ κ₀,
-    gap_interactionCutoffSubUniformApprox_tendsto_ae params Λ κ κ₀,
-    gap_interactionCutoffSubUniformApprox_L2 params Λ κ κ₀⟩
+/-- Frontier theorem for even-moment comparison on the canonical
+uniform-refinement approximant sequence.
+
+This is the actual hypercontractive leaf currently needed on the Nelson side.
+The approximants are already concrete finite `0/2/4` Wick cylinders, so the
+remaining mathematics is precisely the growth estimate for those canonical
+integrated degree-4 Gaussian polynomials, not a broader unused class. -/
+theorem gap_interactionCutoffSubUniformApprox_even_moment_comparison
+    (params : Phi4Params) (Λ : Rectangle) :
+    ∃ C : ℝ, 0 < C ∧
+      ∀ (κ κ₀ : UVCutoff) (n : ℕ) (j : ℕ), 0 < j →
+          ∫ ω,
+              |interactionCutoffSubUniformApprox params Λ κ κ₀ n ω| ^ (2 * j)
+              ∂(freeFieldMeasure params.mass params.mass_pos)
+            ≤ (C * ↑j) ^ (4 * j) *
+                (∫ ω,
+                    (interactionCutoffSubUniformApprox params Λ κ κ₀ n ω) ^ 2
+                    ∂(freeFieldMeasure params.mass params.mass_pos)) ^ j := by
+  obtain ⟨C, hC, hcmp⟩ :=
+    gap_finiteWickCylinder_even_moment_comparison params.mass params.mass_pos
+  refine ⟨C, hC, ?_⟩
+  intro κ κ₀ n j hj
+  exact
+    hcmp (interactionCutoffSubUniformApprox_isFiniteWickCylinder params Λ κ κ₀ n) j hj
 
 /-- Derived theorem for the canonical reference-shell even-moment bound in
 Nelson's argument.
@@ -1768,17 +2115,34 @@ theorem gap_interactionCutoff_sub_even_moment_comparison
               (∫ ω,
                   (interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω) ^ 2
                   ∂(freeFieldMeasure params.mass params.mass_pos)) ^ j := by
-  obtain ⟨C, hC, hfinite⟩ := gap_finiteWickCylinder_even_moment_comparison params
+  obtain ⟨C, hC, hcmp⟩ := gap_interactionCutoffSubUniformApprox_even_moment_comparison params Λ
   refine ⟨C, hC, ?_⟩
-  exact
-    interactionCutoff_sub_even_moment_comparison_of_finiteWickCylinder_approx
-      params Λ C hC (by
-        intro κ κ₀
-        rcases gap_interactionCutoff_sub_finiteWickCylinder_approx params Λ κ κ₀ with
-          ⟨Z, hfin, h_ae, hL2⟩
-        refine ⟨Z, hfin, ?_, h_ae, hL2⟩
-        intro n j hj
-        exact hfinite (Z n) (hfin n) j hj)
+  intro κ κ₀ j hj
+  let μ : Measure FieldConfig2D := freeFieldMeasure params.mass params.mass_pos
+  let X : FieldConfig2D → ℝ :=
+    fun ω => interactionCutoff params Λ κ ω - interactionCutoff params Λ κ₀ ω
+  let Z : ℕ → FieldConfig2D → ℝ := interactionCutoffSubUniformApprox params Λ κ κ₀
+  have hZ_meas : ∀ n, AEStronglyMeasurable (Z n) μ := by
+    intro n
+    exact
+      ((interactionCutoffSubUniformApprox_isFiniteWickCylinder params Λ κ κ₀ n).memLp
+        params.mass params.mass_pos (p := (1 : ℝ≥0∞)) (by norm_num)).aestronglyMeasurable
+  have hX_meas : AEStronglyMeasurable X μ := by
+    simpa [X] using
+      ((interactionCutoff_stronglyMeasurable params Λ κ).sub
+        (interactionCutoff_stronglyMeasurable params Λ κ₀)).aestronglyMeasurable
+  have hZ_int : ∀ n, Integrable (fun ω => |Z n ω| ^ (2 * j)) μ := by
+    intro n
+    simpa [μ, Z] using
+      (interactionCutoffSubUniformApprox_isFiniteWickCylinder params Λ κ κ₀ n).even_integrable
+        params.mass params.mass_pos j
+  simpa [μ, X, Z] using
+    evenMomentComparison_of_tendsto_ae μ X Z ((C * ↑j) ^ (4 * j)) j
+      (by positivity)
+      (gap_interactionCutoffSubUniformApprox_tendsto_ae params Λ κ κ₀)
+      hZ_meas hX_meas hZ_int
+      (fun n => hcmp κ κ₀ n j hj)
+      (gap_interactionCutoffSubUniformApprox_L2 params Λ κ κ₀)
 
 /-- Frontier theorem for the `L²` size of the canonical reference shell in
 Nelson's argument.

@@ -442,4 +442,33 @@ def regularizedPointCovariance (mass : ℝ) (κ : UVCutoff) : ℝ :=
     GaussianField.covariance (freeCovarianceCLM mass h) (uvMollifier κ 0) (uvMollifier κ 0)
   else 0
 
+/-- Honest mollifier-family covariance frontier.
+
+This is the narrower identification actually used by the shell and Nelson
+branches: the CLM covariance paired against UV mollifiers should match the
+flat-space kernel smeared against the same mollifiers. It is strictly weaker
+than `gap_covariance_eq_kernel`, but it exposes the real current blocker for
+the UV analysis without requiring a full flat-space CLM construction. -/
+theorem gap_uvMollifier_covariance_eq_freeCovKernel
+    (mass : ℝ) (hmass : 0 < mass) :
+    ∀ (κ₁ κ₂ : UVCutoff) (x y : Spacetime2D),
+      GaussianField.covariance (freeCovarianceCLM mass hmass)
+        (uvMollifier κ₁ x) (uvMollifier κ₂ y)
+        =
+      ∫ u, ∫ v, uvMollifier κ₁ x u * freeCovKernel mass u v * uvMollifier κ₂ y v := by
+  sorry
+
+/-- Kernel-side frontier for the logarithmic growth of the UV-regularized point
+covariance.
+
+Combined with `gap_covariance_eq_kernel`, this is the actual analytic leaf
+behind `regularizedPointCovariance` growth: it isolates the mollifier-kernel
+estimate from the separate CLM-to-kernel realization problem. -/
+theorem gap_uvMollifier_freeCovKernel_log_growth (mass : ℝ) (hmass : 0 < mass) :
+    ∃ K C₀ : ℝ, 0 < K ∧ 0 ≤ C₀ ∧
+      ∀ κ : UVCutoff,
+        (∫ x, ∫ y, uvMollifier κ 0 x * freeCovKernel mass x y * uvMollifier κ 0 y)
+          ≤ C₀ + K * Real.log κ.κ := by
+  sorry
+
 end

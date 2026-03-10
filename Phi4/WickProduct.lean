@@ -710,6 +710,25 @@ theorem finiteWickCylinder_isFinite
   simp only [finiteWickCylinder]
   rw [h4, h2]
 
+/-- Honest frontier for Nelson-type hypercontractive comparison on degree-4
+finite Wick cylinders.
+
+This isolates the genuine Gaussian-polynomial inequality needed downstream: any
+finite linear combination of quadratic and quartic Wick monomials under the free
+field measure should satisfy a dimension-free even-moment comparison with degree
+`4` growth `(C j)^(4j)`. The canonical Nelson uniform approximants are already
+instances of `IsFiniteWickCylinder`, so this is the real remaining
+hypercontractive leaf rather than sequence-specific bookkeeping. -/
+theorem gap_finiteWickCylinder_even_moment_comparison
+    (mass : ℝ) (hmass : 0 < mass) :
+    ∃ C : ℝ, 0 < C ∧
+      ∀ {Z : FieldConfig2D → ℝ}, IsFiniteWickCylinder Z →
+        ∀ (j : ℕ), 0 < j →
+          ∫ ω, |Z ω| ^ (2 * j) ∂(freeFieldMeasure mass hmass)
+            ≤ (C * ↑j) ^ (4 * j) *
+                (∫ ω, (Z ω) ^ 2 ∂(freeFieldMeasure mass hmass)) ^ j := by
+  sorry
+
 /-! ## Re-Wick-ordering under change of covariance
 
 When the covariance changes from `c₁` to `c₂`, the Wick monomials transform via:

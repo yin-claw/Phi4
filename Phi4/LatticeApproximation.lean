@@ -828,6 +828,39 @@ theorem cellAnchorApproxFun_eq_of_mem_cellIocSet
   · intro hp₀
     simp at hp₀
 
+/-- Outside the half-open mesh interior, the cell-anchor approximation
+vanishes. -/
+theorem cellAnchorApproxFun_eq_zero_of_not_mem_iocSet
+    (L : RectLattice Λ) (f : Spacetime2D → ℝ) {x : Spacetime2D}
+    (hx : x ∉ Rectangle.iocSet Λ) :
+    L.cellAnchorApproxFun f x = 0 := by
+  classical
+  unfold cellAnchorApproxFun
+  apply Finset.sum_eq_zero
+  intro p hp
+  have hnot : x ∉ L.cellIocSet p.1 p.2 := by
+    intro hxcell
+    exact hx (L.cellIocSet_subset_iocSet p.1 p.2 hxcell)
+  simp [Set.indicator_of_notMem, hnot]
+
+/-- Squaring commutes with the cell-anchor approximation because the
+approximation is piecewise constant on pairwise disjoint cells. -/
+theorem sq_cellAnchorApproxFun
+    (L : RectLattice Λ) (f : Spacetime2D → ℝ) (x : Spacetime2D) :
+    (L.cellAnchorApproxFun f x) ^ 2 =
+      L.cellAnchorApproxFun (fun y => (f y) ^ 2) x := by
+  classical
+  by_cases hx : x ∈ Rectangle.iocSet Λ
+  · have hx' : x ∈ ⋃ p : Fin L.Nt × Fin L.Nx, L.cellIocSet p.1 p.2 := by
+      simpa [L.iUnion_cellIocSet_eq_iocSet] using hx
+    rcases Set.mem_iUnion.mp hx' with p
+    rcases p with ⟨⟨i, j⟩, hcell⟩
+    rw [L.cellAnchorApproxFun_eq_of_mem_cellIocSet f hcell,
+      L.cellAnchorApproxFun_eq_of_mem_cellIocSet (fun y => (f y) ^ 2) hcell]
+  · rw [L.cellAnchorApproxFun_eq_zero_of_not_mem_iocSet f hx,
+      L.cellAnchorApproxFun_eq_zero_of_not_mem_iocSet (fun y => (f y) ^ 2) hx]
+    simp
+
 /-- Integrating the piecewise cell-anchor approximation over the half-open mesh
 recovers the cell-anchor Riemann sum. -/
 theorem setIntegral_cellAnchorApproxFun_eq_riemannSumCellAnchorFun_ioc
@@ -920,6 +953,28 @@ theorem integrable_cellAnchorApproxFun
   refine integrable_finset_sum _ ?_
   intro p hp
   exact (integrable_const _).indicator (L.measurableSet_cellIocSet p.1 p.2)
+
+/-- Joint strong measurability of the piecewise cell-anchor approximation built
+from a jointly strongly measurable spacetime family. -/
+theorem stronglyMeasurable_cellAnchorApproxFun_uncurry
+    {Ω : Type*} [MeasurableSpace Ω] {f : Ω → Spacetime2D → ℝ}
+    (L : RectLattice Λ)
+    (hf : StronglyMeasurable (Function.uncurry f)) :
+    StronglyMeasurable
+      (fun p : Ω × Spacetime2D => L.cellAnchorApproxFun (f p.1) p.2) := by
+  classical
+  unfold cellAnchorApproxFun
+  let g : Fin L.Nt × Fin L.Nx → Ω × Spacetime2D → ℝ :=
+    fun q p => Set.indicator (L.cellIocSet q.1 q.2) (fun _ => f p.1 (L.cellAnchor q.1 q.2)) p.2
+  have hg : ∀ q, StronglyMeasurable (g q) := by
+    intro q
+    refine StronglyMeasurable.indicator ?_ ?_
+    · exact hf.comp_measurable (measurable_fst.prodMk measurable_const)
+    · exact (L.measurableSet_cellIocSet q.1 q.2).preimage measurable_snd
+  simpa [g] using
+    (Finset.induction_on (s := (Finset.univ : Finset (Fin L.Nt × Fin L.Nx)))
+      (show StronglyMeasurable (fun _ : Ω × Spacetime2D => 0) by simpa using stronglyMeasurable_const)
+      (fun a s ha hs => by simpa [Finset.sum_insert ha] using (hg a).add hs))
 
 /-- Error bound on one cell between the anchor-value approximation and the exact
 cell integral, assuming a uniform oscillation bound on that cell. -/
