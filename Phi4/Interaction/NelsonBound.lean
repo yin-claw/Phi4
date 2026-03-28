@@ -1380,7 +1380,7 @@ the uniform-refinement cell-anchor approximants. The two genuine remaining
 inputs are:
 1. almost-everywhere convergence of the canonical sequence,
 2. convergence of its second moments. -/
-theorem gap_interactionCutoffSubUniformApprox_tendsto_ae
+theorem interactionCutoffSubUniformApprox_tendsto_ae
     (params : Phi4Params) (Λ : Rectangle) (κ κ₀ : UVCutoff) :
     ∀ᵐ ω ∂(freeFieldMeasure params.mass params.mass_pos),
       Tendsto
@@ -1441,9 +1441,9 @@ private theorem continuous_wickPower_sq_diff_expectation
   let cov12 : Spacetime2D × Spacetime2D → ℝ := fun p =>
     GaussianField.covariance T (uvMollifier κ p.2) (uvMollifier κ p.1)
   have huv_fst : Continuous fun p : Spacetime2D × Spacetime2D => uvMollifier κ p.1 :=
-    (gap_uvMollifier_continuous κ).comp continuous_fst
+    (uvMollifier_continuous κ).comp continuous_fst
   have huv_snd : Continuous fun p : Spacetime2D × Spacetime2D => uvMollifier κ p.2 :=
-    (gap_uvMollifier_continuous κ).comp continuous_snd
+    (uvMollifier_continuous κ).comp continuous_snd
   have hcov11 : Continuous cov11 := by
     simpa [cov11, GaussianField.covariance] using (T.continuous.comp huv_fst).inner
       (T.continuous.comp huv_fst)
@@ -1758,7 +1758,7 @@ private theorem interactionCutoffSubUniformApprox_sub_sq_le_spatialIntegral
 
 /-- Frontier theorem for `L²` convergence of the canonical uniform-refinement
 cell-anchor approximants to the cutoff-interaction difference. -/
-theorem gap_interactionCutoffSubUniformApprox_L2
+theorem interactionCutoffSubUniformApprox_L2
     (params : Phi4Params) (Λ : Rectangle) (κ κ₀ : UVCutoff) :
     Tendsto
       (fun n : ℕ =>
@@ -2187,10 +2187,10 @@ theorem gap_interactionCutoff_sub_even_moment_comparison
   simpa [μ, X, Z] using
     evenMomentComparison_of_tendsto_ae μ X Z ((C * ↑j) ^ (4 * j)) j
       (by positivity)
-      (gap_interactionCutoffSubUniformApprox_tendsto_ae params Λ κ κ₀)
+      (interactionCutoffSubUniformApprox_tendsto_ae params Λ κ κ₀)
       hZ_meas hX_meas hZ_int
       (fun n => hcmp κ κ₀ n j hj)
-      (gap_interactionCutoffSubUniformApprox_L2 params Λ κ κ₀)
+      (interactionCutoffSubUniformApprox_L2 params Λ κ κ₀)
 
 /-- Frontier theorem for the `L²` size of the canonical reference shell in
 Nelson's argument.

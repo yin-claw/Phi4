@@ -1792,18 +1792,18 @@ private theorem continuous_wickPowerStandardSeqShellUpper
     simpa [σ₁] using
       continuous_covariance_comp
         (freeCovarianceCLM params.mass params.mass_pos)
-        (gap_uvMollifier_continuous κ₁) (gap_uvMollifier_continuous κ₁)
+          (uvMollifier_continuous κ₁) (uvMollifier_continuous κ₁)
   have hσ₂ : Continuous σ₂ := by
     simpa [σ₂] using
       continuous_covariance_comp
         (freeCovarianceCLM params.mass params.mass_pos)
-        (gap_uvMollifier_continuous κ₂) (gap_uvMollifier_continuous κ₂)
+          (uvMollifier_continuous κ₂) (uvMollifier_continuous κ₂)
   have hδσ : Continuous δσ := by
     simpa [δσ] using
       continuous_covariance_comp
         (freeCovarianceCLM params.mass params.mass_pos)
-        ((gap_uvMollifier_continuous κ₂).sub (gap_uvMollifier_continuous κ₁))
-        ((gap_uvMollifier_continuous κ₂).sub (gap_uvMollifier_continuous κ₁))
+          ((uvMollifier_continuous κ₂).sub (uvMollifier_continuous κ₁))
+          ((uvMollifier_continuous κ₂).sub (uvMollifier_continuous κ₁))
   have hcont :
       Continuous fun x : Spacetime2D =>
         3 *
@@ -2398,7 +2398,7 @@ theorem gap_interactionCutoff_ae_convergence (params : Phi4Params) (Λ : Rectang
   sorry
 
 /-- Measurability of the limiting interaction. -/
-theorem gap_interaction_aestronglyMeasurable (params : Phi4Params) (Λ : Rectangle) :
+theorem interaction_aestronglyMeasurable (params : Phi4Params) (Λ : Rectangle) :
     AEStronglyMeasurable (interaction params Λ)
       (freeFieldMeasure params.mass params.mass_pos) := by
   -- interaction = Filter.limsup of interactionCutoff (standardUVCutoffSeq n)
@@ -2497,15 +2497,23 @@ private theorem interactionCutoff_standardSeq_lpNorm_sub_le
 /-- Square integrability of the limiting interaction.
     Strategy: from L² convergence (Vκ → V in L²), the limit V ∈ L² by completeness.
     Concretely: V² ≤ 2(V - Vκ)² + 2Vκ² pointwise, so ∫V² ≤ 2∫(V-Vκ)² + 2∫Vκ² < ∞. -/
+private theorem interaction_memLp_two (params : Phi4Params) (Λ : Rectangle) :
+    MemLp (interaction params Λ) 2 (freeFieldMeasure params.mass params.mass_pos) := by
+  obtain ⟨D, hD, h_rate⟩ := gap_interactionCutoff_standardSeq_L2_increment_rate params Λ
+  apply memLp_two_of_tendsto_ae_of_summable_lpNorm_sub
+    (hf := fun n => interactionCutoff_memLp_two params Λ (standardUVCutoffSeq n))
+    (h_lim := gap_interactionCutoff_standardSeq_ae_convergence params Λ)
+    (hd_sum := summable_sqrt_log_sq_div_cube D hD)
+  intro n
+  exact interactionCutoff_standardSeq_lpNorm_sub_le params Λ h_rate n
+
+/-- Square integrability of the limiting interaction.
+    Strategy: the already-established standard-sequence a.e. convergence plus
+    summable `L²` increments place the limit in `L²`; integrability of the square
+    is then the usual `MemLp 2` reformulation. -/
 theorem gap_interaction_sq_integrable (params : Phi4Params) (Λ : Rectangle) :
     Integrable (fun ω => (interaction params Λ ω) ^ 2)
       (freeFieldMeasure params.mass params.mass_pos) := by
-  obtain ⟨D, hD, h_rate⟩ := gap_interactionCutoff_standardSeq_L2_increment_rate params Λ
-  have h_mem : MemLp (interaction params Λ) 2 (freeFieldMeasure params.mass params.mass_pos) := by
-    apply memLp_two_of_tendsto_ae_of_summable_lpNorm_sub
-      (hf := fun n => interactionCutoff_memLp_two params Λ (standardUVCutoffSeq n))
-      (h_lim := gap_interactionCutoff_standardSeq_ae_convergence params Λ)
-      (hd_sum := summable_sqrt_log_sq_div_cube D hD)
-    intro n
-    exact interactionCutoff_standardSeq_lpNorm_sub_le params Λ h_rate n
-  exact (memLp_two_iff_integrable_sq (gap_interaction_aestronglyMeasurable params Λ)).1 h_mem
+  have h_mem : MemLp (interaction params Λ) 2 (freeFieldMeasure params.mass params.mass_pos) :=
+    interaction_memLp_two params Λ
+  exact (memLp_two_iff_integrable_sq (interaction_aestronglyMeasurable params Λ)).1 h_mem

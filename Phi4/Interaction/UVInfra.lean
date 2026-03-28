@@ -71,7 +71,7 @@ private lemma iteratedFDeriv_sub_schwartz (f g : SchwartzMap Spacetime2D ℝ)
 /-- The UV mollifier is continuous as a function of the spacetime point in the
     Schwartz topology: x ↦ uvMollifier κ x is continuous as Spacetime2D → TestFun2D.
     This holds because translation is continuous in the Schwartz topology. -/
-theorem gap_uvMollifier_continuous (κ : UVCutoff) :
+theorem uvMollifier_continuous (κ : UVCutoff) :
     Continuous (fun x : Spacetime2D => uvMollifier κ x) := by
   rw [continuous_iff_continuousAt]; intro x₀
   rw [ContinuousAt, (schwartz_withSeminorms ℝ Spacetime2D ℝ).tendsto_nhds]
@@ -175,7 +175,7 @@ theorem uvMollifier_covariance_abs_bounded_on_compact
             (uvMollifier κ₁ x) (uvMollifier κ₂ x)| ≤ M := by
   exact covariance_comp_abs_bounded_on_compact
     (T := freeCovarianceCLM mass hmass)
-    (gap_uvMollifier_continuous κ₁) (gap_uvMollifier_continuous κ₂) K hK
+    (uvMollifier_continuous κ₁) (uvMollifier_continuous κ₂) K hK
 
 /-- Self-covariances of the CLM are nonnegative. -/
 theorem covariance_self_nonneg
@@ -217,13 +217,13 @@ theorem wickPower_stronglyMeasurable (n : ℕ) (mass : ℝ) (κ : UVCutoff) (x :
 theorem rawFieldEval_continuous_in_x (mass : ℝ) (κ : UVCutoff) (ω : FieldConfig2D) :
     Continuous (fun x : Spacetime2D => rawFieldEval mass κ ω x) := by
   unfold rawFieldEval
-  exact ω.continuous.comp (gap_uvMollifier_continuous κ)
+  exact ω.continuous.comp (uvMollifier_continuous κ)
 
 /-- Wick power is continuous in x for each fixed ω. -/
 theorem wickPower_continuous_in_x (n : ℕ) (mass : ℝ) (κ : UVCutoff) (ω : FieldConfig2D) :
     Continuous (fun x : Spacetime2D => wickPower n mass κ ω x) := by
   unfold wickPower rawFieldEval
-  exact (wickMonomial_continuous n _).comp (ω.continuous.comp (gap_uvMollifier_continuous κ))
+  exact (wickMonomial_continuous n _).comp (ω.continuous.comp (uvMollifier_continuous κ))
 
 /-- Joint strong measurability of the Wick power on FieldConfig2D × Spacetime2D.
     Uses the Carathéodory condition: measurable in ω for each x, continuous in x for each ω.
@@ -1002,7 +1002,7 @@ theorem interactionCutoff_sub_even_integrable
 /-- The L² expectation E[(wickPower 4 mass κ · y)²] is uniformly bounded on compact sets.
     The proof computes the integral explicitly as a polynomial in σ²(y) = Cov(δ_{κ,y}, δ_{κ,y})
     using the Gaussian moment recursion, then uses continuity of σ²(y) (from
-    gap_uvMollifier_continuous) to bound the polynomial on the compact set. -/
+    uvMollifier_continuous) to bound the polynomial on the compact set. -/
 theorem wickPower_sq_expectation_bounded_on_compact (mass : ℝ) (hmass : 0 < mass)
     (κ : UVCutoff) (K : Set Spacetime2D) (hK : IsCompact K) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ y ∈ K,
@@ -1075,9 +1075,9 @@ theorem wickPower_sq_expectation_bounded_on_compact (mass : ℝ) (hmass : 0 < ma
   -- The integral is nonneg (integral of a square)
   have hintegral_nonneg : ∀ y, 0 ≤ ∫ ω, (wickPower 4 mass κ ω y) ^ 2 ∂μ :=
     fun y => integral_nonneg (fun ω => sq_nonneg _)
-  -- covFun is continuous (gap_uvMollifier_continuous + T CLM + inner continuous)
+  -- covFun is continuous (uvMollifier_continuous + T CLM + inner continuous)
   have hcov_cont : Continuous covFun := by
-    have h1 := gap_uvMollifier_continuous κ
+    have h1 := uvMollifier_continuous κ
     have h2 : Continuous (fun y => T (uvMollifier κ y)) := T.continuous.comp h1
     exact continuous_inner.comp (h2.prodMk h2)
   -- Q ∘ covFun is continuous
@@ -1149,7 +1149,7 @@ theorem wickPower_sq_integrable_prod (params : Phi4Params) (Λ : Rectangle)
 /-- The cutoff interaction is square-integrable under the free field measure.
     This is a consequence of the Gaussian structure: V_{Λ,κ} is an integral
     of polynomials of Gaussian random variables over a bounded region. -/
-theorem gap_interactionCutoff_sq_integrable (params : Phi4Params) (Λ : Rectangle)
+theorem interactionCutoff_sq_integrable (params : Phi4Params) (Λ : Rectangle)
     (κ : UVCutoff) :
     Integrable (fun ω => (interactionCutoff params Λ κ ω) ^ 2)
       (freeFieldMeasure params.mass params.mass_pos) := by
@@ -1221,4 +1221,4 @@ theorem interactionCutoff_memLp_two (params : Phi4Params) (Λ : Rectangle)
       (freeFieldMeasure params.mass params.mass_pos) :=
   (memLp_two_iff_integrable_sq
     (interactionCutoff_aestronglyMeasurable params Λ κ)).2
-    (gap_interactionCutoff_sq_integrable params Λ κ)
+    (interactionCutoff_sq_integrable params Λ κ)

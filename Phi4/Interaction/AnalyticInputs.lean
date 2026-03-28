@@ -39,14 +39,14 @@ This route bypasses Part2/Part3 entirely and needs only two analytic inputs:
 /-- The Chapter 8 interaction integrability core: exp(-V_Λ) ∈ Lᵖ for all p < ∞.
     Proved by Fatou's lemma: Nelson's uniform negative exponential moment bounds
     on the cutoff interactions plus a.e. convergence give MemLp for the limit. -/
-theorem hasExpInteractionLp_of_analytic_inputs (params : Phi4Params) :
+theorem gap_hasExpInteractionLp (params : Phi4Params) :
     HasExpInteractionLp params := by
   intro Λ (p : ℝ≥0∞) hp_ne_top
   set μ := freeFieldMeasure params.mass params.mass_pos
   -- Case p = 0: MemLp f 0 μ ↔ AEStronglyMeasurable f μ
   by_cases hp0 : p = 0
   · rw [hp0, memLp_zero_iff_aestronglyMeasurable]
-    exact ((gap_interaction_aestronglyMeasurable params Λ).aemeasurable.neg.exp).aestronglyMeasurable
+    exact ((interaction_aestronglyMeasurable params Λ).aemeasurable.neg.exp).aestronglyMeasurable
   -- Case 0 < p < ⊤: use the Fatou bridge from Part1Core
   have hp_toReal_pos : 0 < p.toReal := ENNReal.toReal_pos hp0 hp_ne_top
   -- a.e. convergence along standardUVCutoffSeq(n), then shift to (n+1)

@@ -3,6 +3,7 @@ Copyright (c) 2026 Phi4 Contributors. All rights reserved.
 Released under Apache 2.0 license.
 -/
 import Phi4.CovarianceOperators
+import Phi4.EuclideanGaussian
 import Mathlib.Algebra.MvPolynomial.Degrees
 import Mathlib.Algebra.MvPolynomial.Eval
 import Mathlib.Algebra.Module.LinearMap.Polynomial
@@ -1241,6 +1242,13 @@ theorem gap_centeredGaussian_mvPolynomial_integral_reduction_to_standardGaussian
             (Measure.map L γ) :=
         ((continuous_mvPolynomial_eval P).pow 2).aestronglyMeasurable
       exact htarget_ae
+
+/-- The Nelson finite-dimensional reduction uses the standard product Gaussian
+on the raw coordinate space `Fin n ⊕ Fin n → ℝ`. -/
+private theorem standardGaussianRaw_fin_eq
+    (n : ℕ) :
+    Phi4.standardGaussianRaw (Fin n ⊕ Fin n) =
+      Measure.pi (fun _ : Fin n ⊕ Fin n => gaussianReal 0 1) := rfl
 
 /-- Honest finite-dimensional centered-Gaussian polynomial frontier behind the
 Nelson hypercontractive step.

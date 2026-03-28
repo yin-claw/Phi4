@@ -155,6 +155,6 @@ impossible hypotheses (geometric decay of absolute exponential moments for
 - `exp_interaction_Lp_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_moment_geometric_bound`
 - `exp_interaction_Lp_of_sq_integrable_data_and_uv_cutoff_seq_shifted_exponential_moment_abs_geometric_bound`
 
-The correct endpoint is now in `AnalyticInputs.lean` via `hasExpInteractionLp_of_analytic_inputs`,
+The correct endpoint is now in `AnalyticInputs.lean` via `gap_hasExpInteractionLp`,
 which uses Nelson's uniform *negative* exponential moment bound (Fatou route).
 See `test/proofideas_nelson_bound.lean` for the proof strategy analysis. -/

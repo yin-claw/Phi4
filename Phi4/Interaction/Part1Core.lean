@@ -282,16 +282,6 @@ def HasExpInteractionLp (params : Phi4Params) : Prop :=
     MemLp (fun ω => Real.exp (-(interaction params Λ ω)))
       p (freeFieldMeasure params.mass params.mass_pos)
 
-/-- Honest theorem-level frontier for the Chapter 8 interaction-integrability
-    core. This is the canonical theorem counterpart to `InteractionWeightModel`.
-    The statement is kept explicit even while legacy model interfaces remain in
-    use elsewhere in the repository. -/
-theorem gap_hasExpInteractionLp (params : Phi4Params) :
-    HasExpInteractionLp params := by
-  -- Proved by hasExpInteractionLp_of_analytic_inputs in AnalyticInputs.lean
-  -- (cannot import here due to circular dependency; see Interaction.lean for wiring)
-  sorry
-
 /-- Almost-everywhere convergence of the canonical cutoff sequence
     `κ_n = n + 1` to the limiting interaction, from explicit real-parameterized
     a.e. UV convergence data. -/

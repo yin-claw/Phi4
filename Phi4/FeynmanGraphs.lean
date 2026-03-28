@@ -47,7 +47,7 @@ def allPairings (n : ℕ) : Finset (Pairing (2 * n)) := Finset.univ
 
 /-- Honest theorem-level frontier: the number of perfect matchings on `2n`
     labels equals the double factorial `(2n-1)!!`. -/
-theorem gap_pairing_card :
+theorem pairing_card :
     ∀ n : ℕ, Fintype.card (Pairing (2 * n)) = Nat.doubleFactorial (2 * n - 1) :=
   pairing_card_eq_doubleFactorial
 
@@ -140,7 +140,7 @@ private theorem wicks_eq (mass : ℝ) (hmass : 0 < mass) :
 
 /-- Honest theorem-level frontier: Wick's theorem for even moments under
     the free Gaussian measure. -/
-theorem gap_wicks_theorem_even (mass : ℝ) (hmass : 0 < mass) :
+theorem wicks_theorem_even (mass : ℝ) (hmass : 0 < mass) :
     ∀ (n : ℕ) (f : Fin (2 * n) → TestFun2D),
       ∃ (pairings : Finset (Pairing (2 * n))),
         ∫ ω, (∏ i, ω (f i)) ∂(freeFieldMeasure mass hmass) =
